@@ -21,12 +21,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
   const [showLangMenu, setShowLangMenu] = useState(false);
 
   useEffect(() => {
-    const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID_HERE";
+    // Safe access to environment variable
+    let clientId = "YOUR_GOOGLE_CLIENT_ID_HERE";
+    try {
+        if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_GOOGLE_CLIENT_ID) {
+            clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+        }
+    } catch(e) {}
 
     if (window.google) {
       try {
         window.google.accounts.id.initialize({
-          client_id: CLIENT_ID,
+          client_id: clientId,
           callback: (response: any) => {
             if (response.credential) {
               const user = handleGoogleCredential(response.credential);

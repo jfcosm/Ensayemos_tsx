@@ -1,12 +1,38 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Safe access to environment variable that works in standard Vite environments
+// without crashing if 'process' is undefined.
+const getApiKey = () => {
+  try {
+    // In some Vite setups, process.env is replaced at build time.
+    // In others, we need import.meta.env.
+    // This check prevents "ReferenceError: process is not defined"
+    if (typeof process !== 'undefined' && process.env) {
+      return process.env.API_KEY;
+    }
+  } catch (e) {
+    // Ignore error
+  }
+  return undefined;
+};
 
 /**
  * Uses Gemini to format raw pasted lyrics/chords into a clean, standard format.
  */
 export const formatSongContent = async (rawText: string): Promise<string> => {
+  const apiKey = getApiKey();
+
+  // If no API key is set, we fail gracefully instead of crashing the app.
+  if (!apiKey) {
+    console.warn("Gemini API Key is missing. Skipping AI formatting.");
+    return rawText;
+  }
+
   try {
+    // Lazy initialization: Only create the client when we actually need it.
+    // This prevents startup crashes if the key is missing or invalid.
+    const ai = new GoogleGenAI({ apiKey });
+
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: `
@@ -37,7 +63,11 @@ export const formatSongContent = async (rawText: string): Promise<string> => {
  * Suggests a setlist based on a mood or genre.
  */
 export const suggestSetlistIdeas = async (genre: string): Promise<string[]> => {
+    const apiKey = getApiKey();
+    if (!apiKey) return [];
+
     try {
+        const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: `Suggest 5 popular songs for a band playing ${genre} music. Return only the song titles separated by commas.`,
