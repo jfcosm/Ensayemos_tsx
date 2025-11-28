@@ -12,6 +12,7 @@ type TranslationKey =
   | 'feature_setlist_title'
   | 'feature_setlist_desc'
   | 'footer_copyright'
+  | 'footer_love'
   | 'login_error'
   | 'dashboard_title'
   | 'dashboard_subtitle'
@@ -47,6 +48,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     feature_setlist_title: "Setlists Inteligentes",
     feature_setlist_desc: "Gestiona letras y acordes con formato automático por IA.",
     footer_copyright: "Hecho para músicos, por músicos.",
+    footer_love: "Hecha con mucho amor musical por",
     login_error: "Error al iniciar sesión.",
     dashboard_title: "Próximos Ensayos",
     dashboard_subtitle: "Organiza y vota las fechas de tus próximos encuentros.",
@@ -81,6 +83,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     feature_setlist_title: "Smart Setlists",
     feature_setlist_desc: "Manage lyrics and chords with automatic AI formatting.",
     footer_copyright: "Made for musicians, by musicians.",
+    footer_love: "Made with musical love by",
     login_error: "Error logging in.",
     dashboard_title: "Upcoming Rehearsals",
     dashboard_subtitle: "Organize and vote on your next meetup dates.",
@@ -115,6 +118,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     feature_setlist_title: "Setlist Intelligenti",
     feature_setlist_desc: "Gestisci testi e accordi con formattazione automatica AI.",
     footer_copyright: "Fatto per musicisti, da musicisti.",
+    footer_love: "Fatto con amore musicale da",
     login_error: "Errore durante l'accesso.",
     dashboard_title: "Prossime Prove",
     dashboard_subtitle: "Organizza e vota le date dei tuoi incontri.",
@@ -149,6 +153,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     feature_setlist_title: "Setlists Intelligentes",
     feature_setlist_desc: "Gérez paroles et accords avec formatage IA.",
     footer_copyright: "Fait pour les musiciens, par des musiciens.",
+    footer_love: "Fait avec amour musical par",
     login_error: "Erreur de connexion.",
     dashboard_title: "Prochaines Répétitions",
     dashboard_subtitle: "Organisez et votez pour vos prochaines dates.",
@@ -183,6 +188,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     feature_setlist_title: "Smarte Setlists",
     feature_setlist_desc: "Texte und Akkorde mit KI-Formatierung verwalten.",
     footer_copyright: "Von Musikern für Musiker.",
+    footer_love: "Mit musikalischer Liebe gemacht von",
     login_error: "Fehler bei der Anmeldung.",
     dashboard_title: "Nächste Proben",
     dashboard_subtitle: "Organisiere und stimme über Termine ab.",
@@ -217,6 +223,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     feature_setlist_title: "स्मार्ट सेटलिस्ट",
     feature_setlist_desc: "AI फ़ॉर्मेटिंग के साथ बोल और कॉर्ड्स प्रबंधित करें।",
     footer_copyright: "संगीतकारों द्वारा, संगीतकारों के लिए।",
+    footer_love: "संगीत प्रेम के साथ बनाया गया",
     login_error: "लॉगिन में त्रुटि।",
     dashboard_title: "आगामी रिहर्सल",
     dashboard_subtitle: "अपनी अगली मुलाकातों को व्यवस्थित करें।",
@@ -251,6 +258,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     feature_setlist_title: "スマートセットリスト",
     feature_setlist_desc: "AIフォーマットで歌詞とコードを管理。",
     footer_copyright: "ミュージシャンのための、ミュージシャンによるアプリ。",
+    footer_love: "音楽への愛を込めて",
     login_error: "ログインエラー。",
     dashboard_title: "次のリハーサル",
     dashboard_subtitle: "次のミーティングの日程を整理して投票します。",
@@ -285,6 +293,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     feature_setlist_title: "스마트 세트리스트",
     feature_setlist_desc: "AI 포맷팅으로 가사와 코드를 관리하세요.",
     footer_copyright: "뮤지션이 뮤지션을 위해 만들었습니다.",
+    footer_love: "음악적 사랑으로 만들어진",
     login_error: "로그인 오류.",
     dashboard_title: "다가오는 리허설",
     dashboard_subtitle: "다음 모임 날짜를 정리하고 투표하세요.",
@@ -319,6 +328,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     feature_setlist_title: "智能歌单",
     feature_setlist_desc: "使用 AI 格式化管理歌词和和弦。",
     footer_copyright: "为音乐人打造，由音乐人制作。",
+    footer_love: "用音乐之爱制作",
     login_error: "登录错误。",
     dashboard_title: "即将到来的排练",
     dashboard_subtitle: "组织并投票选出下次聚会日期。",

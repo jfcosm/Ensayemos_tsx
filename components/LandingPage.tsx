@@ -186,7 +186,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
       </main>
 
       <footer className="p-6 text-center text-zinc-400 text-sm">
-        <p>© {new Date().getFullYear()} {t('app_name')} {t('footer_copyright')}</p>
+        <p>
+          {t('footer_love')} <a href="https://www.melodialab.net" target="_blank" rel="noopener noreferrer" className="text-brand-600 dark:text-brand-400 hover:underline">MelodIA La♭</a>
+        </p>
       </footer>
     </div>
   );

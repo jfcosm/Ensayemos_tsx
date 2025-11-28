@@ -350,6 +350,13 @@ function AppContent() {
         )}
 
       </main>
+
+      {/* Footer */}
+      <footer className="py-6 text-center text-xs text-zinc-400 dark:text-zinc-600 border-t border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm">
+        <p>
+          {t('footer_love')} <a href="https://www.melodialab.net" target="_blank" rel="noopener noreferrer" className="font-medium hover:text-brand-600 dark:hover:text-brand-400 transition-colors">MelodIA La♭</a>
+        </p>
+      </footer>
     </div>
   );
 }
