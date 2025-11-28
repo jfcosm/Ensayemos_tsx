@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { User, Language } from '../types';
 import { handleGoogleCredential, loginAsDemoUser } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -15,47 +15,90 @@ interface LandingPageProps {
   onLogin: (user: User) => void;
 }
 
+// Helper function to safely get the Client ID in Vite/Vercel environment
+const getGoogleClientId = () => {
+  let cid = null;
+
+  try {
+    // 1. Try Vite standard way (import.meta.env)
+    // @ts-ignore
+    if (import.meta && import.meta.env && import.meta.env.VITE_GOOGLE_CLIENT_ID) {
+      // @ts-ignore
+      cid = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    }
+  } catch (e) {}
+
+  if (!cid) {
+    try {
+      // 2. Try legacy process.env way
+      if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_GOOGLE_CLIENT_ID) {
+        cid = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+      }
+    } catch (e) {}
+  }
+
+  // Sanitize: Trim whitespace which causes "Client not found" errors frequently
+  return cid ? String(cid).trim() : null;
+};
+
 export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
   const [error, setError] = useState<string | null>(null);
   const { t, language, setLanguage } = useLanguage();
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
+  const [configError, setConfigError] = useState<string | null>(null);
+  const retryCount = useRef(0);
 
   useEffect(() => {
-    // Safe access to environment variable
-    let clientId = "YOUR_GOOGLE_CLIENT_ID_HERE";
-    try {
-        if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_GOOGLE_CLIENT_ID) {
-            clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-        }
-    } catch(e) {}
+    const clientId = getGoogleClientId();
 
-    if (window.google) {
-      try {
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: (response: any) => {
-            if (response.credential) {
-              const user = handleGoogleCredential(response.credential);
-              if (user) {
-                onLogin(user);
-              } else {
-                setError(t('login_error'));
-              }
-            }
-          },
-        });
-
-        const btnDiv = document.getElementById('googleSignInDiv');
-        if (btnDiv) {
-            window.google.accounts.id.renderButton(
-                btnDiv,
-                { theme: 'outline', size: 'large', width: '280' }
-            );
-        }
-      } catch (e) {
-        console.error("Google Auth Error:", e);
-      }
+    if (!clientId) {
+      console.warn("Google Client ID missing. Auth will fail.");
+      setConfigError("Falta configurar VITE_GOOGLE_CLIENT_ID en Vercel.");
+    } else {
+      // Debug log to help user verify the ID in production console
+      console.log(`[DEBUG] Google Client ID loaded: ${clientId.substring(0, 10)}...`);
     }
+
+    const initializeGoogleAuth = () => {
+      if (window.google && clientId) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: (response: any) => {
+              if (response.credential) {
+                const user = handleGoogleCredential(response.credential);
+                if (user) {
+                  onLogin(user);
+                } else {
+                  setError(t('login_error'));
+                }
+              }
+            },
+          });
+
+          const btnDiv = document.getElementById('googleSignInDiv');
+          if (btnDiv) {
+              window.google.accounts.id.renderButton(
+                  btnDiv,
+                  { theme: 'outline', size: 'large', width: '280' }
+              );
+              setIsGoogleLoaded(true);
+          }
+        } catch (e) {
+          console.error("Google Auth Error:", e);
+        }
+      } else {
+        // Retry logic: script might load async
+        if (retryCount.current < 20) {
+          retryCount.current++;
+          setTimeout(initializeGoogleAuth, 300);
+        }
+      }
+    };
+
+    initializeGoogleAuth();
+    
   }, [onLogin, t]);
 
   const handleDemoLogin = () => {
@@ -130,8 +173,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
             <div className="space-y-4 max-w-sm mx-auto md:mx-0">
                {/* Login Box */}
                <div className="bg-white dark:bg-zinc-900/50 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl backdrop-blur-sm">
-                  <div className="flex justify-center h-12 mb-4">
+                  <div className="flex justify-center h-12 mb-4 min-h-[48px]">
                      <div id="googleSignInDiv"></div>
+                     {!isGoogleLoaded && !configError && (
+                        <div className="flex items-center text-sm text-zinc-400 italic">
+                           {/* Placeholder space if Google fails to load */}
+                        </div>
+                     )}
+                     {configError && (
+                        <p className="text-xs text-red-500 bg-red-50 dark:bg-red-900/10 p-2 rounded border border-red-200">{configError}</p>
+                     )}
                   </div>
                   
                   <div className="relative mb-4">
