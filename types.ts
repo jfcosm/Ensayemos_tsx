@@ -39,3 +39,5 @@ export interface Rehearsal {
   setlist: string[]; // Array of Song IDs
   createdAt: number;
 }
+
+export type Language = 'es' | 'en' | 'it' | 'fr' | 'hi' | 'ja' | 'ko' | 'zh' | 'de';

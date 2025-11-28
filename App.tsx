@@ -3,14 +3,16 @@ import { ViewState, Song, Rehearsal, User } from './types';
 import { RehearsalView } from './components/RehearsalView';
 import { SongEditor } from './components/SongEditor';
 import { ChordViewer } from './components/ChordViewer';
-import { LoginView } from './components/LoginView';
+import { LandingPage } from './components/LandingPage';
 import { CreateRehearsal } from './components/CreateRehearsal';
 import { Button } from './components/Button';
 import { Plus, Music4, CalendarDays, Mic2, LogOut, User as UserIcon, Sun, Moon, Loader2 } from 'lucide-react';
 import { subscribeToRehearsals, saveRehearsal, deleteRehearsal, subscribeToSongs } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 
-function App() {
+function AppContent() {
+  const { t } = useLanguage();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [view, setView] = useState<ViewState>(ViewState.DASHBOARD);
   const [selectedRehearsal, setSelectedRehearsal] = useState<Rehearsal | null>(null);
@@ -18,11 +20,10 @@ function App() {
   const [activePlaylist, setActivePlaylist] = useState<Song[]>([]);
   
   const [rehearsals, setRehearsals] = useState<Rehearsal[]>([]);
-  const [songs, setSongs] = useState<Song[]>([]); // Global song state
+  const [songs, setSongs] = useState<Song[]>([]);
   const [isDark, setIsDark] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initial Auth Check
   useEffect(() => {
     const user = getCurrentUser();
     if (user) {
@@ -32,18 +33,15 @@ function App() {
     setIsDark(isDarkMode);
   }, []);
 
-  // Data Subscriptions (Real-time)
   useEffect(() => {
     if (!currentUser) return;
     
     setIsLoading(true);
 
-    // Listen to Rehearsals
     const unsubRehearsals = subscribeToRehearsals((data) => {
       setRehearsals(data);
-      setIsLoading(false); // Data arrived
+      setIsLoading(false);
       
-      // Update selected rehearsal in real-time if open
       if (selectedRehearsal) {
         const updatedCurrent = data.find(r => r.id === selectedRehearsal.id);
         if (updatedCurrent) {
@@ -52,7 +50,6 @@ function App() {
       }
     });
 
-    // Listen to Songs
     const unsubSongs = subscribeToSongs((data) => {
       setSongs(data);
     });
@@ -63,7 +60,6 @@ function App() {
     };
   }, [currentUser, selectedRehearsal?.id]);
 
-  // Deep Linking Logic (Handle URL params)
   useEffect(() => {
     if (!currentUser) return;
 
@@ -75,14 +71,10 @@ function App() {
       if (target) {
         setSelectedRehearsal(target);
         setView(ViewState.REHEARSAL_DETAIL);
-        // Clean URL
         window.history.replaceState({}, '', window.location.pathname);
       }
     }
   }, [currentUser, rehearsals]);
-
-
-  // --- Handlers ---
 
   const toggleTheme = () => {
     const newIsDark = !isDark;
@@ -129,7 +121,6 @@ function App() {
       createdAt: Date.now()
     };
     
-    // Optimistic update handled by subscription, but we set view immediately
     await saveRehearsal(newRehearsal);
     setSelectedRehearsal(newRehearsal);
     setView(ViewState.REHEARSAL_DETAIL);
@@ -141,9 +132,7 @@ function App() {
   };
 
   const handleUpdateRehearsal = async (updated: Rehearsal) => {
-    // We optimistically update local state, but the real source of truth is Firestore subscription
     setSelectedRehearsal(updated);
-    // Actually save
     await saveRehearsal(updated);
   };
 
@@ -157,7 +146,6 @@ function App() {
   const startPlayMode = (songId: string) => {
     if (!selectedRehearsal) return;
     
-    // Map setlist IDs to full Song objects from global state
     const playlist = selectedRehearsal.setlist
       .map(id => songs.find(s => s.id === id))
       .filter(Boolean) as Song[];
@@ -176,17 +164,15 @@ function App() {
     setView(ViewState.DASHBOARD);
   };
 
-  // --- Render ---
-
   if (!currentUser) {
     return (
       <>
-        <div className="absolute top-4 right-4 z-50">
+        <div className="absolute top-4 right-4 z-50 mr-24 md:mr-0">
            <button onClick={toggleTheme} className="p-2 rounded-full bg-white dark:bg-zinc-800 shadow-md border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300">
              {isDark ? <Sun size={20} /> : <Moon size={20} />}
            </button>
         </div>
-        <LoginView onLogin={handleLogin} />
+        <LandingPage onLogin={handleLogin} />
       </>
     );
   }
@@ -204,7 +190,6 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300">
-      {/* Global Navigation */}
       <nav className="border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <div 
@@ -224,14 +209,14 @@ function App() {
                 className={view === ViewState.DASHBOARD ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white" : ""}
                 onClick={() => setView(ViewState.DASHBOARD)}
               >
-                Ensayos
+                {t('nav_rehearsals')}
               </Button>
               <Button 
                 variant="ghost" 
                 className={view === ViewState.EDIT_SONG ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white" : ""}
                 onClick={() => { setSelectedSong(null); setView(ViewState.EDIT_SONG); }}
               >
-                Biblioteca
+                {t('nav_library')}
               </Button>
             </div>
 
@@ -252,7 +237,7 @@ function App() {
                  )}
                  <span className="hidden md:block text-sm font-medium text-zinc-700 dark:text-zinc-300 max-w-[100px] truncate">{currentUser.name}</span>
                </div>
-               <button onClick={handleLogout} className="text-zinc-500 hover:text-red-500 transition-colors p-2" title="Cerrar Sesión">
+               <button onClick={handleLogout} className="text-zinc-500 hover:text-red-500 transition-colors p-2" title={t('logout')}>
                  <LogOut size={18} />
                </button>
             </div>
@@ -260,19 +245,18 @@ function App() {
         </div>
       </nav>
 
-      {/* Main Content Area */}
       <main className="flex-1 container max-w-5xl mx-auto p-4 md:p-6">
         
         {view === ViewState.DASHBOARD && (
           <div className="space-y-8 animate-in fade-in duration-500">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">Próximos Ensayos</h1>
-                <p className="text-zinc-500 dark:text-zinc-400">Organiza y vota las fechas de tus próximos encuentros.</p>
+                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">{t('dashboard_title')}</h1>
+                <p className="text-zinc-500 dark:text-zinc-400">{t('dashboard_subtitle')}</p>
               </div>
               <Button onClick={handleCreateRehearsalClick} className="gap-2 shadow-xl shadow-brand-900/20">
                 <Plus size={20} />
-                Crear Ensayo
+                {t('create_rehearsal')}
               </Button>
             </div>
 
@@ -280,14 +264,14 @@ function App() {
               {isLoading ? (
                  <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-50">
                    <Loader2 className="h-10 w-10 text-brand-500 animate-spin mb-4" />
-                   <p className="text-zinc-500">Sincronizando con la banda...</p>
+                   <p className="text-zinc-500">...</p>
                  </div>
               ) : rehearsals.length === 0 ? (
                 <div className="col-span-full py-16 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
                   <CalendarDays className="mx-auto text-zinc-400 dark:text-zinc-700 mb-4" size={48} />
-                  <p className="text-zinc-500 dark:text-zinc-500 text-lg">No hay ensayos programados.</p>
-                  <p className="text-zinc-400 text-sm mt-1">Sincronizado con la nube ☁️</p>
-                  <Button variant="ghost" className="mt-4 text-brand-600 dark:text-brand-400" onClick={handleCreateRehearsalClick}>Comienza creando uno</Button>
+                  <p className="text-zinc-500 dark:text-zinc-500 text-lg">{t('no_rehearsals')}</p>
+                  <p className="text-zinc-400 text-sm mt-1">{t('no_rehearsals_sub')}</p>
+                  <Button variant="ghost" className="mt-4 text-brand-600 dark:text-brand-400" onClick={handleCreateRehearsalClick}>{t('create_rehearsal')}</Button>
                 </div>
               ) : (
                 rehearsals.map(rehearsal => (
@@ -309,7 +293,7 @@ function App() {
                         ? 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20' 
                         : 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
                       }`}>
-                        {rehearsal.status === 'CONFIRMED' ? 'CONFIRMADO' : 'EN VOTACIÓN'}
+                        {rehearsal.status === 'CONFIRMED' ? t('status_confirmed') : t('status_voting')}
                       </div>
                       <span className="text-zinc-500 text-xs font-mono">
                         {new Date(rehearsal.createdAt).toLocaleDateString()}
@@ -321,14 +305,14 @@ function App() {
                     <div className="space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
                       <div className="flex items-center gap-2">
                         <Music4 size={14} />
-                        <span>{rehearsal.setlist.length} canciones</span>
+                        <span>{rehearsal.setlist.length} {t('songs_count')}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <CalendarDays size={14} />
                         <span>
                           {rehearsal.status === 'CONFIRMED' 
                             ? new Date(rehearsal.options.find(o => o.id === rehearsal.confirmedOptionId)?.date || '').toLocaleDateString()
-                            : `${rehearsal.options.length} opciones propuestas`}
+                            : `${rehearsal.options.length} ${t('options_count')}`}
                         </span>
                       </div>
                     </div>
@@ -370,4 +354,10 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
+  );
+}
