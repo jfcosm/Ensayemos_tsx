@@ -78,3 +78,51 @@ export const suggestSetlistIdeas = async (genre: string): Promise<string[]> => {
         return [];
     }
 }
+
+/**
+ * Generates a full song composition based on user parameters.
+ */
+export const generateSongFromParams = async (params: {
+    key: string;
+    scale: string;
+    style: string;
+    mood: string;
+    speed: string;
+    complexity: string;
+    topics: string;
+}): Promise<string> => {
+    const apiKey = getApiKey();
+    if (!apiKey) return "Error: API Key Missing";
+
+    try {
+        const ai = new GoogleGenAI({ apiKey });
+        const prompt = `
+            Act as a professional songwriter and composer. I need you to compose a complete song.
+            
+            Parameters:
+            - Key: ${params.key} ${params.scale}
+            - Style/Genre: ${params.style}
+            - Mood: ${params.mood}
+            - Tempo: ${params.speed}
+            - Harmonic Complexity: ${params.complexity}
+            - Lyrical Themes/Keywords: ${params.topics}
+
+            Instructions:
+            1. Create a full song structure (Intro, Verse 1, Chorus, Verse 2, Bridge, Chorus, Outro).
+            2. Write original lyrics based on the themes provided.
+            3. Provide the Chords above the lyrics.
+            4. Include performance notes for each section (e.g., "Drums enter here", "Soft piano only").
+            5. Return the result in plain text format suitable for a chord sheet.
+        `;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+        });
+
+        return response.text || "";
+    } catch (error) {
+        console.error("Error composing song:", error);
+        return "Error creating composition. Please try again.";
+    }
+};

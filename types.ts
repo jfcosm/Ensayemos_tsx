@@ -4,7 +4,8 @@ export enum ViewState {
   REHEARSAL_DETAIL = 'REHEARSAL_DETAIL',
   SONG_LIBRARY = 'SONG_LIBRARY',
   EDIT_SONG = 'EDIT_SONG',
-  PLAY_MODE = 'PLAY_MODE'
+  PLAY_MODE = 'PLAY_MODE',
+  COMPOSER = 'COMPOSER'
 }
 
 export interface User {

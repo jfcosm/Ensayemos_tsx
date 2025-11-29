@@ -40,6 +40,7 @@ type TranslationKey =
   | 'options_count'
   | 'nav_rehearsals'
   | 'nav_library'
+  | 'nav_composer'
   | 'logout'
   | 'new_rehearsal_title'
   | 'new_rehearsal_subtitle'
@@ -60,7 +61,19 @@ type TranslationKey =
   | 'propose_option'
   | 'votes_label'
   | 'confirm_option'
-  | 'propose_new_title';
+  | 'propose_new_title'
+  | 'composer_title'
+  | 'composer_subtitle'
+  | 'comp_key'
+  | 'comp_style'
+  | 'comp_mood'
+  | 'comp_speed'
+  | 'comp_complexity'
+  | 'comp_topics'
+  | 'comp_topics_placeholder'
+  | 'comp_generate'
+  | 'comp_powered_by'
+  | 'comp_save_library';
 
 export const translations: Record<Language, Record<TranslationKey, string>> = {
   es: {
@@ -103,6 +116,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     options_count: "opciones propuestas",
     nav_rehearsals: "Ensayos",
     nav_library: "Biblioteca",
+    nav_composer: "Compositor",
     logout: "Salir",
     new_rehearsal_title: "Nuevo Ensayo",
     new_rehearsal_subtitle: "Define las coordenadas iniciales.",
@@ -123,7 +137,19 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     propose_option: "Proponer otra fecha",
     votes_label: "votos",
     confirm_option: "Confirmar",
-    propose_new_title: "Proponer nueva opción"
+    propose_new_title: "Proponer nueva opción",
+    composer_title: "Compositor de Canciones",
+    composer_subtitle: "Genera progresiones y estructuras completas basadas en tu estilo.",
+    comp_key: "TONALIDAD",
+    comp_style: "ESTILO",
+    comp_mood: "ÁNIMO",
+    comp_speed: "VELOCIDAD",
+    comp_complexity: "COMPLEJIDAD",
+    comp_topics: "TEMÁTICA (Inspiración)",
+    comp_topics_placeholder: "Escribe hasta 5 palabras clave (ej: amor, viaje, noche, desierto...)",
+    comp_generate: "Componer Canción",
+    comp_powered_by: "Impulsado por",
+    comp_save_library: "Guardar en Biblioteca"
   },
   en: {
     app_name: "Verso",
@@ -165,6 +191,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     options_count: "proposed options",
     nav_rehearsals: "Rehearsals",
     nav_library: "Library",
+    nav_composer: "Composer",
     logout: "Logout",
     new_rehearsal_title: "New Rehearsal",
     new_rehearsal_subtitle: "Set the initial coordinates.",
@@ -185,7 +212,19 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     propose_option: "Propose new date",
     votes_label: "votes",
     confirm_option: "Confirm",
-    propose_new_title: "Propose new option"
+    propose_new_title: "Propose new option",
+    composer_title: "Song Composer",
+    composer_subtitle: "Generate chord progressions and structures based on your style.",
+    comp_key: "KEY",
+    comp_style: "STYLE",
+    comp_mood: "MOOD",
+    comp_speed: "SPEED",
+    comp_complexity: "COMPLEXITY",
+    comp_topics: "TOPICS (Inspiration)",
+    comp_topics_placeholder: "Enter up to 5 keywords (e.g. love, travel, night, desert...)",
+    comp_generate: "Compose Song",
+    comp_powered_by: "Powered by",
+    comp_save_library: "Save to Library"
   },
   it: {
     app_name: "Verso",
@@ -227,6 +266,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     options_count: "opzioni proposte",
     nav_rehearsals: "Prove",
     nav_library: "Libreria",
+    nav_composer: "Compositore",
     logout: "Esci",
     new_rehearsal_title: "Nuova Prova",
     new_rehearsal_subtitle: "Definisci le coordinate iniziali.",
@@ -247,7 +287,19 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     propose_option: "Proponi altra data",
     votes_label: "voti",
     confirm_option: "Conferma",
-    propose_new_title: "Proponi nuova opzione"
+    propose_new_title: "Proponi nuova opzione",
+    composer_title: "Compositore",
+    composer_subtitle: "Genera strutture basate sul tuo stile.",
+    comp_key: "TONALITÀ",
+    comp_style: "STILE",
+    comp_mood: "UMORE",
+    comp_speed: "VELOCITÀ",
+    comp_complexity: "COMPLESSITÀ",
+    comp_topics: "TEMI (Ispirazione)",
+    comp_topics_placeholder: "Inserisci fino a 5 parole chiave...",
+    comp_generate: "Componi Canzone",
+    comp_powered_by: "Realizzato da",
+    comp_save_library: "Salva nella Libreria"
   },
   fr: {
     app_name: "Verso",
@@ -289,6 +341,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     options_count: "options proposées",
     nav_rehearsals: "Répétitions",
     nav_library: "Bibliothèque",
+    nav_composer: "Compositeur",
     logout: "Sortir",
     new_rehearsal_title: "Nouvelle Répétition",
     new_rehearsal_subtitle: "Définir les coordonnées initiales.",
@@ -309,7 +362,19 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     propose_option: "Proposer une date",
     votes_label: "votes",
     confirm_option: "Confirmer",
-    propose_new_title: "Proposer une option"
+    propose_new_title: "Proposer une option",
+    composer_title: "Compositeur",
+    composer_subtitle: "Générez des structures basées sur votre style.",
+    comp_key: "TONALITÉ",
+    comp_style: "STYLE",
+    comp_mood: "HUMEUR",
+    comp_speed: "VITESSE",
+    comp_complexity: "COMPLEXITÉ",
+    comp_topics: "SUJETS (Inspiration)",
+    comp_topics_placeholder: "Entrez jusqu'à 5 mots-clés...",
+    comp_generate: "Composer la chanson",
+    comp_powered_by: "Propulsé par",
+    comp_save_library: "Enregistrer dans la bibliothèque"
   },
   de: {
     app_name: "Verso",
@@ -351,6 +416,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     options_count: "Vorschläge",
     nav_rehearsals: "Proben",
     nav_library: "Bibliothek",
+    nav_composer: "Komponist",
     logout: "Abmelden",
     new_rehearsal_title: "Neue Probe",
     new_rehearsal_subtitle: "Lege die Eckdaten fest.",
@@ -371,7 +437,19 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     propose_option: "Datum vorschlagen",
     votes_label: "Stimmen",
     confirm_option: "Bestätigen",
-    propose_new_title: "Option vorschlagen"
+    propose_new_title: "Option vorschlagen",
+    composer_title: "Song-Komponist",
+    composer_subtitle: "Generieren Sie Progressionen und Strukturen.",
+    comp_key: "TONART",
+    comp_style: "STIL",
+    comp_mood: "STIMMUNG",
+    comp_speed: "GESCHWINDIGKEIT",
+    comp_complexity: "KOMPLEXITÄT",
+    comp_topics: "THEMEN (Inspiration)",
+    comp_topics_placeholder: "Bis zu 5 Stichworte eingeben...",
+    comp_generate: "Lied komponieren",
+    comp_powered_by: "Unterstützt von",
+    comp_save_library: "In Bibliothek speichern"
   },
   hi: {
     app_name: "Verso",
@@ -413,6 +491,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     options_count: "विकल्प",
     nav_rehearsals: "रिहर्सल",
     nav_library: "पुस्तकालय",
+    nav_composer: "संगीतकार",
     logout: "लॉग आउट",
     new_rehearsal_title: "नई रिहर्सल",
     new_rehearsal_subtitle: "प्रारंभिक विवरण सेट करें।",
@@ -433,7 +512,19 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     propose_option: "तिथि प्रस्तावित करें",
     votes_label: "वोट",
     confirm_option: "पुष्टि करें",
-    propose_new_title: "विकल्प प्रस्तावित करें"
+    propose_new_title: "विकल्प प्रस्तावित करें",
+    composer_title: "गीतकार",
+    composer_subtitle: "अपनी शैली के आधार पर कॉर्ड प्रगति उत्पन्न करें।",
+    comp_key: "स्वर",
+    comp_style: "शैली",
+    comp_mood: "मनोदशा",
+    comp_speed: "गति",
+    comp_complexity: "जटिलता",
+    comp_topics: "विषय (प्रेरणा)",
+    comp_topics_placeholder: "5 कीवर्ड तक दर्ज करें...",
+    comp_generate: "गीत की रचना करें",
+    comp_powered_by: "द्वारा संचालित",
+    comp_save_library: "पुस्तकालय में सहेजें"
   },
   ja: {
     app_name: "Verso",
@@ -475,6 +566,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     options_count: "提案",
     nav_rehearsals: "リハーサル",
     nav_library: "ライブラリ",
+    nav_composer: "作曲",
     logout: "ログアウト",
     new_rehearsal_title: "新しいリハーサル",
     new_rehearsal_subtitle: "初期設定を入力してください。",
@@ -495,7 +587,19 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     propose_option: "日程を提案",
     votes_label: "票",
     confirm_option: "確認",
-    propose_new_title: "新しいオプション"
+    propose_new_title: "新しいオプション",
+    composer_title: "ソングコンポーザー",
+    composer_subtitle: "スタイルに基づいてコード進行と構造を生成します。",
+    comp_key: "キー",
+    comp_style: "スタイル",
+    comp_mood: "ムード",
+    comp_speed: "テンポ",
+    comp_complexity: "複雑さ",
+    comp_topics: "トピック（インスピレーション）",
+    comp_topics_placeholder: "キーワードを5つまで入力...",
+    comp_generate: "曲を作曲する",
+    comp_powered_by: "提供：",
+    comp_save_library: "ライブラリに保存"
   },
   ko: {
     app_name: "Verso",
@@ -537,6 +641,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     options_count: "제안",
     nav_rehearsals: "리허설",
     nav_library: "라이브러리",
+    nav_composer: "작곡가",
     logout: "로그아웃",
     new_rehearsal_title: "새 리허설",
     new_rehearsal_subtitle: "기본 정보를 입력하세요.",
@@ -557,7 +662,19 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     propose_option: "날짜 제안",
     votes_label: "표",
     confirm_option: "확인",
-    propose_new_title: "새 옵션 제안"
+    propose_new_title: "새 옵션 제안",
+    composer_title: "작곡가",
+    composer_subtitle: "스타일에 따라 코드 진행과 구조를 생성합니다.",
+    comp_key: "키",
+    comp_style: "스타일",
+    comp_mood: "기분",
+    comp_speed: "속도",
+    comp_complexity: "복잡성",
+    comp_topics: "주제 (영감)",
+    comp_topics_placeholder: "키워드를 5개까지 입력하세요...",
+    comp_generate: "작곡하기",
+    comp_powered_by: "제공:",
+    comp_save_library: "라이브러리에 저장"
   },
   zh: {
     app_name: "Verso",
@@ -599,6 +716,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     options_count: "个提议",
     nav_rehearsals: "排练",
     nav_library: "库",
+    nav_composer: "作曲家",
     logout: "退出",
     new_rehearsal_title: "新排练",
     new_rehearsal_subtitle: "设置初始信息。",
@@ -619,6 +737,18 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     propose_option: "提议日期",
     votes_label: "票",
     confirm_option: "确认",
-    propose_new_title: "提议新选项"
+    propose_new_title: "提议新选项",
+    composer_title: "歌曲作曲家",
+    composer_subtitle: "根据您的风格生成和弦进行和结构。",
+    comp_key: "调式",
+    comp_style: "风格",
+    comp_mood: "情绪",
+    comp_speed: "速度",
+    comp_complexity: "复杂度",
+    comp_topics: "主题（灵感）",
+    comp_topics_placeholder: "最多输入5个关键词...",
+    comp_generate: "作曲",
+    comp_powered_by: "技术支持：",
+    comp_save_library: "保存到库"
   }
 };

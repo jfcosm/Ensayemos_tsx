@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, Language, ViewState } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Mic2, LogOut, User as UserIcon, Sun, Moon, Globe, Cloud } from 'lucide-react';
+import { Mic2, LogOut, User as UserIcon, Sun, Moon, Globe, Cloud, Wand2, Music2 } from 'lucide-react';
 import { Button } from './Button';
 
 interface NavbarProps {
@@ -45,9 +45,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           onClick={() => user && onNavigate(ViewState.DASHBOARD)}
         >
           <div className="bg-brand-600 p-1.5 rounded-lg text-white shadow-lg shadow-brand-500/30">
-            <Mic2 size={20} />
+            <Music2 size={20} strokeWidth={1.5} />
           </div>
-          <span className="text-zinc-900 dark:text-white">Verso</span>
+          <span className="text-zinc-900 dark:text-white font-serif italic">Verso.</span>
         </div>
         
         {/* Controls */}
@@ -68,6 +68,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onNavigate(ViewState.SONG_LIBRARY)}
               >
                 {t('nav_library')}
+              </Button>
+               <Button 
+                variant="ghost" 
+                className={`gap-2 ${currentView === ViewState.COMPOSER ? "bg-zinc-100 dark:bg-zinc-800 text-brand-600 dark:text-brand-400" : ""}`}
+                onClick={() => onNavigate(ViewState.COMPOSER)}
+              >
+                <Wand2 size={16} />
+                {t('nav_composer')}
               </Button>
             </div>
           )}

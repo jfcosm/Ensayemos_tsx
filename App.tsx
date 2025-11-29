@@ -8,6 +8,7 @@ import { CreateRehearsal } from './components/CreateRehearsal';
 import { SongLibrary } from './components/SongLibrary';
 import { Navbar } from './components/Navbar';
 import { Button } from './components/Button';
+import { SongComposer } from './components/SongComposer';
 import { Plus, Music4, CalendarDays, Loader2 } from 'lucide-react';
 import { subscribeToRehearsals, saveRehearsal, deleteRehearsal, subscribeToSongs } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
@@ -282,6 +283,10 @@ function AppContent() {
               onCreateNew={() => { setSelectedSong(null); setView(ViewState.EDIT_SONG); }}
               onEdit={handleSongLibraryEdit}
             />
+          )}
+
+          {view === ViewState.COMPOSER && (
+            <SongComposer onSongCreated={() => setView(ViewState.SONG_LIBRARY)} />
           )}
 
           {view === ViewState.CREATE_REHEARSAL && (
