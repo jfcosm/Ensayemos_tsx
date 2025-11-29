@@ -5,8 +5,10 @@ import { SongEditor } from './components/SongEditor';
 import { ChordViewer } from './components/ChordViewer';
 import { LandingPage } from './components/LandingPage';
 import { CreateRehearsal } from './components/CreateRehearsal';
+import { SongLibrary } from './components/SongLibrary';
+import { Navbar } from './components/Navbar';
 import { Button } from './components/Button';
-import { Plus, Music4, CalendarDays, Mic2, LogOut, User as UserIcon, Sun, Moon, Loader2 } from 'lucide-react';
+import { Plus, Music4, CalendarDays, Loader2 } from 'lucide-react';
 import { subscribeToRehearsals, saveRehearsal, deleteRehearsal, subscribeToSongs } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -160,22 +162,14 @@ function AppContent() {
     if(song) setSelectedSong(song);
   };
 
-  const handleCloseSongEditor = () => {
-    setView(ViewState.DASHBOARD);
+  const handleSongLibraryEdit = (song: Song) => {
+    setSelectedSong(song);
+    setView(ViewState.EDIT_SONG);
   };
 
-  if (!currentUser) {
-    return (
-      <>
-        <div className="absolute top-4 right-4 z-50 mr-24 md:mr-0">
-           <button onClick={toggleTheme} className="p-2 rounded-full bg-white dark:bg-zinc-800 shadow-md border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300">
-             {isDark ? <Sun size={20} /> : <Moon size={20} />}
-           </button>
-        </div>
-        <LandingPage onLogin={handleLogin} />
-      </>
-    );
-  }
+  const handleCloseSongEditor = () => {
+    setView(ViewState.SONG_LIBRARY);
+  };
 
   if (view === ViewState.PLAY_MODE && selectedSong) {
     return (
@@ -190,166 +184,133 @@ function AppContent() {
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300">
-      <nav className="border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div 
-            className="flex items-center gap-2 font-bold text-xl tracking-tight cursor-pointer"
-            onClick={() => setView(ViewState.DASHBOARD)}
-          >
-            <div className="bg-brand-600 p-1.5 rounded-lg text-white shadow-lg shadow-brand-500/30">
-              <Mic2 size={20} />
-            </div>
-            <span className="text-zinc-900 dark:text-white">Ensaye<span className="text-brand-600 dark:text-brand-500">mos!</span></span>
-          </div>
+      
+      <Navbar 
+        user={currentUser}
+        onLogout={handleLogout}
+        isDark={isDark}
+        toggleTheme={toggleTheme}
+        currentView={view}
+        onNavigate={setView}
+      />
+
+      {!currentUser ? (
+        <LandingPage onLogin={handleLogin} />
+      ) : (
+        <main className="flex-1 container max-w-5xl mx-auto p-4 md:p-6">
           
-          <div className="flex items-center gap-2 md:gap-4">
-            <div className="hidden md:flex gap-2">
-              <Button 
-                variant="ghost" 
-                className={view === ViewState.DASHBOARD ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white" : ""}
-                onClick={() => setView(ViewState.DASHBOARD)}
-              >
-                {t('nav_rehearsals')}
-              </Button>
-              <Button 
-                variant="ghost" 
-                className={view === ViewState.EDIT_SONG ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white" : ""}
-                onClick={() => { setSelectedSong(null); setView(ViewState.EDIT_SONG); }}
-              >
-                {t('nav_library')}
-              </Button>
-            </div>
-
-            <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800 mx-1"></div>
-
-            <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-colors">
-               {isDark ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-
-            <div className="flex items-center gap-3">
-               <div className="flex items-center gap-2">
-                 {currentUser.picture ? (
-                   <img src={currentUser.picture} alt={currentUser.name} className="w-8 h-8 rounded-full border border-zinc-200 dark:border-zinc-700" />
-                 ) : (
-                   <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
-                     <UserIcon size={16} />
-                   </div>
-                 )}
-                 <span className="hidden md:block text-sm font-medium text-zinc-700 dark:text-zinc-300 max-w-[100px] truncate">{currentUser.name}</span>
-               </div>
-               <button onClick={handleLogout} className="text-zinc-500 hover:text-red-500 transition-colors p-2" title={t('logout')}>
-                 <LogOut size={18} />
-               </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="flex-1 container max-w-5xl mx-auto p-4 md:p-6">
-        
-        {view === ViewState.DASHBOARD && (
-          <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">{t('dashboard_title')}</h1>
-                <p className="text-zinc-500 dark:text-zinc-400">{t('dashboard_subtitle')}</p>
-              </div>
-              <Button onClick={handleCreateRehearsalClick} className="gap-2 shadow-xl shadow-brand-900/20">
-                <Plus size={20} />
-                {t('create_rehearsal')}
-              </Button>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {isLoading ? (
-                 <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-50">
-                   <Loader2 className="h-10 w-10 text-brand-500 animate-spin mb-4" />
-                   <p className="text-zinc-500">...</p>
-                 </div>
-              ) : rehearsals.length === 0 ? (
-                <div className="col-span-full py-16 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
-                  <CalendarDays className="mx-auto text-zinc-400 dark:text-zinc-700 mb-4" size={48} />
-                  <p className="text-zinc-500 dark:text-zinc-500 text-lg">{t('no_rehearsals')}</p>
-                  <p className="text-zinc-400 text-sm mt-1">{t('no_rehearsals_sub')}</p>
-                  <Button variant="ghost" className="mt-4 text-brand-600 dark:text-brand-400" onClick={handleCreateRehearsalClick}>{t('create_rehearsal')}</Button>
+          {view === ViewState.DASHBOARD && (
+            <div className="space-y-8 animate-in fade-in duration-500">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">{t('dashboard_title')}</h1>
+                  <p className="text-zinc-500 dark:text-zinc-400">{t('dashboard_subtitle')}</p>
                 </div>
-              ) : (
-                rehearsals.map(rehearsal => (
-                  <div 
-                    key={rehearsal.id} 
-                    onClick={() => handleOpenRehearsal(rehearsal)}
-                    className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-brand-500/50 hover:shadow-2xl hover:shadow-brand-900/10 rounded-xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden"
-                  >
-                    <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                       <button onClick={(e) => handleDeleteRehearsal(e, rehearsal.id)} className="text-zinc-400 hover:text-red-500 transition-colors bg-white dark:bg-zinc-900 rounded-full p-1 shadow-sm">
-                         <span className="sr-only">Borrar</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                       </button>
-                    </div>
-                    
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
-                        rehearsal.status === 'CONFIRMED' 
-                        ? 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20' 
-                        : 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
-                      }`}>
-                        {rehearsal.status === 'CONFIRMED' ? t('status_confirmed') : t('status_voting')}
-                      </div>
-                      <span className="text-zinc-500 text-xs font-mono">
-                        {new Date(rehearsal.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
+                <Button onClick={handleCreateRehearsalClick} className="gap-2 shadow-xl shadow-brand-900/20">
+                  <Plus size={20} />
+                  {t('create_rehearsal')}
+                </Button>
+              </div>
 
-                    <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2 group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors truncate">{rehearsal.title}</h3>
-                    
-                    <div className="space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
-                      <div className="flex items-center gap-2">
-                        <Music4 size={14} />
-                        <span>{rehearsal.setlist.length} {t('songs_count')}</span>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {isLoading ? (
+                  <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-50">
+                    <Loader2 className="h-10 w-10 text-brand-500 animate-spin mb-4" />
+                    <p className="text-zinc-500">...</p>
+                  </div>
+                ) : rehearsals.length === 0 ? (
+                  <div className="col-span-full py-16 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
+                    <CalendarDays className="mx-auto text-zinc-400 dark:text-zinc-700 mb-4" size={48} />
+                    <p className="text-zinc-500 dark:text-zinc-500 text-lg">{t('no_rehearsals')}</p>
+                    <p className="text-zinc-400 text-sm mt-1">{t('no_rehearsals_sub')}</p>
+                    <Button variant="ghost" className="mt-4 text-brand-600 dark:text-brand-400" onClick={handleCreateRehearsalClick}>{t('create_rehearsal')}</Button>
+                  </div>
+                ) : (
+                  rehearsals.map(rehearsal => (
+                    <div 
+                      key={rehearsal.id} 
+                      onClick={() => handleOpenRehearsal(rehearsal)}
+                      className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-brand-500/50 hover:shadow-2xl hover:shadow-brand-900/10 rounded-xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <button onClick={(e) => handleDeleteRehearsal(e, rehearsal.id)} className="text-zinc-400 hover:text-red-500 transition-colors bg-white dark:bg-zinc-900 rounded-full p-1 shadow-sm">
+                          <span className="sr-only">Borrar</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <CalendarDays size={14} />
-                        <span>
-                          {rehearsal.status === 'CONFIRMED' 
-                            ? new Date(rehearsal.options.find(o => o.id === rehearsal.confirmedOptionId)?.date || '').toLocaleDateString()
-                            : `${rehearsal.options.length} ${t('options_count')}`}
+                      
+                      <div className="flex items-start justify-between mb-4">
+                        <div className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
+                          rehearsal.status === 'CONFIRMED' 
+                          ? 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20' 
+                          : 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
+                        }`}>
+                          {rehearsal.status === 'CONFIRMED' ? t('status_confirmed') : t('status_voting')}
+                        </div>
+                        <span className="text-zinc-500 text-xs font-mono">
+                          {new Date(rehearsal.createdAt).toLocaleDateString()}
                         </span>
                       </div>
+
+                      <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2 group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors truncate">{rehearsal.title}</h3>
+                      
+                      <div className="space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
+                        <div className="flex items-center gap-2">
+                          <Music4 size={14} />
+                          <span>{rehearsal.setlist.length} {t('songs_count')}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CalendarDays size={14} />
+                          <span>
+                            {rehearsal.status === 'CONFIRMED' 
+                              ? new Date(rehearsal.options.find(o => o.id === rehearsal.confirmedOptionId)?.date || '').toLocaleDateString()
+                              : `${rehearsal.options.length} ${t('options_count')}`}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))
-              )}
+                  ))
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {view === ViewState.CREATE_REHEARSAL && (
-          <CreateRehearsal 
-            onSave={handleSaveNewRehearsal} 
-            onCancel={() => setView(ViewState.DASHBOARD)} 
-          />
-        )}
+          {view === ViewState.SONG_LIBRARY && (
+            <SongLibrary 
+              songs={songs}
+              onCreateNew={() => { setSelectedSong(null); setView(ViewState.EDIT_SONG); }}
+              onEdit={handleSongLibraryEdit}
+            />
+          )}
 
-        {view === ViewState.REHEARSAL_DETAIL && selectedRehearsal && (
-          <RehearsalView 
-            rehearsal={selectedRehearsal} 
-            onBack={() => setView(ViewState.DASHBOARD)} 
-            onUpdate={handleUpdateRehearsal}
-            onPlaySong={startPlayMode}
-          />
-        )}
+          {view === ViewState.CREATE_REHEARSAL && (
+            <CreateRehearsal 
+              onSave={handleSaveNewRehearsal} 
+              onCancel={() => setView(ViewState.DASHBOARD)} 
+            />
+          )}
 
-        {view === ViewState.EDIT_SONG && (
-          <div className="h-[calc(100vh-140px)]">
-             <SongEditor 
-               initialSong={selectedSong} 
-               onClose={handleCloseSongEditor}
-               onSave={handleCloseSongEditor}
-             />
-          </div>
-        )}
+          {view === ViewState.REHEARSAL_DETAIL && selectedRehearsal && (
+            <RehearsalView 
+              rehearsal={selectedRehearsal} 
+              onBack={() => setView(ViewState.DASHBOARD)} 
+              onUpdate={handleUpdateRehearsal}
+              onPlaySong={startPlayMode}
+            />
+          )}
 
-      </main>
+          {view === ViewState.EDIT_SONG && (
+            <div className="h-[calc(100vh-140px)]">
+              <SongEditor 
+                initialSong={selectedSong} 
+                onClose={handleCloseSongEditor}
+                onSave={handleCloseSongEditor}
+              />
+            </div>
+          )}
+
+        </main>
+      )}
 
       {/* Footer */}
       <footer className="py-6 text-center text-xs text-zinc-400 dark:text-zinc-600 border-t border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm">

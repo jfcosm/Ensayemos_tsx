@@ -33,7 +33,13 @@ type TranslationKey =
   | 'field_time'
   | 'field_location'
   | 'cancel'
-  | 'save';
+  | 'save'
+  | 'status_online'
+  | 'library_title'
+  | 'library_subtitle'
+  | 'search_placeholder'
+  | 'new_song'
+  | 'no_songs_found';
 
 export const translations: Record<Language, Record<TranslationKey, string>> = {
   es: {
@@ -70,6 +76,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     field_location: "Lugar / Sala",
     cancel: "Cancelar",
     save: "Guardar",
+    status_online: "En línea",
+    library_title: "Biblioteca Musical",
+    library_subtitle: "Gestiona todo el repertorio de tu banda.",
+    search_placeholder: "Buscar por título o artista...",
+    new_song: "Nueva Canción",
+    no_songs_found: "No se encontraron canciones."
   },
   en: {
     app_name: "Ensayemos!",
@@ -105,6 +117,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     field_location: "Location / Room",
     cancel: "Cancel",
     save: "Save",
+    status_online: "Online",
+    library_title: "Music Library",
+    library_subtitle: "Manage your band's entire repertoire.",
+    search_placeholder: "Search by title or artist...",
+    new_song: "New Song",
+    no_songs_found: "No songs found."
   },
   it: {
     app_name: "Ensayemos!",
@@ -140,6 +158,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     field_location: "Luogo / Sala",
     cancel: "Annulla",
     save: "Salva",
+    status_online: "Online",
+    library_title: "Libreria Musicale",
+    library_subtitle: "Gestisci l'intero repertorio della band.",
+    search_placeholder: "Cerca per titolo o artista...",
+    new_song: "Nuova Canzone",
+    no_songs_found: "Nessuna canzone trovata."
   },
   fr: {
     app_name: "Ensayemos!",
@@ -175,6 +199,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     field_location: "Lieu / Salle",
     cancel: "Annuler",
     save: "Enregistrer",
+    status_online: "En ligne",
+    library_title: "Bibliothèque Musicale",
+    library_subtitle: "Gérez tout le répertoire de votre groupe.",
+    search_placeholder: "Rechercher par titre ou artiste...",
+    new_song: "Nouvelle Chanson",
+    no_songs_found: "Aucune chanson trouvée."
   },
   de: {
     app_name: "Ensayemos!",
@@ -210,6 +240,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     field_location: "Ort / Raum",
     cancel: "Abbrechen",
     save: "Speichern",
+    status_online: "Online",
+    library_title: "Musikbibliothek",
+    library_subtitle: "Verwalte das gesamte Repertoire.",
+    search_placeholder: "Suche nach Titel oder Künstler...",
+    new_song: "Neues Lied",
+    no_songs_found: "Keine Lieder gefunden."
   },
   hi: {
     app_name: "Ensayemos!",
@@ -245,6 +281,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     field_location: "स्थान",
     cancel: "रद्द करें",
     save: "सहेजें",
+    status_online: "ऑनलाइन",
+    library_title: "संगीत पुस्तकालय",
+    library_subtitle: "अपने पूरे प्रदर्शनों की सूची प्रबंधित करें।",
+    search_placeholder: "शीर्षक या कलाकार द्वारा खोजें...",
+    new_song: "नया गाना",
+    no_songs_found: "कोई गाना नहीं मिला।"
   },
   ja: {
     app_name: "Ensayemos!",
@@ -280,6 +322,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     field_location: "場所",
     cancel: "キャンセル",
     save: "保存",
+    status_online: "オンライン",
+    library_title: "音楽ライブラリ",
+    library_subtitle: "バンドのレパートリーを管理。",
+    search_placeholder: "タイトルまたはアーティストで検索...",
+    new_song: "新しい曲",
+    no_songs_found: "曲が見つかりません。"
   },
   ko: {
     app_name: "Ensayemos!",
@@ -315,6 +363,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     field_location: "장소",
     cancel: "취소",
     save: "저장",
+    status_online: "온라인",
+    library_title: "음악 라이브러리",
+    library_subtitle: "밴드의 전체 레퍼토리를 관리하세요.",
+    search_placeholder: "제목 또는 아티스트로 검색...",
+    new_song: "새 노래",
+    no_songs_found: "노래를 찾을 수 없습니다."
   },
   zh: {
     app_name: "Ensayemos!",
@@ -350,5 +404,11 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     field_location: "地点",
     cancel: "取消",
     save: "保存",
+    status_online: "在线",
+    library_title: "音乐库",
+    library_subtitle: "管理您乐队的全部曲目。",
+    search_placeholder: "按标题或艺术家搜索...",
+    new_song: "新歌",
+    no_songs_found: "未找到歌曲。"
   }
 };
