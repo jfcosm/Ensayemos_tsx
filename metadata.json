@@ -1,5 +1,5 @@
 {
   "name": "Verso",
-  "description": "v2.0 Fix API Key visibility and Branding Typography",
+  "description": "v2.1 Fix Composer Language and API Key robustness",
   "requestFramePermissions": []
 }

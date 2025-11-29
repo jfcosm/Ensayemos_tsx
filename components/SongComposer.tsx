@@ -11,7 +11,7 @@ interface SongComposerProps {
 }
 
 export const SongComposer: React.FC<SongComposerProps> = ({ onSongCreated }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [isGenerating, setIsGenerating] = useState(false);
     const [generatedContent, setGeneratedContent] = useState('');
     
@@ -40,7 +40,8 @@ export const SongComposer: React.FC<SongComposerProps> = ({ onSongCreated }) => 
             mood: selectedMood,
             speed: selectedSpeed,
             complexity: selectedComplexity,
-            topics: topics
+            topics: topics,
+            language: language // Pass the current language code
         });
         setGeneratedContent(result);
         setIsGenerating(false);

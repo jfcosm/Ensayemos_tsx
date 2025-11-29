@@ -96,6 +96,7 @@ export const generateSongFromParams = async (params: {
     speed: string;
     complexity: string;
     topics: string;
+    language: string;
 }): Promise<string> => {
     const apiKey = getApiKey();
     if (!apiKey) {
@@ -105,6 +106,22 @@ export const generateSongFromParams = async (params: {
 
     try {
         const ai = new GoogleGenAI({ apiKey });
+        
+        // Map language code to full language name for the prompt
+        const langMap: Record<string, string> = {
+            'es': 'Spanish',
+            'en': 'English',
+            'it': 'Italian',
+            'fr': 'French',
+            'de': 'German',
+            'pt': 'Portuguese',
+            'ja': 'Japanese',
+            'ko': 'Korean',
+            'zh': 'Chinese',
+            'hi': 'Hindi'
+        };
+        const targetLang = langMap[params.language] || 'Spanish';
+
         const prompt = `
             Act as a professional songwriter and composer. I need you to compose a complete song.
             
@@ -116,12 +133,14 @@ export const generateSongFromParams = async (params: {
             - Harmonic Complexity: ${params.complexity}
             - Lyrical Themes/Keywords: ${params.topics}
 
-            Instructions:
-            1. Create a full song structure (Intro, Verse 1, Chorus, Verse 2, Bridge, Chorus, Outro).
-            2. Write original lyrics based on the themes provided.
-            3. Provide the Chords above the lyrics.
-            4. Include performance notes for each section (e.g., "Drums enter here", "Soft piano only").
-            5. Return the result in plain text format suitable for a chord sheet.
+            IMPORTANT INSTRUCTIONS:
+            1. Write the ENTIRE response (lyrics, section headers, performance notes, and titles) in ${targetLang}.
+            2. Create a full song structure (Intro, Verse 1, Chorus, Verse 2, Bridge, Chorus, Outro).
+            3. Write original lyrics based on the themes provided.
+            4. Provide the Chords above the lyrics.
+            5. Include performance notes for each section (e.g., "Drums enter here", "Soft piano only") translated to ${targetLang}.
+            6. Return the result in plain text format suitable for a chord sheet.
+            7. Do NOT include conversational filler like "Okay, here is your song". Start directly with the Song Title.
         `;
 
         const response = await ai.models.generateContent({
