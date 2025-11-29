@@ -4,14 +4,20 @@ import { GoogleGenAI } from "@google/genai";
 // without crashing if 'process' is undefined.
 const getApiKey = () => {
   try {
-    // In some Vite setups, process.env is replaced at build time.
-    // In others, we need import.meta.env.
-    // This check prevents "ReferenceError: process is not defined"
+    // 1. Check standard Vite environment variables (Preferred)
+    // @ts-ignore
+    if (import.meta && import.meta.env && import.meta.env.VITE_API_KEY) {
+      // @ts-ignore
+      return import.meta.env.VITE_API_KEY;
+    }
+
+    // 2. Check for process.env (Vercel/Node compat)
     if (typeof process !== 'undefined' && process.env) {
-      return process.env.API_KEY;
+      // Vercel sometimes injects VITE_ prefixed vars into process.env too
+      return process.env.VITE_API_KEY || process.env.API_KEY || process.env.REACT_APP_API_KEY;
     }
   } catch (e) {
-    // Ignore error
+    console.warn("Error accessing environment variables:", e);
   }
   return undefined;
 };
@@ -92,7 +98,10 @@ export const generateSongFromParams = async (params: {
     topics: string;
 }): Promise<string> => {
     const apiKey = getApiKey();
-    if (!apiKey) return "Error: API Key Missing";
+    if (!apiKey) {
+        console.error("API Key not found in environment variables.");
+        return "Error: API Key Missing. Please ensure VITE_API_KEY is set in your Vercel project settings.";
+    }
 
     try {
         const ai = new GoogleGenAI({ apiKey });
@@ -123,6 +132,6 @@ export const generateSongFromParams = async (params: {
         return response.text || "";
     } catch (error) {
         console.error("Error composing song:", error);
-        return "Error creating composition. Please try again.";
+        return "Error creating composition. Please check your API Quota or Connection.";
     }
 };

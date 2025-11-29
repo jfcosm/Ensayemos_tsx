@@ -45,9 +45,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           onClick={() => user && onNavigate(ViewState.DASHBOARD)}
         >
           <div className="bg-brand-600 p-1.5 rounded-lg text-white shadow-lg shadow-brand-500/30">
-            <Music2 size={20} strokeWidth={1.5} />
+            <Music2 size={20} strokeWidth={2.5} />
           </div>
-          <span className="text-zinc-900 dark:text-white font-serif italic">Verso.</span>
+          <span className="text-zinc-900 dark:text-white font-sans font-extrabold tracking-tight lowercase text-2xl">verso.</span>
         </div>
         
         {/* Controls */}

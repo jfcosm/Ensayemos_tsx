@@ -130,8 +130,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
         <div className="space-y-8 text-center md:text-left order-2 md:order-1">
           <div className="space-y-4">
             <div className="inline-flex items-center justify-center md:justify-start gap-2 text-brand-600 dark:text-brand-500 font-bold text-xl md:text-2xl">
-                <Music2 size={28} strokeWidth={1.5} />
-                <span className="font-serif italic text-zinc-900 dark:text-white">{t('app_name')}.</span>
+                <Music2 size={28} strokeWidth={2.5} />
+                <span className="font-sans font-extrabold tracking-tight lowercase text-zinc-900 dark:text-white">verso.</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight text-zinc-900 dark:text-white font-sans">
               {t('tagline').split('.')[0]}.<br/>
