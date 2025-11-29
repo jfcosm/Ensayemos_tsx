@@ -54,7 +54,13 @@ type TranslationKey =
   | 'library_subtitle'
   | 'search_placeholder'
   | 'new_song'
-  | 'no_songs_found';
+  | 'no_songs_found'
+  | 'vote_join'
+  | 'vote_leave'
+  | 'propose_option'
+  | 'votes_label'
+  | 'confirm_option'
+  | 'propose_new_title';
 
 export const translations: Record<Language, Record<TranslationKey, string>> = {
   es: {
@@ -111,7 +117,13 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     library_subtitle: "Gestiona todo el repertorio de tu banda.",
     search_placeholder: "Buscar por título o artista...",
     new_song: "Nueva Canción",
-    no_songs_found: "No se encontraron canciones."
+    no_songs_found: "No se encontraron canciones.",
+    vote_join: "Me anoto",
+    vote_leave: "Me bajo",
+    propose_option: "Proponer otra fecha",
+    votes_label: "votos",
+    confirm_option: "Confirmar",
+    propose_new_title: "Proponer nueva opción"
   },
   en: {
     app_name: "Verso",
@@ -167,7 +179,13 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     library_subtitle: "Manage your band's entire repertoire.",
     search_placeholder: "Search by title or artist...",
     new_song: "New Song",
-    no_songs_found: "No songs found."
+    no_songs_found: "No songs found.",
+    vote_join: "I'm in",
+    vote_leave: "I'm out",
+    propose_option: "Propose new date",
+    votes_label: "votes",
+    confirm_option: "Confirm",
+    propose_new_title: "Propose new option"
   },
   it: {
     app_name: "Verso",
@@ -223,7 +241,13 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     library_subtitle: "Gestisci l'intero repertorio della band.",
     search_placeholder: "Cerca per titolo o artista...",
     new_song: "Nuova Canzone",
-    no_songs_found: "Nessuna canzone trovata."
+    no_songs_found: "Nessuna canzone trovata.",
+    vote_join: "Partecipo",
+    vote_leave: "Rinuncio",
+    propose_option: "Proponi altra data",
+    votes_label: "voti",
+    confirm_option: "Conferma",
+    propose_new_title: "Proponi nuova opzione"
   },
   fr: {
     app_name: "Verso",
@@ -279,7 +303,13 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     library_subtitle: "Gérez tout le répertoire de votre groupe.",
     search_placeholder: "Rechercher par titre ou artiste...",
     new_song: "Nouvelle Chanson",
-    no_songs_found: "Aucune chanson trouvée."
+    no_songs_found: "Aucune chanson trouvée.",
+    vote_join: "Je participe",
+    vote_leave: "Je me retire",
+    propose_option: "Proposer une date",
+    votes_label: "votes",
+    confirm_option: "Confirmer",
+    propose_new_title: "Proposer une option"
   },
   de: {
     app_name: "Verso",
@@ -335,7 +365,13 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     library_subtitle: "Verwalte das gesamte Repertoire.",
     search_placeholder: "Suche nach Titel oder Künstler...",
     new_song: "Neues Lied",
-    no_songs_found: "Keine Lieder gefunden."
+    no_songs_found: "Keine Lieder gefunden.",
+    vote_join: "Ich bin dabei",
+    vote_leave: "Ich bin raus",
+    propose_option: "Datum vorschlagen",
+    votes_label: "Stimmen",
+    confirm_option: "Bestätigen",
+    propose_new_title: "Option vorschlagen"
   },
   hi: {
     app_name: "Verso",
@@ -391,7 +427,13 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     library_subtitle: "अपने पूरे प्रदर्शनों की सूची प्रबंधित करें।",
     search_placeholder: "शीर्षक या कलाकार द्वारा खोजें...",
     new_song: "नया गाना",
-    no_songs_found: "कोई गाना नहीं मिला।"
+    no_songs_found: "कोई गाना नहीं मिला।",
+    vote_join: "मैं शामिल हूं",
+    vote_leave: "मैं बाहर हूं",
+    propose_option: "तिथि प्रस्तावित करें",
+    votes_label: "वोट",
+    confirm_option: "पुष्टि करें",
+    propose_new_title: "विकल्प प्रस्तावित करें"
   },
   ja: {
     app_name: "Verso",
@@ -447,7 +489,13 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     library_subtitle: "バンドのレパートリーを管理。",
     search_placeholder: "タイトルまたはアーティストで検索...",
     new_song: "新しい曲",
-    no_songs_found: "曲が見つかりません。"
+    no_songs_found: "曲が見つかりません。",
+    vote_join: "参加",
+    vote_leave: "不参加",
+    propose_option: "日程を提案",
+    votes_label: "票",
+    confirm_option: "確認",
+    propose_new_title: "新しいオプション"
   },
   ko: {
     app_name: "Verso",
@@ -503,7 +551,13 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     library_subtitle: "밴드의 전체 레퍼토리를 관리하세요.",
     search_placeholder: "제목 또는 아티스트로 검색...",
     new_song: "새 노래",
-    no_songs_found: "노래를 찾을 수 없습니다."
+    no_songs_found: "노래를 찾을 수 없습니다.",
+    vote_join: "참가",
+    vote_leave: "불참",
+    propose_option: "날짜 제안",
+    votes_label: "표",
+    confirm_option: "확인",
+    propose_new_title: "새 옵션 제안"
   },
   zh: {
     app_name: "Verso",
@@ -559,6 +613,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     library_subtitle: "管理您乐队的全部曲目。",
     search_placeholder: "按标题或艺术家搜索...",
     new_song: "新歌",
-    no_songs_found: "未找到歌曲。"
+    no_songs_found: "未找到歌曲。",
+    vote_join: "我加入",
+    vote_leave: "我不去",
+    propose_option: "提议日期",
+    votes_label: "票",
+    confirm_option: "确认",
+    propose_new_title: "提议新选项"
   }
 };

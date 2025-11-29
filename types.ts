@@ -27,7 +27,7 @@ export interface RehearsalOption {
   date: string; // ISO string
   time: string;
   location: string;
-  votes: number;
+  voterIds: string[]; // Array of User IDs who voted for this
 }
 
 export interface Rehearsal {

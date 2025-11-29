@@ -116,7 +116,7 @@ function AppContent() {
           date: data.date, 
           time: data.time, 
           location: data.location, 
-          votes: 1 
+          voterIds: currentUser ? [currentUser.id] : [] 
         }
       ],
       setlist: [],
@@ -293,6 +293,7 @@ function AppContent() {
 
           {view === ViewState.REHEARSAL_DETAIL && selectedRehearsal && (
             <RehearsalView 
+              currentUser={currentUser!}
               rehearsal={selectedRehearsal} 
               onBack={() => setView(ViewState.DASHBOARD)} 
               onUpdate={handleUpdateRehearsal}
