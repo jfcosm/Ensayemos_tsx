@@ -93,32 +93,60 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
   }, [onLogin, t]);
 
   return (
-    <div className="flex-1 flex flex-col items-center p-4 md:p-8 animate-in fade-in duration-700 overflow-x-hidden">
+    <div className="flex-1 flex flex-col items-center p-4 md:p-8 animate-in fade-in duration-700 overflow-x-hidden relative">
       
+      {/* --- BACKGROUND ANIMATION (LED EQ EFFECT) --- */}
+      <style>{`
+        @keyframes eq-bounce {
+          0%, 100% { transform: scaleY(0.3); opacity: 0.1; }
+          50% { transform: scaleY(1); opacity: 0.4; }
+        }
+        .led-column {
+          animation: eq-bounce infinite ease-in-out;
+          transform-origin: bottom;
+        }
+      `}</style>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 select-none">
+        <div className="flex justify-center items-end gap-4 md:gap-12 h-full w-full opacity-30 dark:opacity-40 max-w-7xl mx-auto px-10">
+            {/* LED Column 1 */}
+            <div className="led-column w-16 md:w-32 h-[60%] bg-gradient-to-t from-red-600 via-brand-500 to-transparent blur-[40px] rounded-t-full" style={{ animationDuration: '3s', animationDelay: '0s' }}></div>
+            {/* LED Column 2 */}
+            <div className="led-column w-16 md:w-32 h-[80%] bg-gradient-to-t from-red-700 via-brand-600 to-transparent blur-[50px] rounded-t-full" style={{ animationDuration: '4.2s', animationDelay: '1s' }}></div>
+            {/* LED Column 3 (Center - Highest) */}
+            <div className="led-column w-20 md:w-40 h-[90%] bg-gradient-to-t from-brand-800 via-red-500 to-transparent blur-[60px] rounded-t-full" style={{ animationDuration: '5s', animationDelay: '0.5s' }}></div>
+            {/* LED Column 4 */}
+            <div className="led-column w-16 md:w-32 h-[75%] bg-gradient-to-t from-red-700 via-brand-600 to-transparent blur-[50px] rounded-t-full" style={{ animationDuration: '3.5s', animationDelay: '2s' }}></div>
+            {/* LED Column 5 */}
+            <div className="led-column w-16 md:w-32 h-[50%] bg-gradient-to-t from-red-600 via-brand-500 to-transparent blur-[40px] rounded-t-full" style={{ animationDuration: '4.5s', animationDelay: '1.5s' }}></div>
+        </div>
+        {/* Bottom fade to seamlessly blend with footer/scroll */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-zinc-50 dark:from-zinc-950 to-transparent"></div>
+      </div>
+
       {/* Hero Section */}
-      <div className="max-w-6xl w-full grid md:grid-cols-2 gap-12 lg:gap-20 items-center min-h-[600px]">
+      <div className="relative z-10 max-w-6xl w-full grid md:grid-cols-2 gap-12 lg:gap-20 items-center min-h-[600px]">
         
         {/* Left: Content & Login */}
         <div className="space-y-8 text-center md:text-left order-2 md:order-1">
           <div className="space-y-4">
             <div className="inline-flex items-center justify-center md:justify-start gap-2 text-brand-600 dark:text-brand-500 font-bold text-xl md:text-2xl">
-                <Mic2 size={28} />
-                <span>{t('app_name')}</span>
+                <Music2 size={28} strokeWidth={1.5} />
+                <span className="font-serif italic text-zinc-900 dark:text-white">{t('app_name')}.</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight text-zinc-900 dark:text-white">
+            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight text-zinc-900 dark:text-white font-sans">
               {t('tagline').split('.')[0]}.<br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-brand-400 dark:from-brand-500 dark:to-brand-300">
                 {t('tagline').split('.')[1] || "Master it."}
               </span>
             </h1>
-            <p className="text-lg text-zinc-600 dark:text-zinc-300 max-w-lg mx-auto md:mx-0">
+            <p className="text-lg text-zinc-600 dark:text-zinc-300 max-w-lg mx-auto md:mx-0 font-sans">
                {t('tour_subtitle')}
             </p>
           </div>
 
           <div className="space-y-4 max-w-sm mx-auto md:mx-0">
               {/* Login Box */}
-              <div className="bg-white dark:bg-zinc-900/50 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl backdrop-blur-sm relative z-10">
+              <div className="bg-white/80 dark:bg-zinc-900/60 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl backdrop-blur-md relative z-10">
                 <div className="flex justify-center h-12 mb-2 min-h-[48px]">
                     <div id="googleSignInDiv"></div>
                     {!isGoogleLoaded && !configError && (
@@ -132,7 +160,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
                 {error && (
                   <p className="mt-3 text-red-500 text-xs text-center">{error}</p>
                 )}
-                <p className="text-xs text-center text-zinc-400 mt-4">
+                <p className="text-xs text-center text-zinc-400 mt-4 font-sans">
                   {t('footer_copyright')}
                 </p>
               </div>
@@ -141,7 +169,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
 
         {/* Right: 3D App Mockup */}
         <div className="order-1 md:order-2 relative group perspective-1000">
-            <div className="absolute inset-0 bg-brand-500/20 blur-3xl rounded-full transform scale-75 group-hover:scale-90 transition-transform duration-700"></div>
+            {/* Glow behind the mock */}
+            <div className="absolute inset-0 bg-brand-500/10 blur-3xl rounded-full transform scale-75 group-hover:scale-90 transition-transform duration-700"></div>
+            
             <div className="relative bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden transform md:rotate-y-[-10deg] md:rotate-x-[5deg] transition-transform duration-500 hover:rotate-0 max-w-md mx-auto">
                 {/* Fake Window Header */}
                 <div className="bg-zinc-100 dark:bg-zinc-900/50 p-3 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
@@ -159,7 +189,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
                 <div className="p-6 space-y-5">
                   <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="text-xl font-bold text-zinc-900 dark:text-white">{t('tour_mockup_header')}</h3>
+                        <h3 className="text-xl font-bold text-zinc-900 dark:text-white font-sans">{t('tour_mockup_header')}</h3>
                         <div className="text-sm text-zinc-500 dark:text-zinc-400 flex items-center gap-1 mt-1">
                             <Users size={12} /> The Rolling Stones
                         </div>
@@ -176,7 +206,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
                             <Calendar size={18} />
                         </div>
                         <div>
-                            <div className="text-sm font-semibold text-zinc-900 dark:text-white">{t('tour_mockup_date')}</div>
+                            <div className="text-sm font-semibold text-zinc-900 dark:text-white font-sans">{t('tour_mockup_date')}</div>
                             <div className="text-xs text-zinc-500">{t('tour_mockup_location')}</div>
                         </div>
                       </div>
@@ -189,12 +219,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
 
                   {/* Fake Setlist */}
                   <div>
-                      <div className="text-xs font-bold text-zinc-400 mb-2 uppercase tracking-wider">{t('tour_mockup_setlist')}</div>
+                      <div className="text-xs font-bold text-zinc-400 mb-2 uppercase tracking-wider font-sans">{t('tour_mockup_setlist')}</div>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between p-2 rounded-lg bg-brand-50 dark:bg-brand-900/10 border border-brand-100 dark:border-brand-500/20">
                             <div className="flex items-center gap-3">
                               <span className="font-mono text-xs text-brand-400">01</span>
-                              <span className="text-sm font-medium text-brand-900 dark:text-brand-100">Paint It Black</span>
+                              <span className="text-sm font-medium text-brand-900 dark:text-brand-100 font-sans">Paint It Black</span>
                             </div>
                             <div className="flex items-center gap-1 bg-brand-200 dark:bg-brand-800 text-brand-800 dark:text-brand-200 text-[10px] px-1.5 py-0.5 rounded">
                               <PlayCircle size={10} /> {t('tour_mockup_playing')}
@@ -203,13 +233,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
                         <div className="flex items-center justify-between p-2 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 border border-transparent">
                             <div className="flex items-center gap-3">
                               <span className="font-mono text-xs text-zinc-400">02</span>
-                              <span className="text-sm text-zinc-600 dark:text-zinc-300">Gimme Shelter</span>
+                              <span className="text-sm text-zinc-600 dark:text-zinc-300 font-sans">Gimme Shelter</span>
                             </div>
                         </div>
                         <div className="flex items-center justify-between p-2 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 border border-transparent">
                             <div className="flex items-center gap-3">
                               <span className="font-mono text-xs text-zinc-400">03</span>
-                              <span className="text-sm text-zinc-600 dark:text-zinc-300">Sympathy for the Devil</span>
+                              <span className="text-sm text-zinc-600 dark:text-zinc-300 font-sans">Sympathy for the Devil</span>
                             </div>
                             <CheckCircle2 size={14} className="text-green-500" />
                         </div>
@@ -222,30 +252,30 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
       </div>
 
       {/* Features Section - Below fold */}
-      <div className="w-full max-w-6xl mt-20 mb-10">
+      <div className="relative z-10 w-full max-w-6xl mt-20 mb-10">
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
               <div className="bg-brand-100 dark:bg-brand-900/30 p-3 rounded-xl text-brand-600 dark:text-brand-400 w-fit mb-4">
                   <Users size={24} />
               </div>
-              <h3 className="font-bold text-lg text-zinc-900 dark:text-white mb-2">{t('feature_vote_title')}</h3>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">{t('feature_vote_desc')}</p>
+              <h3 className="font-bold text-lg text-zinc-900 dark:text-white mb-2 font-sans">{t('feature_vote_title')}</h3>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed font-sans">{t('feature_vote_desc')}</p>
             </div>
 
-            <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
               <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-xl text-blue-600 dark:text-blue-400 w-fit mb-4">
                   <Cloud size={24} />
               </div>
-              <h3 className="font-bold text-lg text-zinc-900 dark:text-white mb-2">{t('feature_sync_title')}</h3>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">{t('feature_sync_desc')}</p>
+              <h3 className="font-bold text-lg text-zinc-900 dark:text-white mb-2 font-sans">{t('feature_sync_title')}</h3>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed font-sans">{t('feature_sync_desc')}</p>
             </div>
 
-            <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
               <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-xl text-purple-600 dark:text-purple-400 w-fit mb-4">
                   <Calendar size={24} />
               </div>
-              <h3 className="font-bold text-lg text-zinc-900 dark:text-white mb-2">{t('feature_setlist_title')}</h3>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">{t('feature_setlist_desc')}</p>
+              <h3 className="font-bold text-lg text-zinc-900 dark:text-white mb-2 font-sans">{t('feature_setlist_title')}</h3>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed font-sans">{t('feature_setlist_desc')}</p>
             </div>
           </div>
       </div>
