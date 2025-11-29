@@ -47,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="bg-brand-600 p-1.5 rounded-lg text-white shadow-lg shadow-brand-500/30">
             <Mic2 size={20} />
           </div>
-          <span className="text-zinc-900 dark:text-white">Ensaye<span className="text-brand-600 dark:text-brand-500">mos!</span></span>
+          <span className="text-zinc-900 dark:text-white">Verso</span>
         </div>
         
         {/* Controls */}

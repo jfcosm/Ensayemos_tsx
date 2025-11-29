@@ -43,7 +43,7 @@ type TranslationKey =
 
 export const translations: Record<Language, Record<TranslationKey, string>> = {
   es: {
-    app_name: "Ensayemos!",
+    app_name: "Verso",
     tagline: "Coordina tu banda. Domina tus ensayos.",
     start_button: "Iniciar con Google",
     demo_button: "Probar Modo Demo",
@@ -84,7 +84,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     no_songs_found: "No se encontraron canciones."
   },
   en: {
-    app_name: "Ensayemos!",
+    app_name: "Verso",
     tagline: "Coordinate your band. Master your rehearsals.",
     start_button: "Sign in with Google",
     demo_button: "Try Demo Mode",
@@ -125,7 +125,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     no_songs_found: "No songs found."
   },
   it: {
-    app_name: "Ensayemos!",
+    app_name: "Verso",
     tagline: "Coordina la tua band. Gestisci le prove.",
     start_button: "Accedi con Google",
     demo_button: "Prova modalità Demo",
@@ -166,7 +166,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     no_songs_found: "Nessuna canzone trovata."
   },
   fr: {
-    app_name: "Ensayemos!",
+    app_name: "Verso",
     tagline: "Coordonnez votre groupe. Maîtrisez vos répétitions.",
     start_button: "Se connecter avec Google",
     demo_button: "Mode Démo",
@@ -207,7 +207,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     no_songs_found: "Aucune chanson trouvée."
   },
   de: {
-    app_name: "Ensayemos!",
+    app_name: "Verso",
     tagline: "Koordiniere deine Band. Meistere deine Proben.",
     start_button: "Mit Google anmelden",
     demo_button: "Demo-Modus testen",
@@ -248,7 +248,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     no_songs_found: "Keine Lieder gefunden."
   },
   hi: {
-    app_name: "Ensayemos!",
+    app_name: "Verso",
     tagline: "अपने बैंड का समन्वय करें। रिहर्सल में महारत हासिल करें।",
     start_button: "Google के साथ साइन इन करें",
     demo_button: "डेमो मोड आज़माएं",
@@ -289,7 +289,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     no_songs_found: "कोई गाना नहीं मिला।"
   },
   ja: {
-    app_name: "Ensayemos!",
+    app_name: "Verso",
     tagline: "バンドをコーディネート。リハーサルをマスターしよう。",
     start_button: "Googleでログイン",
     demo_button: "デモモードを試す",
@@ -330,7 +330,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     no_songs_found: "曲が見つかりません。"
   },
   ko: {
-    app_name: "Ensayemos!",
+    app_name: "Verso",
     tagline: "밴드를 조율하세요. 리허설을 마스터하세요.",
     start_button: "Google로 로그인",
     demo_button: "데모 모드 체험",
@@ -371,7 +371,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     no_songs_found: "노래를 찾을 수 없습니다."
   },
   zh: {
-    app_name: "Ensayemos!",
+    app_name: "Verso",
     tagline: "协调你的乐队。掌控你的排练。",
     start_button: "使用 Google 登录",
     demo_button: "试用演示模式",

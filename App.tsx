@@ -201,6 +201,7 @@ function AppContent() {
           
           {view === ViewState.DASHBOARD && (
             <div className="space-y-8 animate-in fade-in duration-500">
+              
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">{t('dashboard_title')}</h1>
