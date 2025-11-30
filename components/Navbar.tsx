@@ -34,6 +34,15 @@ export const Navbar: React.FC<NavbarProps> = ({
     { code: 'ko', label: '한국어', flag: '🇰🇷' },
     { code: 'zh', label: '中文', flag: '🇨🇳' },
     { code: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
+    { code: 'gu', label: 'ગુજરાતી', flag: '🇮🇳' },
+    { code: 'ta', label: 'தமிழ்', flag: '🇮🇳' },
+    { code: 'uk', label: 'Українська', flag: '🇺🇦' },
+    { code: 'sv', label: 'Svenska', flag: '🇸🇪' },
+    { code: 'fi', label: 'Suomi', flag: '🇫🇮' },
+    { code: 'nl', label: 'Nederlands', flag: '🇳🇱' },
+    { code: 'is', label: 'Íslenska', flag: '🇮🇸' },
+    { code: 'arn', label: 'Mapudungun', flag: '🇨🇱' },
+    { code: 'pl', label: 'Polski', flag: '🇵🇱' },
   ];
 
   return (

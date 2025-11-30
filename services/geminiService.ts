@@ -1,32 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Safe access to environment variable that works in standard Vite environments
-// without crashing if 'process' is undefined.
-const getApiKey = () => {
-  try {
-    // 1. Check standard Vite environment variables (Preferred)
-    // @ts-ignore
-    if (import.meta && import.meta.env && import.meta.env.VITE_API_KEY) {
-      // @ts-ignore
-      return import.meta.env.VITE_API_KEY;
-    }
-
-    // 2. Check for process.env (Vercel/Node compat)
-    if (typeof process !== 'undefined' && process.env) {
-      // Vercel sometimes injects VITE_ prefixed vars into process.env too
-      return process.env.VITE_API_KEY || process.env.API_KEY || process.env.REACT_APP_API_KEY;
-    }
-  } catch (e) {
-    console.warn("Error accessing environment variables:", e);
-  }
-  return undefined;
-};
-
 /**
  * Uses Gemini to format raw pasted lyrics/chords into a clean, standard format.
  */
 export const formatSongContent = async (rawText: string): Promise<string> => {
-  const apiKey = getApiKey();
+  const apiKey = process.env.API_KEY;
 
   // If no API key is set, we fail gracefully instead of crashing the app.
   if (!apiKey) {
@@ -69,7 +47,7 @@ export const formatSongContent = async (rawText: string): Promise<string> => {
  * Suggests a setlist based on a mood or genre.
  */
 export const suggestSetlistIdeas = async (genre: string): Promise<string[]> => {
-    const apiKey = getApiKey();
+    const apiKey = process.env.API_KEY;
     if (!apiKey) return [];
 
     try {
@@ -98,10 +76,10 @@ export const generateSongFromParams = async (params: {
     topics: string;
     language: string;
 }): Promise<string> => {
-    const apiKey = getApiKey();
+    const apiKey = process.env.API_KEY;
     if (!apiKey) {
         console.error("API Key not found in environment variables.");
-        return "Error: API Key Missing. Please ensure VITE_API_KEY is set in your Vercel project settings.";
+        return "Error: API Key Missing. Please ensure API_KEY is set in your environment variables.";
     }
 
     try {
@@ -118,7 +96,16 @@ export const generateSongFromParams = async (params: {
             'ja': 'Japanese',
             'ko': 'Korean',
             'zh': 'Chinese',
-            'hi': 'Hindi'
+            'hi': 'Hindi',
+            'gu': 'Gujarati',
+            'ta': 'Tamil',
+            'uk': 'Ukrainian',
+            'sv': 'Swedish',
+            'fi': 'Finnish',
+            'nl': 'Dutch',
+            'is': 'Icelandic',
+            'arn': 'Mapudungun',
+            'pl': 'Polish'
         };
         const targetLang = langMap[params.language] || 'Spanish';
 

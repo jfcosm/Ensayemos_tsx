@@ -41,4 +41,4 @@ export interface Rehearsal {
   createdAt: number;
 }
 
-export type Language = 'es' | 'en' | 'it' | 'fr' | 'hi' | 'ja' | 'ko' | 'zh' | 'de';
+export type Language = 'es' | 'en' | 'it' | 'fr' | 'de' | 'ja' | 'ko' | 'zh' | 'hi' | 'gu' | 'ta' | 'uk' | 'sv' | 'fi' | 'nl' | 'is' | 'arn' | 'pl';
