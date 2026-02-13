@@ -1,5 +1,5 @@
 {
   "name": "Verso",
-  "description": "v2.3 Removed Guest Access - Google Auth Only",
+  "description": "v2.4 Restored Guest Access for troubleshooting and Multi-language support.",
   "requestFramePermissions": []
 }

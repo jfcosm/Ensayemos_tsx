@@ -1,6 +1,6 @@
 
-// v2.1.2 - Fixed class component property access errors by using React.Component explicitly and declaring public state
-import React, { ErrorInfo, ReactNode } from 'react';
+// v2.1.3 - Standardized class component structure to fix property access issues
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 /**
  * ErrorBoundary component to catch rendering errors.
@@ -15,9 +15,9 @@ interface State {
   error: Error | null;
 }
 
-// Fix: Use React.Component to ensure props and state are correctly inherited and visible to TypeScript
-export class ErrorBoundary extends React.Component<Props, State> {
-  // Fix for Error in line 22, 39: Explicitly define state property to resolve access issues in some TS environments
+// Fix: Use Component from named import to ensure props and state are correctly inherited and visible to TypeScript
+export class ErrorBoundary extends Component<Props, State> {
+  // Explicitly define state and initialize it to resolve visibility issues in some TS environments
   public state: State = {
     hasError: false,
     error: null
@@ -35,10 +35,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
     console.error('Uncaught error:', error, errorInfo);
   }
 
-  // Fix for Error in line 38, 39: render method accesses inherited props and state
+  // render method accesses inherited props and state
   public render() {
-    const { children } = this.props;
     const { hasError, error } = this.state;
+    const { children } = this.props;
 
     if (hasError) {
       return (
