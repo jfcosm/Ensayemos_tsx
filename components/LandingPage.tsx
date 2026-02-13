@@ -1,11 +1,9 @@
-
-// v2.2 - Added Guest Access Button to bypass OAuth Origin Mismatch
+// v2.3 - Removed Guest Access (Google Auth only)
 import React, { useEffect, useState, useRef } from 'react';
 import { User } from '../types';
-import { handleGoogleCredential, loginAsDemoUser } from '../services/authService';
+import { handleGoogleCredential } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Mic2, Music2, Calendar, Users, Cloud, PlayCircle, CheckCircle2, User as UserIcon } from 'lucide-react';
-import { Button } from './Button';
+import { Music2, Calendar, Users, Cloud, PlayCircle, CheckCircle2 } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -41,7 +39,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
   const [error, setError] = useState<string | null>(null);
   const { t } = useLanguage();
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
-  const [configError, setConfigError] = useState<string | null>(null);
   const retryCount = useRef(0);
 
   useEffect(() => {
@@ -49,7 +46,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
 
     if (!clientId) {
       console.warn("Google Client ID missing.");
-      // We don't block the UI here anymore because we have the Demo button
     }
 
     const initializeGoogleAuth = () => {
@@ -92,11 +88,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
     
   }, [onLogin, t]);
 
-  const handleDemoLogin = () => {
-    const user = loginAsDemoUser();
-    onLogin(user);
-  };
-
   return (
     <div className="flex-1 flex flex-col items-center p-4 md:p-8 animate-in fade-in duration-700 overflow-x-hidden relative">
       
@@ -113,15 +104,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
       `}</style>
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 select-none">
         <div className="flex justify-center items-end gap-4 md:gap-12 h-full w-full opacity-30 dark:opacity-40 max-w-7xl mx-auto px-10">
-            {/* LED Column 1 */}
             <div className="led-column w-16 md:w-32 h-[60%] bg-gradient-to-t from-red-600 via-brand-500 to-transparent blur-[40px] rounded-t-full" style={{ animationDuration: '3s', animationDelay: '0s' }}></div>
-            {/* LED Column 2 */}
             <div className="led-column w-16 md:w-32 h-[80%] bg-gradient-to-t from-red-700 via-brand-600 to-transparent blur-[50px] rounded-t-full" style={{ animationDuration: '4.2s', animationDelay: '1s' }}></div>
-            {/* LED Column 3 (Center - Highest) */}
             <div className="led-column w-20 md:w-40 h-[90%] bg-gradient-to-t from-brand-800 via-red-500 to-transparent blur-[60px] rounded-t-full" style={{ animationDuration: '5s', animationDelay: '0.5s' }}></div>
-            {/* LED Column 4 */}
             <div className="led-column w-16 md:w-32 h-[75%] bg-gradient-to-t from-red-700 via-brand-600 to-transparent blur-[50px] rounded-t-full" style={{ animationDuration: '3.5s', animationDelay: '2s' }}></div>
-            {/* LED Column 5 */}
             <div className="led-column w-16 md:w-32 h-[50%] bg-gradient-to-t from-red-600 via-brand-500 to-transparent blur-[40px] rounded-t-full" style={{ animationDuration: '4.5s', animationDelay: '1.5s' }}></div>
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-zinc-50 dark:from-zinc-950 to-transparent"></div>
@@ -150,30 +136,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
 
           <div className="space-y-4 max-w-sm mx-auto md:mx-0">
               {/* Login Box */}
-              <div className="bg-white/80 dark:bg-zinc-900/60 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl backdrop-blur-md relative z-10">
-                <div className="flex flex-col items-center gap-4">
-                    <div id="googleSignInDiv"></div>
-                    
-                    <div className="flex items-center w-full gap-2">
-                        <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800"></div>
-                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">o</span>
-                        <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800"></div>
-                    </div>
-
-                    <Button 
-                      variant="secondary" 
-                      onClick={handleDemoLogin} 
-                      className="w-full max-w-[280px] h-12 gap-2 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950"
-                    >
-                      <UserIcon size={18} />
-                      {t('demo_access')}
-                    </Button>
+              <div className="bg-white/80 dark:bg-zinc-900/60 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl backdrop-blur-md relative z-10">
+                <div className="flex flex-col items-center gap-6">
+                    <div id="googleSignInDiv" className="min-h-[40px]"></div>
                 </div>
                 
                 {error && (
-                  <p className="mt-3 text-red-500 text-xs text-center">{error}</p>
+                  <p className="mt-4 text-red-500 text-xs text-center">{error}</p>
                 )}
-                <p className="text-xs text-center text-zinc-400 mt-6 font-sans">
+                <p className="text-[10px] text-center text-zinc-400 mt-8 font-sans uppercase tracking-widest font-bold">
                   {t('footer_copyright')}
                 </p>
               </div>
@@ -182,7 +153,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
 
         {/* Right: 3D App Mockup */}
         <div className="order-1 md:order-2 relative group perspective-1000">
-            {/* Glow behind the mock */}
             <div className="absolute inset-0 bg-brand-500/10 blur-3xl rounded-full transform scale-75 group-hover:scale-90 transition-transform duration-700"></div>
             
             <div className="relative bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden transform md:rotate-y-[-10deg] md:rotate-x-[5deg] transition-transform duration-500 hover:rotate-0 max-w-md mx-auto">

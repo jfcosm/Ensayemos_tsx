@@ -1,3 +1,4 @@
+// v2.3 - Removed loginAsDemoUser helper
 import { User } from '../types';
 
 const USER_KEY = 'ensayamos_user';
@@ -35,17 +36,6 @@ export const handleGoogleCredential = (credential: string): User | null => {
 
   localStorage.setItem(USER_KEY, JSON.stringify(user));
   return user;
-};
-
-export const loginAsDemoUser = (): User => {
-  const demoUser: User = {
-    id: 'demo-123',
-    name: 'Musico Invitado',
-    email: 'musico@ensayamos.app',
-    picture: 'https://ui-avatars.com/api/?name=Musico+Invitado&background=7c3aed&color=fff',
-  };
-  localStorage.setItem(USER_KEY, JSON.stringify(demoUser));
-  return demoUser;
 };
 
 export const getCurrentUser = (): User | null => {
