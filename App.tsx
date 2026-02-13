@@ -1,4 +1,5 @@
-// v2.6 - Firestore Permission Error Handling
+
+// v2.7 - Firestore Permission Error Handling & UI Fixes
 import React, { useState, useEffect } from 'react';
 import { ViewState, Song, Rehearsal, User } from './types';
 import { RehearsalView } from './components/RehearsalView';
@@ -10,7 +11,7 @@ import { SongLibrary } from './components/SongLibrary';
 import { Navbar } from './components/Navbar';
 import { Button } from './components/Button';
 import { SongComposer } from './components/SongComposer';
-import { Plus, Music4, CalendarDays, Loader2, Heart, Gift, AlertCircle } from 'lucide-react';
+import { Plus, Music4, CalendarDays, Loader2, Heart, Gift, AlertCircle, RefreshCw } from 'lucide-react';
 import { subscribeToRehearsals, saveRehearsal, deleteRehearsal, subscribeToSongs } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -48,6 +49,7 @@ function AppContent() {
       (data) => {
         setRehearsals(data);
         setIsLoading(false);
+        setDbError(null);
         
         if (selectedRehearsal) {
           const updatedCurrent = data.find(r => r.id === selectedRehearsal.id);
@@ -58,7 +60,8 @@ function AppContent() {
       },
       (error) => {
         setIsLoading(false);
-        setDbError("Error de permisos en la base de datos. Verifica tus reglas de Firestore.");
+        console.error("Firestore Permission denied:", error);
+        setDbError("Acceso denegado a la base de datos.");
       }
     );
 
@@ -231,29 +234,38 @@ function AppContent() {
               </div>
 
               {dbError ? (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 p-8 rounded-2xl text-center">
-                  <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
-                  <h2 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">Error de Sincronización</h2>
-                  <p className="text-red-600 dark:text-red-300/80 mb-6 max-w-md mx-auto">
-                    {dbError}
-                    <br/><br/>
-                    Esto ocurre porque las <b>Reglas de Firestore</b> en tu consola de Firebase están bloqueando el acceso. Debes cambiarlas a "allow read, write: if true;".
-                  </p>
-                  <Button variant="secondary" onClick={() => window.location.reload()}>Reintentar</Button>
+                <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 p-10 rounded-3xl text-center shadow-2xl shadow-red-900/10 max-w-2xl mx-auto border-dashed">
+                  <div className="bg-red-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-500/40">
+                    <AlertCircle className="text-white" size={32} />
+                  </div>
+                  <h2 className="text-2xl font-black text-red-700 dark:text-red-400 mb-4 uppercase tracking-tight">Error de Seguridad en Firestore</h2>
+                  <div className="text-zinc-600 dark:text-zinc-300 mb-8 space-y-4 text-sm md:text-base leading-relaxed text-left bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-red-100 dark:border-red-900/20">
+                    <p>La base de datos de Google está rechazando el acceso. Para arreglarlo:</p>
+                    <ol className="list-decimal list-inside space-y-2 font-medium">
+                      <li>Ve a tu <a href="https://console.firebase.google.com/" target="_blank" className="text-red-600 underline font-bold">Firebase Console</a>.</li>
+                      <li>Entra en <b>Firestore Database</b> &gt; Pestaña <b>Rules</b>.</li>
+                      <li>Pega: <code className="bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded text-red-500">allow read, write: if true;</code></li>
+                      <li>Haz clic en <b>Publish</b> y espera 1 minuto.</li>
+                    </ol>
+                  </div>
+                  <Button variant="primary" onClick={() => window.location.reload()} className="gap-2 px-8 h-12 text-lg">
+                    <RefreshCw size={20} />
+                    Reintentar Conexión
+                  </Button>
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {isLoading ? (
                     <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-50">
                       <Loader2 className="h-10 w-10 text-brand-500 animate-spin mb-4" />
-                      <p className="text-zinc-500">Sincronizando con MelodIA...</p>
+                      <p className="text-zinc-500 font-medium">Conectando con MelodIA Cloud...</p>
                     </div>
                   ) : rehearsals.length === 0 ? (
                     <div className="col-span-full py-16 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
                       <CalendarDays className="mx-auto text-zinc-400 dark:text-zinc-700 mb-4" size={48} />
-                      <p className="text-zinc-500 dark:text-zinc-500 text-lg">{t('no_rehearsals')}</p>
+                      <p className="text-zinc-500 dark:text-zinc-500 text-lg font-bold">{t('no_rehearsals')}</p>
                       <p className="text-zinc-400 text-sm mt-1">{t('no_rehearsals_sub')}</p>
-                      <Button variant="ghost" className="mt-4 text-brand-600 dark:text-brand-400" onClick={handleCreateRehearsalClick}>{t('create_rehearsal')}</Button>
+                      <Button variant="ghost" className="mt-4 text-brand-600 dark:text-brand-400 font-bold" onClick={handleCreateRehearsalClick}>+ {t('create_rehearsal')}</Button>
                     </div>
                   ) : (
                     rehearsals.map(rehearsal => (

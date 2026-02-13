@@ -1,4 +1,5 @@
-// v2.5 - Strict Google Auth Only
+
+// v2.7 - Fixed broken image assets (404s) and strict Google Auth
 import React, { useEffect, useState, useRef } from 'react';
 import { User } from '../types';
 import { handleGoogleCredential } from '../services/authService';
@@ -83,6 +84,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
     initializeGoogleAuth();
     
   }, [onLogin, t]);
+
+  // Reliable image URLs to avoid 404s
+  const featureImages = {
+    voting: 'https://images.unsplash.com/photo-1514525253361-b8748530499e?q=80&w=800&auto=format&fit=crop',
+    sync: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=800&auto=format&fit=crop',
+    setlist: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=800&auto=format&fit=crop'
+  };
 
   return (
     <div className="flex-1 flex flex-col items-center p-4 md:p-8 animate-in fade-in duration-700 overflow-x-hidden relative">
@@ -236,7 +244,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
           <div className="grid md:grid-cols-3 gap-6">
             <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
               <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                 <img src="p1.jpg" alt="Voting" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" onError={(e) => { (e.target as any).src = 'https://images.unsplash.com/photo-1514525253361-b8748530499e?w=800&auto=format&fit=crop&q=60'; }} />
+                 <img 
+                    src={featureImages.voting} 
+                    alt="Voting" 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" 
+                 />
               </div>
               <div className="p-6">
                 <div className="bg-brand-100 dark:bg-brand-900/30 p-3 rounded-xl text-brand-600 dark:text-brand-400 w-fit mb-4">
@@ -249,7 +261,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
 
             <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
               <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                 <img src="p2.jpg" alt="Cloud Sync" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" onError={(e) => { (e.target as any).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=60'; }} />
+                 <img 
+                    src={featureImages.sync} 
+                    alt="Cloud Sync" 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" 
+                 />
               </div>
               <div className="p-6">
                 <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-xl text-blue-600 dark:text-blue-400 w-fit mb-4">
@@ -262,7 +278,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
 
             <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
               <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                 <img src="p3.jpg" alt="Smart Setlist" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" onError={(e) => { (e.target as any).src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=60'; }} />
+                 <img 
+                    src={featureImages.setlist} 
+                    alt="Smart Setlist" 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" 
+                 />
               </div>
               <div className="p-6">
                 <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-xl text-purple-600 dark:text-purple-400 w-fit mb-4">

@@ -1,5 +1,5 @@
 {
   "name": "Verso",
-  "description": "v2.6 Firestore error handling and Permission fix instructions.",
+  "description": "v2.7 Firestore Permission Retry & UI Asset Fix",
   "requestFramePermissions": []
 }
