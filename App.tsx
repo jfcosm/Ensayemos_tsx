@@ -1,5 +1,4 @@
-
-// v2.7 - Firestore Permission Error Handling & UI Fixes
+// v2.9 - Added missing icon imports for Heart and Gift
 import React, { useState, useEffect } from 'react';
 import { ViewState, Song, Rehearsal, User } from './types';
 import { RehearsalView } from './components/RehearsalView';
@@ -11,10 +10,12 @@ import { SongLibrary } from './components/SongLibrary';
 import { Navbar } from './components/Navbar';
 import { Button } from './components/Button';
 import { SongComposer } from './components/SongComposer';
-import { Plus, Music4, CalendarDays, Loader2, Heart, Gift, AlertCircle, RefreshCw } from 'lucide-react';
+import { Plus, Music4, CalendarDays, Loader2, AlertCircle, RefreshCw, Heart, Gift } from 'lucide-react';
 import { subscribeToRehearsals, saveRehearsal, deleteRehearsal, subscribeToSongs } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
+import { auth } from './services/firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
 
 function AppContent() {
   const { t } = useLanguage();
@@ -29,6 +30,7 @@ function AppContent() {
   const [isDark, setIsDark] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -37,10 +39,22 @@ function AppContent() {
     }
     const isDarkMode = document.documentElement.classList.contains('dark');
     setIsDark(isDarkMode);
+
+    // Escuchar cambios de autenticación reales de Firebase
+    const unsubAuth = onAuthStateChanged(auth, (fbUser) => {
+        setIsAuthReady(true);
+        if (!fbUser && user) {
+            // Si hay usuario local pero no en FB, forzar re-login silencioso o logout
+            console.warn("Auth sync mismatch. Session might be stale.");
+        }
+    });
+
+    return () => unsubAuth();
   }, []);
 
   useEffect(() => {
-    if (!currentUser) return;
+    // Solo suscribirse si el usuario está logueado Y Firebase Auth ha confirmado la identidad
+    if (!currentUser || !isAuthReady) return;
     
     setIsLoading(true);
     setDbError(null);
@@ -58,10 +72,13 @@ function AppContent() {
           }
         }
       },
-      (error) => {
+      (error: any) => {
         setIsLoading(false);
         console.error("Firestore Permission denied:", error);
-        setDbError("Acceso denegado a la base de datos.");
+        // Si el código de error es 'permission-denied', mostramos la UI de error
+        if (error.code === 'permission-denied') {
+            setDbError("Acceso denegado. Tu identidad no ha sido verificada por Firestore.");
+        }
       }
     );
 
@@ -69,32 +86,14 @@ function AppContent() {
       (data) => {
         setSongs(data);
       },
-      () => {
-        // Errors handled by rehearsals subscription primarily for the loader
-      }
+      () => {}
     );
 
     return () => {
       unsubRehearsals();
       unsubSongs();
     };
-  }, [currentUser, selectedRehearsal?.id]);
-
-  useEffect(() => {
-    if (!currentUser) return;
-
-    const params = new URLSearchParams(window.location.search);
-    const linkedRehearsalId = params.get('rehearsal');
-
-    if (linkedRehearsalId && rehearsals.length > 0) {
-      const target = rehearsals.find(r => r.id === linkedRehearsalId);
-      if (target) {
-        setSelectedRehearsal(target);
-        setView(ViewState.REHEARSAL_DETAIL);
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-    }
-  }, [currentUser, rehearsals]);
+  }, [currentUser, selectedRehearsal?.id, isAuthReady]);
 
   const toggleTheme = () => {
     const newIsDark = !isDark;
@@ -141,7 +140,7 @@ function AppContent() {
       createdAt: Date.now()
     };
     
-    await saveRehearsal(newRehearsal);
+    await handleUpdateRehearsal(newRehearsal);
     setSelectedRehearsal(newRehearsal);
     setView(ViewState.REHEARSAL_DETAIL);
   };
@@ -152,8 +151,12 @@ function AppContent() {
   };
 
   const handleUpdateRehearsal = async (updated: Rehearsal) => {
-    setSelectedRehearsal(updated);
-    await saveRehearsal(updated);
+    try {
+      setSelectedRehearsal(updated);
+      await saveRehearsal(updated);
+    } catch (e) {
+      setDbError("No tienes permiso para guardar cambios.");
+    }
   };
 
   const handleDeleteRehearsal = async (e: React.MouseEvent, id: string) => {
@@ -238,27 +241,33 @@ function AppContent() {
                   <div className="bg-red-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-500/40">
                     <AlertCircle className="text-white" size={32} />
                   </div>
-                  <h2 className="text-2xl font-black text-red-700 dark:text-red-400 mb-4 uppercase tracking-tight">Error de Seguridad en Firestore</h2>
+                  <h2 className="text-2xl font-black text-red-700 dark:text-red-400 mb-4 uppercase tracking-tight">Error de Sesión Segura</h2>
                   <div className="text-zinc-600 dark:text-zinc-300 mb-8 space-y-4 text-sm md:text-base leading-relaxed text-left bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-red-100 dark:border-red-900/20">
-                    <p>La base de datos de Google está rechazando el acceso. Para arreglarlo:</p>
+                    <p>Has configurado reglas seguras, pero tu sesión actual no ha sido reconocida por Google Firestore.</p>
+                    <p className="font-bold">Para solucionarlo sin abrir tu base de datos:</p>
                     <ol className="list-decimal list-inside space-y-2 font-medium">
-                      <li>Ve a tu <a href="https://console.firebase.google.com/" target="_blank" className="text-red-600 underline font-bold">Firebase Console</a>.</li>
-                      <li>Entra en <b>Firestore Database</b> &gt; Pestaña <b>Rules</b>.</li>
-                      <li>Pega: <code className="bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded text-red-500">allow read, write: if true;</code></li>
-                      <li>Haz clic en <b>Publish</b> y espera 1 minuto.</li>
+                      <li>Haz clic en tu nombre arriba a la derecha.</li>
+                      <li>Selecciona <b>Salir ({t('logout')})</b>.</li>
+                      <li>Vuelve a entrar con tu cuenta de Google.</li>
+                      <li>Esto sincronizará tu "llave" de acceso con las nuevas reglas.</li>
                     </ol>
                   </div>
-                  <Button variant="primary" onClick={() => window.location.reload()} className="gap-2 px-8 h-12 text-lg">
-                    <RefreshCw size={20} />
-                    Reintentar Conexión
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button variant="secondary" onClick={handleLogout} className="gap-2 px-8">
+                       Cerrar Sesión para Sincronizar
+                    </Button>
+                    <Button variant="primary" onClick={() => window.location.reload()} className="gap-2 px-8">
+                      <RefreshCw size={20} />
+                      Reintentar
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {isLoading ? (
                     <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-50">
                       <Loader2 className="h-10 w-10 text-brand-500 animate-spin mb-4" />
-                      <p className="text-zinc-500 font-medium">Conectando con MelodIA Cloud...</p>
+                      <p className="text-zinc-500 font-medium">Autenticando con la nube...</p>
                     </div>
                   ) : rehearsals.length === 0 ? (
                     <div className="col-span-full py-16 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
@@ -306,7 +315,7 @@ function AppContent() {
                             <span>
                               {rehearsal.status === 'CONFIRMED' 
                                 ? new Date(rehearsal.options.find(o => o.id === rehearsal.confirmedOptionId)?.date || '').toLocaleDateString()
-                                : `${rehearsal.options.length} ${t('options_count')}`}
+                                : `${rehearsal.options.length} {t('options_count')}`}
                             </span>
                           </div>
                         </div>

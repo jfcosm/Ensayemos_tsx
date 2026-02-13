@@ -1,6 +1,5 @@
-
-// v2.1.6 - Fixed property 'props' access issue by using React.Component and explicit constructor
-import React, { ErrorInfo, ReactNode } from 'react';
+// v2.1.7 - Explicitly importing Component and defining property types for better TS recognition
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 /**
  * ErrorBoundary component to catch rendering errors.
@@ -15,15 +14,16 @@ interface State {
   error: Error | null;
 }
 
-// Fix: Using React.Component explicitly to resolve type inheritance issues
-export class ErrorBoundary extends React.Component<Props, State> {
-  // Fix: Explicit constructor to ensure props and state are correctly typed and inherited
+// Fix: Using Component explicitly and declaring state to resolve type inheritance issues
+export class ErrorBoundary extends Component<Props, State> {
+  // Fix: Explicit state declaration ensures it is recognized by TS
+  public state: State = {
+    hasError: false,
+    error: null
+  };
+
   constructor(props: Props) {
     super(props);
-    this.state = {
-      hasError: false,
-      error: null
-    };
   }
 
   public static getDerivedStateFromError(error: Error): State {
@@ -34,10 +34,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
     console.error('Uncaught error:', error, errorInfo);
   }
 
-  // render method accesses inherited props and state
   public render() {
     const { hasError, error } = this.state;
-    // Fix: Accessing children from inherited this.props ensured by extending React.Component
+    // Fix: Accessing children from inherited this.props is now properly typed
     const { children } = this.props;
 
     if (hasError) {

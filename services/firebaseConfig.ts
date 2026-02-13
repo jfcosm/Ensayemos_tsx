@@ -1,11 +1,8 @@
+
+// v2.8 - Added Auth export for identity syncing
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-
-// ------------------------------------------------------------------
-// INSTRUCCIONES:
-// Reemplaza el objeto de abajo con la configuración que te dio Firebase Console.
-// Ve a Configuración del Proyecto -> General -> Tus apps -> SDK setup
-// ------------------------------------------------------------------
+import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAihjd-EIiYDxU4dEUDh8iODfq1ldcUlz8",
@@ -19,3 +16,4 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const auth = getAuth(app);
