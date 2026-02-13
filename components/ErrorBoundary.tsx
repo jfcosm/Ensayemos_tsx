@@ -1,8 +1,9 @@
 
+// v2.1.1 - Fixed class component property access errors
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 /**
- * v2.0.3 - ErrorBoundary component to catch rendering errors.
+ * ErrorBoundary component to catch rendering errors.
  */
 
 interface Props {
@@ -14,7 +15,7 @@ interface State {
   error: Error | null;
 }
 
-// Fix: Explicitly use Component from react and add constructor to ensure props/state are correctly typed in the class context
+// Fix: Using Component directly from import to ensure proper inheritance and property availability
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -32,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error('Uncaught error:', error, errorInfo);
   }
 
-  // Fix: The render method now correctly recognizes this.props and this.state through proper inheritance
+  // Fix: Ensuring render method correctly accesses props and state from the base Component class
   public render() {
     const { children } = this.props;
     const { hasError, error } = this.state;

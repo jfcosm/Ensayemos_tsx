@@ -1,8 +1,10 @@
+
+// v2.2 - Added Guest Access Button to bypass OAuth Origin Mismatch
 import React, { useEffect, useState, useRef } from 'react';
 import { User } from '../types';
-import { handleGoogleCredential } from '../services/authService';
+import { handleGoogleCredential, loginAsDemoUser } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Mic2, Music2, Calendar, Users, Cloud, PlayCircle, CheckCircle2 } from 'lucide-react';
+import { Mic2, Music2, Calendar, Users, Cloud, PlayCircle, CheckCircle2, User as UserIcon } from 'lucide-react';
 import { Button } from './Button';
 
 declare global {
@@ -47,9 +49,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
 
     if (!clientId) {
       console.warn("Google Client ID missing.");
-      setConfigError("Falta configurar VITE_GOOGLE_CLIENT_ID en Vercel.");
-    } else {
-      console.log(`[DEBUG] Google Client ID loaded: ${clientId.substring(0, 10)}...`);
+      // We don't block the UI here anymore because we have the Demo button
     }
 
     const initializeGoogleAuth = () => {
@@ -91,6 +91,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
     initializeGoogleAuth();
     
   }, [onLogin, t]);
+
+  const handleDemoLogin = () => {
+    const user = loginAsDemoUser();
+    onLogin(user);
+  };
 
   return (
     <div className="flex-1 flex flex-col items-center p-4 md:p-8 animate-in fade-in duration-700 overflow-x-hidden relative">
@@ -146,20 +151,29 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
           <div className="space-y-4 max-w-sm mx-auto md:mx-0">
               {/* Login Box */}
               <div className="bg-white/80 dark:bg-zinc-900/60 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl backdrop-blur-md relative z-10">
-                <div className="flex justify-center h-12 mb-2 min-h-[48px]">
+                <div className="flex flex-col items-center gap-4">
                     <div id="googleSignInDiv"></div>
-                    {!isGoogleLoaded && !configError && (
-                      <div className="flex items-center text-sm text-zinc-400 italic"></div>
-                    )}
-                    {configError && (
-                      <p className="text-xs text-red-500 bg-red-50 dark:bg-red-900/10 p-2 rounded border border-red-200">{configError}</p>
-                    )}
+                    
+                    <div className="flex items-center w-full gap-2">
+                        <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800"></div>
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">o</span>
+                        <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800"></div>
+                    </div>
+
+                    <Button 
+                      variant="secondary" 
+                      onClick={handleDemoLogin} 
+                      className="w-full max-w-[280px] h-12 gap-2 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950"
+                    >
+                      <UserIcon size={18} />
+                      {t('demo_access')}
+                    </Button>
                 </div>
                 
                 {error && (
                   <p className="mt-3 text-red-500 text-xs text-center">{error}</p>
                 )}
-                <p className="text-xs text-center text-zinc-400 mt-4 font-sans">
+                <p className="text-xs text-center text-zinc-400 mt-6 font-sans">
                   {t('footer_copyright')}
                 </p>
               </div>

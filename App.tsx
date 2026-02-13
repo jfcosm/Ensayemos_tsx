@@ -1,3 +1,5 @@
+
+// v2.2 - Multi-language Footer and Main Layout
 import React, { useState, useEffect } from 'react';
 import { ViewState, Song, Rehearsal, User } from './types';
 import { RehearsalView } from './components/RehearsalView';

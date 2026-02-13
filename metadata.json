@@ -1,5 +1,5 @@
 {
   "name": "Verso",
-  "description": "v2.1 Fix Composer Language and API Key robustness",
+  "description": "v2.2 OAuth Guest Access and Multi-language Footer",
   "requestFramePermissions": []
 }
