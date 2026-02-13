@@ -1,3 +1,4 @@
+// v2.6 - Added error handling to real-time subscriptions
 import { Song, Rehearsal } from '../types';
 import { db } from './firebaseConfig';
 import { 
@@ -15,13 +16,21 @@ const REHEARSALS_COLLECTION = 'rehearsals';
 
 // --- Songs ---
 
-// Subscribe to real-time song updates
-export const subscribeToSongs = (callback: (songs: Song[]) => void) => {
+export const subscribeToSongs = (
+  callback: (songs: Song[]) => void, 
+  onError?: (error: any) => void
+) => {
   const q = query(collection(db, SONGS_COLLECTION), orderBy('title'));
-  return onSnapshot(q, (snapshot) => {
-    const songs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Song));
-    callback(songs);
-  });
+  return onSnapshot(q, 
+    (snapshot) => {
+      const songs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Song));
+      callback(songs);
+    },
+    (error) => {
+      console.error("Firestore Songs Error:", error);
+      if (onError) onError(error);
+    }
+  );
 };
 
 export const saveSong = async (song: Song): Promise<void> => {
@@ -30,7 +39,7 @@ export const saveSong = async (song: Song): Promise<void> => {
     await setDoc(docRef, song, { merge: true });
   } catch (error) {
     console.error("Error saving song:", error);
-    alert("Error al guardar en la nube. Revisa tu conexión.");
+    alert("Error al guardar en la nube. Revisa tus reglas de Firebase.");
   }
 };
 
@@ -44,13 +53,21 @@ export const deleteSong = async (id: string): Promise<void> => {
 
 // --- Rehearsals ---
 
-// Subscribe to real-time rehearsal updates
-export const subscribeToRehearsals = (callback: (rehearsals: Rehearsal[]) => void) => {
+export const subscribeToRehearsals = (
+  callback: (rehearsals: Rehearsal[]) => void,
+  onError?: (error: any) => void
+) => {
   const q = query(collection(db, REHEARSALS_COLLECTION), orderBy('createdAt', 'desc'));
-  return onSnapshot(q, (snapshot) => {
-    const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Rehearsal));
-    callback(list);
-  });
+  return onSnapshot(q, 
+    (snapshot) => {
+      const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Rehearsal));
+      callback(list);
+    },
+    (error) => {
+      console.error("Firestore Rehearsals Error:", error);
+      if (onError) onError(error);
+    }
+  );
 };
 
 export const saveRehearsal = async (rehearsal: Rehearsal): Promise<void> => {
@@ -59,7 +76,7 @@ export const saveRehearsal = async (rehearsal: Rehearsal): Promise<void> => {
     await setDoc(docRef, rehearsal, { merge: true });
   } catch (error) {
     console.error("Error saving rehearsal:", error);
-    alert("Error al guardar ensayo. Revisa la consola.");
+    alert("Error al guardar ensayo. Revisa tus reglas de Firebase.");
   }
 };
 

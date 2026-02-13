@@ -1,5 +1,5 @@
 {
   "name": "Verso",
-  "description": "v2.5 Strict Google Auth Only - Guest Access Removed Permanently",
+  "description": "v2.6 Firestore error handling and Permission fix instructions.",
   "requestFramePermissions": []
 }

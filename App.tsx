@@ -1,5 +1,4 @@
-
-// v2.2 - Multi-language Footer and Main Layout
+// v2.6 - Firestore Permission Error Handling
 import React, { useState, useEffect } from 'react';
 import { ViewState, Song, Rehearsal, User } from './types';
 import { RehearsalView } from './components/RehearsalView';
@@ -11,7 +10,7 @@ import { SongLibrary } from './components/SongLibrary';
 import { Navbar } from './components/Navbar';
 import { Button } from './components/Button';
 import { SongComposer } from './components/SongComposer';
-import { Plus, Music4, CalendarDays, Loader2, Heart, Gift } from 'lucide-react';
+import { Plus, Music4, CalendarDays, Loader2, Heart, Gift, AlertCircle } from 'lucide-react';
 import { subscribeToRehearsals, saveRehearsal, deleteRehearsal, subscribeToSongs } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -28,6 +27,7 @@ function AppContent() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [isDark, setIsDark] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [dbError, setDbError] = useState<string | null>(null);
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -42,22 +42,34 @@ function AppContent() {
     if (!currentUser) return;
     
     setIsLoading(true);
+    setDbError(null);
 
-    const unsubRehearsals = subscribeToRehearsals((data) => {
-      setRehearsals(data);
-      setIsLoading(false);
-      
-      if (selectedRehearsal) {
-        const updatedCurrent = data.find(r => r.id === selectedRehearsal.id);
-        if (updatedCurrent) {
-          setSelectedRehearsal(updatedCurrent);
+    const unsubRehearsals = subscribeToRehearsals(
+      (data) => {
+        setRehearsals(data);
+        setIsLoading(false);
+        
+        if (selectedRehearsal) {
+          const updatedCurrent = data.find(r => r.id === selectedRehearsal.id);
+          if (updatedCurrent) {
+            setSelectedRehearsal(updatedCurrent);
+          }
         }
+      },
+      (error) => {
+        setIsLoading(false);
+        setDbError("Error de permisos en la base de datos. Verifica tus reglas de Firestore.");
       }
-    });
+    );
 
-    const unsubSongs = subscribeToSongs((data) => {
-      setSongs(data);
-    });
+    const unsubSongs = subscribeToSongs(
+      (data) => {
+        setSongs(data);
+      },
+      () => {
+        // Errors handled by rehearsals subscription primarily for the loader
+      }
+    );
 
     return () => {
       unsubRehearsals();
@@ -210,72 +222,87 @@ function AppContent() {
                   <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">{t('dashboard_title')}</h1>
                   <p className="text-zinc-500 dark:text-zinc-400">{t('dashboard_subtitle')}</p>
                 </div>
-                <Button onClick={handleCreateRehearsalClick} className="gap-2 shadow-xl shadow-brand-900/20">
-                  <Plus size={20} />
-                  {t('create_rehearsal')}
-                </Button>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {isLoading ? (
-                  <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-50">
-                    <Loader2 className="h-10 w-10 text-brand-500 animate-spin mb-4" />
-                    <p className="text-zinc-500">...</p>
-                  </div>
-                ) : rehearsals.length === 0 ? (
-                  <div className="col-span-full py-16 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
-                    <CalendarDays className="mx-auto text-zinc-400 dark:text-zinc-700 mb-4" size={48} />
-                    <p className="text-zinc-500 dark:text-zinc-500 text-lg">{t('no_rehearsals')}</p>
-                    <p className="text-zinc-400 text-sm mt-1">{t('no_rehearsals_sub')}</p>
-                    <Button variant="ghost" className="mt-4 text-brand-600 dark:text-brand-400" onClick={handleCreateRehearsalClick}>{t('create_rehearsal')}</Button>
-                  </div>
-                ) : (
-                  rehearsals.map(rehearsal => (
-                    <div 
-                      key={rehearsal.id} 
-                      onClick={() => handleOpenRehearsal(rehearsal)}
-                      className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-brand-500/50 hover:shadow-2xl hover:shadow-brand-900/10 rounded-xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden"
-                    >
-                      <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                        <button onClick={(e) => handleDeleteRehearsal(e, rehearsal.id)} className="text-zinc-400 hover:text-red-500 transition-colors bg-white dark:bg-zinc-900 rounded-full p-1 shadow-sm">
-                          <span className="sr-only">Borrar</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                        </button>
-                      </div>
-                      
-                      <div className="flex items-start justify-between mb-4">
-                        <div className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
-                          rehearsal.status === 'CONFIRMED' 
-                          ? 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20' 
-                          : 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
-                        }`}>
-                          {rehearsal.status === 'CONFIRMED' ? t('status_confirmed') : t('status_voting')}
-                        </div>
-                        <span className="text-zinc-500 text-xs font-mono">
-                          {new Date(rehearsal.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-
-                      <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2 group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors truncate">{rehearsal.title}</h3>
-                      
-                      <div className="space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
-                        <div className="flex items-center gap-2">
-                          <Music4 size={14} />
-                          <span>{rehearsal.setlist.length} {t('songs_count')}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CalendarDays size={14} />
-                          <span>
-                            {rehearsal.status === 'CONFIRMED' 
-                              ? new Date(rehearsal.options.find(o => o.id === rehearsal.confirmedOptionId)?.date || '').toLocaleDateString()
-                              : `${rehearsal.options.length} ${t('options_count')}`}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))
+                {!dbError && (
+                  <Button onClick={handleCreateRehearsalClick} className="gap-2 shadow-xl shadow-brand-900/20">
+                    <Plus size={20} />
+                    {t('create_rehearsal')}
+                  </Button>
                 )}
               </div>
+
+              {dbError ? (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 p-8 rounded-2xl text-center">
+                  <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
+                  <h2 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">Error de Sincronización</h2>
+                  <p className="text-red-600 dark:text-red-300/80 mb-6 max-w-md mx-auto">
+                    {dbError}
+                    <br/><br/>
+                    Esto ocurre porque las <b>Reglas de Firestore</b> en tu consola de Firebase están bloqueando el acceso. Debes cambiarlas a "allow read, write: if true;".
+                  </p>
+                  <Button variant="secondary" onClick={() => window.location.reload()}>Reintentar</Button>
+                </div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {isLoading ? (
+                    <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-50">
+                      <Loader2 className="h-10 w-10 text-brand-500 animate-spin mb-4" />
+                      <p className="text-zinc-500">Sincronizando con MelodIA...</p>
+                    </div>
+                  ) : rehearsals.length === 0 ? (
+                    <div className="col-span-full py-16 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
+                      <CalendarDays className="mx-auto text-zinc-400 dark:text-zinc-700 mb-4" size={48} />
+                      <p className="text-zinc-500 dark:text-zinc-500 text-lg">{t('no_rehearsals')}</p>
+                      <p className="text-zinc-400 text-sm mt-1">{t('no_rehearsals_sub')}</p>
+                      <Button variant="ghost" className="mt-4 text-brand-600 dark:text-brand-400" onClick={handleCreateRehearsalClick}>{t('create_rehearsal')}</Button>
+                    </div>
+                  ) : (
+                    rehearsals.map(rehearsal => (
+                      <div 
+                        key={rehearsal.id} 
+                        onClick={() => handleOpenRehearsal(rehearsal)}
+                        className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-brand-500/50 hover:shadow-2xl hover:shadow-brand-900/10 rounded-xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden"
+                      >
+                        <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                          <button onClick={(e) => handleDeleteRehearsal(e, rehearsal.id)} className="text-zinc-400 hover:text-red-500 transition-colors bg-white dark:bg-zinc-900 rounded-full p-1 shadow-sm">
+                            <span className="sr-only">Borrar</span>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                          </button>
+                        </div>
+                        
+                        <div className="flex items-start justify-between mb-4">
+                          <div className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
+                            rehearsal.status === 'CONFIRMED' 
+                            ? 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20' 
+                            : 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
+                          }`}>
+                            {rehearsal.status === 'CONFIRMED' ? t('status_confirmed') : t('status_voting')}
+                          </div>
+                          <span className="text-zinc-500 text-xs font-mono">
+                            {new Date(rehearsal.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+
+                        <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2 group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors truncate">{rehearsal.title}</h3>
+                        
+                        <div className="space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
+                          <div className="flex items-center gap-2">
+                            <Music4 size={14} />
+                            <span>{rehearsal.setlist.length} {t('songs_count')}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CalendarDays size={14} />
+                            <span>
+                              {rehearsal.status === 'CONFIRMED' 
+                                ? new Date(rehearsal.options.find(o => o.id === rehearsal.confirmedOptionId)?.date || '').toLocaleDateString()
+                                : `${rehearsal.options.length} ${t('options_count')}`}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -351,7 +378,7 @@ function AppContent() {
                   className="group relative"
                 >
                   <div className="absolute -inset-2 bg-gradient-to-r from-brand-600 to-brand-400 rounded-lg blur opacity-10 group-hover:opacity-40 transition duration-500"></div>
-                  <div className="relative text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 group-hover:from-brand-600 group-hover:to-brand-400 transition-all duration-300">
+                  <div className="relative text-black dark:text-white text-3xl md:text-4xl font-black group-hover:text-brand-600 transition-all duration-300">
                     MelodIA La♭
                   </div>
                 </a>
