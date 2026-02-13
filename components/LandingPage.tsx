@@ -1,10 +1,9 @@
-// v2.4 - Restored Guest Access Fallback
+// v2.5 - Strict Google Auth Only
 import React, { useEffect, useState, useRef } from 'react';
 import { User } from '../types';
-import { handleGoogleCredential, loginAsDemoUser } from '../services/authService';
+import { handleGoogleCredential } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Music2, Calendar, Users, Cloud, PlayCircle, CheckCircle2, User as UserIcon } from 'lucide-react';
-import { Button } from './Button';
+import { Music2, Calendar, Users, Cloud, PlayCircle, CheckCircle2 } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -39,7 +38,6 @@ const getGoogleClientId = () => {
 export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
   const [error, setError] = useState<string | null>(null);
   const { t } = useLanguage();
-  const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   const retryCount = useRef(0);
 
   useEffect(() => {
@@ -60,23 +58,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
                 }
               }
             },
+            auto_select: false,
+            cancel_on_tap_outside: true
           });
 
           const btnDiv = document.getElementById('googleSignInDiv');
           if (btnDiv) {
               window.google.accounts.id.renderButton(
                   btnDiv,
-                  { theme: 'outline', size: 'large', width: '280' }
+                  { theme: 'outline', size: 'large', width: '280', text: 'signin_with' }
               );
-              setIsGoogleLoaded(true);
           }
         } catch (e) {
-          console.error("Google Auth Error:", e);
+          console.error("Google Auth Initialization Error:", e);
         }
       } else {
-        if (retryCount.current < 20) {
+        if (retryCount.current < 30) {
           retryCount.current++;
-          setTimeout(initializeGoogleAuth, 300);
+          setTimeout(initializeGoogleAuth, 500);
         }
       }
     };
@@ -84,11 +83,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
     initializeGoogleAuth();
     
   }, [onLogin, t]);
-
-  const handleDemoLogin = () => {
-    const user = loginAsDemoUser();
-    onLogin(user);
-  };
 
   return (
     <div className="flex-1 flex flex-col items-center p-4 md:p-8 animate-in fade-in duration-700 overflow-x-hidden relative">
@@ -140,27 +134,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
               {/* Login Box */}
               <div className="bg-white/80 dark:bg-zinc-900/60 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl backdrop-blur-md relative z-10">
                 <div className="flex flex-col items-center gap-6">
-                    <div id="googleSignInDiv" className="min-h-[40px]"></div>
-                    
-                    <div className="flex items-center w-full gap-2 opacity-50">
-                        <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800"></div>
-                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">o</span>
-                        <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800"></div>
-                    </div>
-
-                    <Button 
-                      variant="secondary" 
-                      onClick={handleDemoLogin} 
-                      className="w-full h-12 gap-2 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-xs uppercase tracking-widest font-bold"
-                    >
-                      <UserIcon size={16} />
-                      {t('demo_access')}
-                    </Button>
+                    <div id="googleSignInDiv" className="min-h-[44px] flex items-center justify-center"></div>
                 </div>
                 
                 {error && (
-                  <p className="mt-4 text-red-500 text-xs text-center">{error}</p>
+                  <p className="mt-4 text-red-500 text-xs text-center font-medium bg-red-50 dark:bg-red-900/20 p-2 rounded-lg">{error}</p>
                 )}
+                
                 <p className="text-[10px] text-center text-zinc-400 mt-8 font-sans uppercase tracking-widest font-bold">
                   {t('footer_copyright')}
                 </p>

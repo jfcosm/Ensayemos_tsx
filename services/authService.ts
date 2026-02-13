@@ -1,4 +1,4 @@
-// v2.4 - Restored loginAsDemoUser helper for troubleshooting
+// v2.5 - Strict Google Auth (Removed guest helper)
 import { User } from '../types';
 
 const USER_KEY = 'ensayamos_user';
@@ -34,17 +34,6 @@ export const handleGoogleCredential = (credential: string): User | null => {
     picture: payload.picture,
   };
 
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
-  return user;
-};
-
-export const loginAsDemoUser = (): User => {
-  const user: User = {
-    id: 'demo-user-123',
-    name: 'Músico Invitado',
-    email: 'invitado@verso.app',
-    picture: '',
-  };
   localStorage.setItem(USER_KEY, JSON.stringify(user));
   return user;
 };
