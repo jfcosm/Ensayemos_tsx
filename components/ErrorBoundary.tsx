@@ -1,4 +1,9 @@
-import React, { ErrorInfo, ReactNode } from 'react';
+
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+
+/**
+ * v2.0.3 - ErrorBoundary component to catch rendering errors.
+ */
 
 interface Props {
   children?: ReactNode;
@@ -9,11 +14,15 @@ interface State {
   error: Error | null;
 }
 
-export class ErrorBoundary extends React.Component<Props, State> {
-  public state: State = {
-    hasError: false,
-    error: null
-  };
+// Fix: Explicitly use Component from react and add constructor to ensure props/state are correctly typed in the class context
+export class ErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: null
+    };
+  }
 
   public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
@@ -23,8 +32,12 @@ export class ErrorBoundary extends React.Component<Props, State> {
     console.error('Uncaught error:', error, errorInfo);
   }
 
+  // Fix: The render method now correctly recognizes this.props and this.state through proper inheritance
   public render() {
-    if (this.state.hasError) {
+    const { children } = this.props;
+    const { hasError, error } = this.state;
+
+    if (hasError) {
       return (
         <div className="min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center p-8 text-center">
           <div className="bg-red-900/20 border border-red-500 rounded-xl p-8 max-w-2xl">
@@ -34,7 +47,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
             </p>
             <div className="bg-black/50 p-4 rounded-lg text-left overflow-auto font-mono text-sm mb-6 border border-zinc-800">
               <p className="text-red-400 font-bold mb-2">Error Técnico:</p>
-              {this.state.error?.toString()}
+              {error?.toString()}
               <p className="mt-4 text-zinc-500 text-xs">
                  Si ves "process is not defined", es un problema de configuración de entorno (Vite).
               </p>
@@ -50,6 +63,6 @@ export class ErrorBoundary extends React.Component<Props, State> {
       );
     }
 
-    return this.props.children;
+    return children;
   }
 }

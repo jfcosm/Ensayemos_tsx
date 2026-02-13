@@ -9,7 +9,7 @@ import { SongLibrary } from './components/SongLibrary';
 import { Navbar } from './components/Navbar';
 import { Button } from './components/Button';
 import { SongComposer } from './components/SongComposer';
-import { Plus, Music4, CalendarDays, Loader2 } from 'lucide-react';
+import { Plus, Music4, CalendarDays, Loader2, Heart, Gift } from 'lucide-react';
 import { subscribeToRehearsals, saveRehearsal, deleteRehearsal, subscribeToSongs } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -319,11 +319,64 @@ function AppContent() {
         </main>
       )}
 
-      {/* Footer */}
-      <footer className="py-6 text-center text-xs text-zinc-400 dark:text-zinc-600 border-t border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm">
-        <p>
-          {t('footer_love')} <a href="https://www.melodialab.net" target="_blank" rel="noopener noreferrer" className="font-medium hover:text-brand-600 dark:hover:text-brand-400 transition-colors">MelodIA La♭</a>
-        </p>
+      {/* Striking Footer */}
+      <footer className="relative mt-auto border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 transition-colors duration-300">
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-brand-500 to-transparent opacity-50"></div>
+        
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-10">
+            <div className="space-y-4 text-center md:text-left">
+              <div className="inline-flex items-center gap-2">
+                 <div className="bg-brand-600 p-2 rounded-xl text-white shadow-xl shadow-brand-500/20">
+                   <Music4 size={24} />
+                 </div>
+                 <span className="text-2xl font-extrabold tracking-tight lowercase text-zinc-900 dark:text-white">verso.</span>
+              </div>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-xs mx-auto md:mx-0 leading-relaxed font-medium">
+                {t('footer_gift_community')}
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center gap-6 md:items-end">
+              <div className="flex flex-col items-center md:items-end gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-600">
+                  {t('footer_powered_by')}
+                </span>
+                <a 
+                  href="https://www.melodialab.net" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="group relative"
+                >
+                  <div className="absolute -inset-2 bg-gradient-to-r from-brand-600 to-brand-400 rounded-lg blur opacity-10 group-hover:opacity-40 transition duration-500"></div>
+                  <div className="relative text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 group-hover:from-brand-600 group-hover:to-brand-400 transition-all duration-300">
+                    MelodIA La♭
+                  </div>
+                </a>
+              </div>
+              
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20 px-3 py-1.5 rounded-full border border-brand-200 dark:border-brand-500/20">
+                  <Heart size={14} fill="currentColor" />
+                  <span>{t('footer_made_for')}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-full border border-amber-200 dark:border-amber-500/20">
+                  <Gift size={14} />
+                  <span>{t('footer_free_forever')}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-zinc-100 dark:border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-600">
+            <p>© {new Date().getFullYear()} VERSO APP</p>
+            <div className="flex gap-8">
+              <a href="#" className="hover:text-brand-500 transition-colors">{t('footer_documentation')}</a>
+              <a href="#" className="hover:text-brand-500 transition-colors">{t('footer_privacy')}</a>
+              <a href="#" className="hover:text-brand-500 transition-colors">{t('footer_terms')}</a>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );

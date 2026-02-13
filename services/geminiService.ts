@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 
 /**
@@ -15,10 +16,11 @@ export const formatSongContent = async (rawText: string): Promise<string> => {
   try {
     // Lazy initialization: Only create the client when we actually need it.
     // This prevents startup crashes if the key is missing or invalid.
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
+    // Fix: Updated model to 'gemini-3-flash-preview' for basic text tasks
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: `
         You are a professional music editor. I will provide you with raw text that contains lyrics and chords, likely copied from a website. 
         Please format this text to be clean and readable for a musician.
@@ -51,9 +53,10 @@ export const suggestSetlistIdeas = async (genre: string): Promise<string[]> => {
     if (!apiKey) return [];
 
     try {
-        const ai = new GoogleGenAI({ apiKey });
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        // Fix: Updated model to 'gemini-3-flash-preview' for basic text tasks
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3-flash-preview',
             contents: `Suggest 5 popular songs for a band playing ${genre} music. Return only the song titles separated by commas.`,
         });
         const text = response.text || "";
@@ -83,7 +86,7 @@ export const generateSongFromParams = async (params: {
     }
 
     try {
-        const ai = new GoogleGenAI({ apiKey });
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         
         // Map language code to full language name for the prompt
         const langMap: Record<string, string> = {
@@ -130,8 +133,9 @@ export const generateSongFromParams = async (params: {
             7. Do NOT include conversational filler like "Okay, here is your song". Start directly with the Song Title.
         `;
 
+        // Fix: Updated model to 'gemini-3-pro-preview' for complex text tasks
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3-pro-preview',
             contents: prompt,
         });
 

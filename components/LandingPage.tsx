@@ -119,7 +119,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
             {/* LED Column 5 */}
             <div className="led-column w-16 md:w-32 h-[50%] bg-gradient-to-t from-red-600 via-brand-500 to-transparent blur-[40px] rounded-t-full" style={{ animationDuration: '4.5s', animationDelay: '1.5s' }}></div>
         </div>
-        {/* Bottom fade to seamlessly blend with footer/scroll */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-zinc-50 dark:from-zinc-950 to-transparent"></div>
       </div>
 
@@ -254,28 +253,43 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
       {/* Features Section - Below fold */}
       <div className="relative z-10 w-full max-w-6xl mt-20 mb-10">
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
-              <div className="bg-brand-100 dark:bg-brand-900/30 p-3 rounded-xl text-brand-600 dark:text-brand-400 w-fit mb-4">
-                  <Users size={24} />
+            <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
+              <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                 <img src="p1.jpg" alt="Voting" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" onError={(e) => { (e.target as any).src = 'https://images.unsplash.com/photo-1514525253361-b8748530499e?w=800&auto=format&fit=crop&q=60'; }} />
               </div>
-              <h3 className="font-bold text-lg text-zinc-900 dark:text-white mb-2 font-sans">{t('feature_vote_title')}</h3>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed font-sans">{t('feature_vote_desc')}</p>
+              <div className="p-6">
+                <div className="bg-brand-100 dark:bg-brand-900/30 p-3 rounded-xl text-brand-600 dark:text-brand-400 w-fit mb-4">
+                    <Users size={24} />
+                </div>
+                <h3 className="font-bold text-lg text-zinc-900 dark:text-white mb-2 font-sans">{t('feature_vote_title')}</h3>
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed font-sans">{t('feature_vote_desc')}</p>
+              </div>
             </div>
 
-            <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
-              <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-xl text-blue-600 dark:text-blue-400 w-fit mb-4">
-                  <Cloud size={24} />
+            <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
+              <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                 <img src="p2.jpg" alt="Cloud Sync" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" onError={(e) => { (e.target as any).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=60'; }} />
               </div>
-              <h3 className="font-bold text-lg text-zinc-900 dark:text-white mb-2 font-sans">{t('feature_sync_title')}</h3>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed font-sans">{t('feature_sync_desc')}</p>
+              <div className="p-6">
+                <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-xl text-blue-600 dark:text-blue-400 w-fit mb-4">
+                    <Cloud size={24} />
+                </div>
+                <h3 className="font-bold text-lg text-zinc-900 dark:text-white mb-2 font-sans">{t('feature_sync_title')}</h3>
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed font-sans">{t('feature_sync_desc')}</p>
+              </div>
             </div>
 
-            <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
-              <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-xl text-purple-600 dark:text-purple-400 w-fit mb-4">
-                  <Calendar size={24} />
+            <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
+              <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                 <img src="p3.jpg" alt="Smart Setlist" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" onError={(e) => { (e.target as any).src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=60'; }} />
               </div>
-              <h3 className="font-bold text-lg text-zinc-900 dark:text-white mb-2 font-sans">{t('feature_setlist_title')}</h3>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed font-sans">{t('feature_setlist_desc')}</p>
+              <div className="p-6">
+                <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-xl text-purple-600 dark:text-purple-400 w-fit mb-4">
+                    <Calendar size={24} />
+                </div>
+                <h3 className="font-bold text-lg text-zinc-900 dark:text-white mb-2 font-sans">{t('feature_setlist_title')}</h3>
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed font-sans">{t('feature_setlist_desc')}</p>
+              </div>
             </div>
           </div>
       </div>
