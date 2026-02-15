@@ -1,4 +1,5 @@
-// v2.1.7 - Explicitly importing Component and defining property types for better TS recognition
+
+// v2.1.9 - Fix for TypeScript errors regarding inherited props and state
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 /**
@@ -14,16 +15,15 @@ interface State {
   error: Error | null;
 }
 
-// Fix: Using Component explicitly and declaring state to resolve type inheritance issues
+// Fix: Using named Component import for better TypeScript inheritance support
 export class ErrorBoundary extends Component<Props, State> {
-  // Fix: Explicit state declaration ensures it is recognized by TS
-  public state: State = {
-    hasError: false,
-    error: null
-  };
-
   constructor(props: Props) {
     super(props);
+    // Fix: Explicitly initialize state property inherited from Component
+    this.state = {
+      hasError: false,
+      error: null
+    };
   }
 
   public static getDerivedStateFromError(error: Error): State {
@@ -35,8 +35,9 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public render() {
+    // Fix: Accessing state inherited from Component
     const { hasError, error } = this.state;
-    // Fix: Accessing children from inherited this.props is now properly typed
+    // Fix: Accessing children from inherited props
     const { children } = this.props;
 
     if (hasError) {
