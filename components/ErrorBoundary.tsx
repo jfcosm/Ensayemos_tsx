@@ -1,5 +1,5 @@
 
-// v2.1.9 - Fix for TypeScript errors regarding inherited props and state
+// v2.1.13 - Fixed inheritance and property access issues by using explicit Component import
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 /**
@@ -15,11 +15,11 @@ interface State {
   error: Error | null;
 }
 
-// Fix: Using named Component import for better TypeScript inheritance support
+// Fix: Explicitly importing Component and using it to ensure TypeScript correctly identifies the base class and its properties
 export class ErrorBoundary extends Component<Props, State> {
+  // Explicit initialization of state to avoid undefined issues during early lifecycle
   constructor(props: Props) {
     super(props);
-    // Fix: Explicitly initialize state property inherited from Component
     this.state = {
       hasError: false,
       error: null
@@ -30,14 +30,15 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  // Fix: Explicitly overriding the base class method after ensuring correct inheritance
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Uncaught error:', error, errorInfo);
   }
 
-  public render() {
-    // Fix: Accessing state inherited from Component
+  // Fix: Explicitly overriding the base class method after ensuring correct inheritance
+  public override render() {
+    // Both state and props are now correctly recognized by extending Component<Props, State>
     const { hasError, error } = this.state;
-    // Fix: Accessing children from inherited props
     const { children } = this.props;
 
     if (hasError) {

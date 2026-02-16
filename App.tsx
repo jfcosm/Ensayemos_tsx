@@ -1,5 +1,5 @@
 
-// v2.11 - Enhanced Firestore Rule Debugging
+// v2.18 - MelodIA lab Brand Restoration & Correct Domain (.net)
 import React, { useState, useEffect } from 'react';
 import { ViewState, Song, Rehearsal, User } from './types';
 import { RehearsalView } from './components/RehearsalView';
@@ -11,8 +11,24 @@ import { SongLibrary } from './components/SongLibrary';
 import { Navbar } from './components/Navbar';
 import { Button } from './components/Button';
 import { SongComposer } from './components/SongComposer';
-import { Plus, Music4, CalendarDays, Loader2, AlertCircle, RefreshCw, Heart, Gift, ExternalLink } from 'lucide-react';
-import { subscribeToRehearsals, saveRehearsal, deleteRehearsal, subscribeToSongs } from './services/storageService';
+import { 
+  Plus, 
+  Music4, 
+  CalendarDays, 
+  Loader2, 
+  AlertCircle, 
+  Heart, 
+  Music2, 
+  Shield, 
+  FileText, 
+  BookOpen, 
+  Gift,
+  Wand2,
+  Sparkles,
+  ArrowRight,
+  FlaskConical
+} from 'lucide-react';
+import { subscribeToRehearsals, saveRehearsal, subscribeToSongs } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { auth } from './services/firebaseConfig';
@@ -40,9 +56,7 @@ function AppContent() {
     const isDarkMode = document.documentElement.classList.contains('dark');
     setIsDark(isDarkMode);
 
-    // Watch for REAL Firebase Auth state
     const unsubAuth = onAuthStateChanged(auth, (fbUser) => {
-        console.log("Firebase Auth State Changed:", fbUser ? "Logged In" : "Logged Out");
         if (fbUser) {
             setIsAuthSynced(true);
         } else {
@@ -55,7 +69,6 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    // CRITICAL: ONLY subscribe if Firebase Auth confirms we are logged in
     if (!currentUser || !isAuthSynced) return;
     
     setIsLoading(true);
@@ -69,11 +82,8 @@ function AppContent() {
       },
       (error: any) => {
         setIsLoading(false);
-        console.error("Firestore Error:", error.code, error.message);
         if (error.code === 'permission-denied') {
-            setDbError("PERMISOS_DENEGADOS");
-        } else {
-            setDbError(error.message);
+            setDbError("Tu sesión no tiene permisos suficientes.");
         }
       }
     );
@@ -102,7 +112,6 @@ function AppContent() {
     await logout();
     setCurrentUser(null);
     setIsAuthSynced(false);
-    setDbError(null);
     setView(ViewState.DASHBOARD);
   };
 
@@ -148,49 +157,19 @@ function AppContent() {
                 )}
               </div>
 
-              {dbError === "PERMISOS_DENEGADOS" ? (
-                <div className="bg-white dark:bg-zinc-900 border-2 border-red-500/30 p-10 rounded-3xl text-center shadow-2xl max-w-2xl mx-auto border-dashed">
-                  <div className="bg-red-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-500/20">
-                    <AlertCircle className="text-white" size={32} />
-                  </div>
-                  <h2 className="text-2xl font-black text-zinc-900 dark:text-white mb-4 uppercase tracking-tight">Acceso Bloqueado por Firebase</h2>
-                  
-                  <div className="text-left bg-zinc-50 dark:bg-zinc-950 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 mb-8 space-y-4">
-                    <p className="text-zinc-600 dark:text-zinc-300 text-sm md:text-base leading-relaxed">
-                        Tu aplicación está intentando conectar, pero tu base de datos en la <b>Nube de Firebase</b> tiene las puertas cerradas.
-                    </p>
-                    <div className="space-y-2">
-                        <p className="text-xs font-bold text-brand-600 uppercase tracking-widest">Solución obligatoria:</p>
-                        <ol className="text-sm text-zinc-500 dark:text-zinc-400 list-decimal list-inside space-y-2">
-                            <li>Entra a la <a href="https://console.firebase.google.com/" target="_blank" className="underline font-bold text-zinc-700 dark:text-zinc-200 inline-flex items-center gap-1">Consola de Firebase <ExternalLink size={12}/></a></li>
-                            <li>Ve a <b>Firestore Database</b> &gt; pestaña <b>Rules</b>.</li>
-                            <li>Cambia <code className="bg-zinc-200 dark:bg-zinc-800 px-1">allow read, write: if false;</code> por <code className="bg-zinc-200 dark:bg-zinc-800 px-1 text-green-600">allow read, write: if request.auth != null;</code></li>
-                            <li>Dale al botón azul de <b>Publicar (Publish)</b>.</li>
-                        </ol>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Button variant="primary" onClick={() => window.location.reload()} className="gap-2 px-8">
-                      <RefreshCw size={20} />
-                      Ya publiqué las reglas, reintentar
-                    </Button>
-                    <Button variant="ghost" onClick={handleLogout} className="text-zinc-500 text-xs">
-                      Cerrar sesión
-                    </Button>
-                  </div>
+              {dbError ? (
+                <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 p-10 rounded-3xl text-center shadow-2xl border-dashed max-w-2xl mx-auto">
+                  <div className="bg-red-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"><AlertCircle className="text-white" size={32} /></div>
+                  <h2 className="text-2xl font-black text-red-700 dark:text-red-400 mb-4 uppercase">Error de Acceso Seguro</h2>
+                  <p className="text-zinc-600 dark:text-zinc-300 mb-8 text-sm leading-relaxed">Parece que Firebase no reconoce tu identidad actual. Por favor, cierra sesión y vuelve a entrar.</p>
+                  <Button variant="secondary" onClick={handleLogout} className="gap-2 px-8">Sincronizar de nuevo</Button>
                 </div>
-              ) : dbError ? (
-                 <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 p-6 rounded-xl text-red-600">
-                    <p className="font-bold">Error inesperado:</p>
-                    <p className="text-sm">{dbError}</p>
-                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {isLoading ? (
                     <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-50">
                       <Loader2 className="h-10 w-10 text-brand-500 animate-spin mb-4" />
-                      <p className="text-zinc-500 font-medium">Conectando con la Nube...</p>
+                      <p className="text-zinc-500 font-medium">Cargando ensayos seguros...</p>
                     </div>
                   ) : rehearsals.length === 0 ? (
                     <div className="col-span-full py-16 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
@@ -243,17 +222,104 @@ function AppContent() {
         </main>
       )}
 
-      <footer className="mt-auto border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-8 text-center">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-2">
-                <Music4 className="text-brand-600" size={24} />
-                <span className="text-xl font-bold dark:text-white">verso.</span>
+      {/* SIGNATURE FOOTER - MelodIA lab Identity Focus (v2.18) */}
+      <footer className="mt-auto border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 transition-colors duration-300">
+        <div className="max-w-6xl mx-auto px-6 pt-16 pb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+            
+            {/* Column 1: Brand & Creator */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <div className="bg-brand-600 p-1.5 rounded-lg text-white">
+                  <Music2 size={20} />
+                </div>
+                <span className="text-2xl font-black dark:text-white lowercase tracking-tight">verso.</span>
+              </div>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">
+                {t('tagline')}<br/>
+                <span className="font-bold text-zinc-900 dark:text-zinc-100">Original de MelodIA lab.</span>
+              </p>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest border border-indigo-100 dark:border-indigo-800/30">
+                <FlaskConical size={12} />
+                <span>Innovation by MelodIA lab</span>
+              </div>
             </div>
-            <div className="flex gap-4 text-xs font-bold uppercase tracking-widest text-zinc-400">
-                <span>Made with <Heart className="inline text-red-500 mx-1" size={14} fill="currentColor" /> for Musicians</span>
-                <span>•</span>
-                <span>{new Date().getFullYear()} Verso App</span>
+
+            {/* Column 2: Navigation */}
+            <div className="space-y-6">
+              <h4 className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Plataforma</h4>
+              <ul className="space-y-4">
+                <li>
+                  <button onClick={() => setView(ViewState.DASHBOARD)} className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-brand-600 transition-colors flex items-center gap-2">
+                    <CalendarDays size={14} /> {t('nav_rehearsals')}
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => setView(ViewState.SONG_LIBRARY)} className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-brand-600 transition-colors flex items-center gap-2">
+                    <Music4 size={14} /> {t('nav_library')}
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => setView(ViewState.COMPOSER)} className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-brand-600 transition-colors flex items-center gap-2">
+                    <Wand2 size={14} /> {t('nav_composer')}
+                  </button>
+                </li>
+              </ul>
             </div>
+
+            {/* Column 3: Legal & Resources */}
+            <div className="space-y-6">
+              <h4 className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Recursos</h4>
+              <ul className="space-y-4">
+                <li>
+                  <a href="#" className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-brand-600 transition-colors flex items-center gap-2">
+                    <BookOpen size={14} /> {t('footer_documentation')}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-brand-600 transition-colors flex items-center gap-2">
+                    <Shield size={14} /> {t('footer_privacy')}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-brand-600 transition-colors flex items-center gap-2">
+                    <FileText size={14} /> {t('footer_terms')}
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 4: MelodIA lab Community Gift */}
+            <div className="space-y-6">
+              <h4 className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">MelodIA lab</h4>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed italic">
+                {t('footer_gift_community')}
+              </p>
+              <div className="pt-2">
+                <a 
+                  href="https://www.melodialab.net" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 text-xs font-black group hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white transition-all shadow-xl"
+                >
+                  Ir a MelodIA lab <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium text-zinc-400">
+            <p>© {new Date().getFullYear()} Verso App. {t('footer_copyright')}</p>
+            <div className="flex gap-6">
+              <span className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-tighter">
+                <Sparkles size={12}/> {t('footer_free_forever')}
+              </span>
+              <span className="flex items-center gap-1 font-bold">
+                <Heart size={12} className="text-red-500" fill="currentColor"/> 
+                {t('footer_love')}
+              </span>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

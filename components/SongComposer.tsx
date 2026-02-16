@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Button } from './Button';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Wand2, Save, Music, Zap, Sliders, Type } from 'lucide-react';
+import { Wand2, Save, Music, Zap, Sliders, Type, FlaskConical } from 'lucide-react';
 import { generateSongFromParams } from '../services/geminiService';
 import { saveSong } from '../services/storageService';
 import { Song } from '../types';
@@ -55,7 +56,7 @@ export const SongComposer: React.FC<SongComposerProps> = ({ onSongCreated }) => 
         const newSong: Song = {
             id: crypto.randomUUID(),
             title: title || 'Composición IA',
-            artist: 'Verso AI (Armonix)',
+            artist: 'Verso AI (MelodIA lab Engine)',
             content: generatedContent,
             key: `${selectedKey} ${selectedScale}`
         };
@@ -175,7 +176,7 @@ export const SongComposer: React.FC<SongComposerProps> = ({ onSongCreated }) => 
                     </div>
                 </div>
 
-                {/* TOPICS INPUT (NEW) */}
+                {/* TOPICS INPUT */}
                 <div className="mb-8">
                     <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">{t('comp_topics')}</label>
                     <div className="relative">
@@ -199,11 +200,12 @@ export const SongComposer: React.FC<SongComposerProps> = ({ onSongCreated }) => 
                     {t('comp_generate')}
                 </Button>
 
-                {/* Powered By Footer */}
-                <div className="mt-4 text-center">
-                    <p className="text-xs text-zinc-400">
-                        {t('comp_powered_by')} <a href="https://www.armonix.app" target="_blank" rel="noopener noreferrer" className="font-bold text-brand-500 hover:underline">Armonix.app</a>
-                    </p>
+                {/* Powered By MelodIA lab */}
+                <div className="mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800 text-center">
+                    <a href="https://www.melodialab.net" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs text-zinc-400 hover:text-indigo-500 transition-colors">
+                        <FlaskConical size={12} />
+                        {t('comp_powered_by')} <span className="font-bold">MelodIA lab</span>
+                    </a>
                 </div>
 
             </div>
