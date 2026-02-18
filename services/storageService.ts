@@ -86,7 +86,7 @@ export const subscribeToRehearsals = (
 };
 
 export const saveRehearsal = async (rehearsal: Rehearsal, userId: string): Promise<void> => {
-  if (!userId) throw new Error("Se requiere ID de usuario para guardar");
+  if (!userId || typeof userId !== 'string') throw new Error("ID de usuario inválido");
   const docRef = doc(db, REHEARSALS_COLLECTION, rehearsal.id);
   return await setDoc(docRef, { ...rehearsal, createdBy: userId }, { merge: true });
 };

@@ -1,4 +1,4 @@
-// v3.15 - Optimized Sync and Multi-User Security
+// v3.17 - Cleaned Sync Logic & Multi-User Shield | MelodIA Lab
 import React, { useState, useEffect } from 'react';
 import { ViewState, Song, Rehearsal, User } from './types';
 import { RehearsalView } from './components/RehearsalView';
@@ -32,6 +32,7 @@ function AppContent() {
   const [dbError, setDbError] = useState<string | null>(null);
   const [isAuthSynced, setIsAuthSynced] = useState(false);
 
+  // 1. Manejo de Autenticación
   useEffect(() => {
     const localUser = getCurrentUser();
     if (localUser) setCurrentUser(localUser);
@@ -51,52 +52,41 @@ function AppContent() {
     return () => unsubAuth();
   }, []);
 
-  // FIX: Solo se dispara cuando el ID del usuario cambia realmente
-  // v3.16 - Final Sync Shield | MelodIA Lab
-useEffect(() => {
-  // Verificación estricta: solo procedemos si id es un STRING válido
-  const userId = currentUser?.id;
-  
-  if (!userId || typeof userId !== 'string' || !isAuthSynced) {
-    return;
-  }
-  
-  setIsLoading(true);
-  setDbError(null);
-
-  // Suscripción a ensayos pasando explícitamente el string userId
-  const unsubRehearsals = subscribeToRehearsals(
-    userId,
-    (data) => {
-      setRehearsals(data);
-      setIsLoading(false);
-    },
-    (error: any) => {
-      setIsLoading(false);
-      if (error.code === 'permission-denied') setDbError(t('error_auth_title'));
+  // 2. Suscripción a Datos (Blindada contra el error "Unsupported field value: a function")
+  useEffect(() => {
+    const userId = currentUser?.id;
+    
+    // Verificación estricta para evitar que Firestore reciba datos inválidos
+    if (!userId || typeof userId !== 'string' || !isAuthSynced) {
+      return;
     }
-  );
+    
+    setIsLoading(true);
+    setDbError(null);
 
-  // Suscripción a canciones pasando explícitamente el string userId
-  const unsubSongs = subscribeToSongs(
-    userId, 
-    (data) => setSongs(data), 
-    (err) => console.error("Error songs:", err)
-  );
+    const unsubRehearsals = subscribeToRehearsals(
+      userId,
+      (data) => {
+        setRehearsals(data);
+        setIsLoading(false);
+      },
+      (error: any) => {
+        setIsLoading(false);
+        if (error.code === 'permission-denied') setDbError(t('error_auth_title'));
+      }
+    );
 
-  return () => {
-    unsubRehearsals();
-    unsubSongs();
-  };
-}, [currentUser?.id, isAuthSynced]); // Eliminamos 't' para evitar re-suscripciones innecesarias
-
-    const unsubSongs = subscribeToSongs(currentUser.id, (data) => setSongs(data), () => {});
+    const unsubSongs = subscribeToSongs(
+      userId, 
+      (data) => setSongs(data), 
+      (err) => console.error("Error songs:", err)
+    );
 
     return () => {
       unsubRehearsals();
       unsubSongs();
     };
-  }, [currentUser?.id, isAuthSynced]);
+  }, [currentUser?.id, isAuthSynced]); 
 
   const toggleTheme = () => {
     const newIsDark = !isDark;
@@ -118,7 +108,7 @@ useEffect(() => {
   };
 
   const handleUpdateRehearsal = async (updated: Rehearsal) => {
-    if (!currentUser) return;
+    if (!currentUser?.id) return;
     try {
       setSelectedRehearsal(updated);
       await saveRehearsal(updated, currentUser.id);
@@ -211,7 +201,7 @@ useEffect(() => {
 
           {view === ViewState.CREATE_REHEARSAL && (
             <CreateRehearsal onSave={async (d) => {
-                if (!currentUser) return;
+                if (!currentUser?.id) return;
                 const newR: Rehearsal = { 
                   id: crypto.randomUUID(), 
                   title: d.title, 
@@ -225,16 +215,13 @@ useEffect(() => {
             }} onCancel={() => setView(ViewState.DASHBOARD)} />
           )}
 
-          {/* Busca este bloque dentro de tu App.tsx y reemplázalo */}
           {view === ViewState.EDIT_SONG && currentUser && (
             <SongEditor 
               initialSong={selectedSong} 
               userId={currentUser.id} 
               onClose={() => setView(ViewState.SONG_LIBRARY)} 
-              onSave={(newSong) => {
-                // Guardamos la canción en segundo plano
-                saveSong(newSong, currentUser.id);
-                // Cambiamos la vista de inmediato
+              onSave={async (newSong) => {
+                await saveSong(newSong, currentUser.id);
                 setView(ViewState.SONG_LIBRARY);
               }} 
             />
@@ -243,8 +230,6 @@ useEffect(() => {
           {view === ViewState.COMPOSER && <SongComposer onSongCreated={() => setView(ViewState.SONG_LIBRARY)} />}
         </main>
       )}
-
-      {/* Footer omitido para brevedad */}
     </div>
   );
 }
