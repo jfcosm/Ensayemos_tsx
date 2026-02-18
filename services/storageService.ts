@@ -1,4 +1,4 @@
-// v3.0 - Added User-Based Filtering and Optimized Snapshots
+// v3.0 - Added User-Based Filtering and Optimized Snapshots | MelodIA Lab
 import { Song, Rehearsal } from '../types';
 import { db } from './firebaseConfig';
 import { 
@@ -18,11 +18,11 @@ const REHEARSALS_COLLECTION = 'rehearsals';
 // --- Songs ---
 
 export const subscribeToSongs = (
-  userId: string, // Agregamos userId como filtro
+  userId: string, 
   callback: (songs: Song[]) => void, 
   onError?: (error: any) => void
 ) => {
-  // Solo traemos canciones creadas por este usuario
+  // Solo traemos canciones que te pertenecen (ownerId)
   const q = query(
     collection(db, SONGS_COLLECTION), 
     where('ownerId', '==', userId), 
@@ -43,7 +43,7 @@ export const subscribeToSongs = (
 
 export const saveSong = async (song: Song, userId: string): Promise<void> => {
   const docRef = doc(db, SONGS_COLLECTION, song.id);
-  // Guardamos siempre con el ownerId
+  // Guardamos con ownerId para persistencia total entre sesiones
   return await setDoc(docRef, { ...song, ownerId: userId }, { merge: true });
 };
 
@@ -58,11 +58,11 @@ export const deleteSong = async (id: string): Promise<void> => {
 // --- Rehearsals ---
 
 export const subscribeToRehearsals = (
-  userId: string, // Agregamos userId como filtro
+  userId: string, 
   callback: (rehearsals: Rehearsal[]) => void,
   onError?: (error: any) => void
 ) => {
-  // Solo traemos ensayos donde el usuario es dueño o participante
+  // Solo traemos ensayos creados por ti (createdBy)
   const q = query(
     collection(db, REHEARSALS_COLLECTION), 
     where('createdBy', '==', userId), 
@@ -83,7 +83,7 @@ export const subscribeToRehearsals = (
 
 export const saveRehearsal = async (rehearsal: Rehearsal, userId: string): Promise<void> => {
   const docRef = doc(db, REHEARSALS_COLLECTION, rehearsal.id);
-  // Aseguramos que el ensayo guarde quién lo creó para el filtro
+  // Aseguramos el vínculo con tu cuenta de MelodIA Lab
   return await setDoc(docRef, { ...rehearsal, createdBy: userId }, { merge: true });
 };
 

@@ -6,9 +6,9 @@ import { formatSongContent } from '../services/geminiService';
 
 interface SongEditorProps {
   initialSong?: Song | null;
-  userId: string; // <-- Importante: Agregamos el userId aquí
+  userId: string;
   onClose: () => void;
-  onSave: (song: Song) => void; // <-- Ahora onSave envía la canción de vuelta
+  onSave: (song: Song) => void;
 }
 
 export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, userId, onClose, onSave }) => {
@@ -26,23 +26,24 @@ export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, userId, onC
     }
   }, [initialSong]);
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!title) return alert('El título es obligatorio');
     
     setIsSaving(true);
     
-    const newSong: Song = {
+    const songData: Song = {
       id: initialSong?.id || crypto.randomUUID(),
       title,
       artist: artist || 'Artista Desconocido',
       content
     };
     
-    // Enviamos la canción al padre (App.tsx) para que él la guarde con el userId
-    onSave(newSong);
+    // RESPUESTA INMEDIATA: Disparamos el guardado al padre pero no lo esperamos
+    onSave(songData);
     
-    // Respuesta inmediata para evitar el spinner infinito
+    // Liberamos el estado y cerramos de inmediato
     setIsSaving(false);
+    onClose();
   };
 
   const handleAIFormat = async () => {

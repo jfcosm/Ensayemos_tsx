@@ -205,14 +205,16 @@ function AppContent() {
             }} onCancel={() => setView(ViewState.DASHBOARD)} />
           )}
 
+          {/* Busca este bloque dentro de tu App.tsx y reemplázalo */}
           {view === ViewState.EDIT_SONG && currentUser && (
             <SongEditor 
               initialSong={selectedSong} 
-              userId={currentUser.id} // <-- Pasamos el ID del usuario logueado
+              userId={currentUser.id} 
               onClose={() => setView(ViewState.SONG_LIBRARY)} 
-              onSave={async (newSong) => {
-                // Guardamos la canción con el ownerId correcto
-                await saveSong(newSong, currentUser.id);
+              onSave={(newSong) => {
+                // Guardamos la canción en segundo plano
+                saveSong(newSong, currentUser.id);
+                // Cambiamos la vista de inmediato
                 setView(ViewState.SONG_LIBRARY);
               }} 
             />
