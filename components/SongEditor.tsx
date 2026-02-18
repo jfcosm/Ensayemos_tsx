@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Song, ViewState } from '../types';
+import { Song } from '../types';
 import { Button } from './Button';
 import { Save, Wand2, X, Music2 } from 'lucide-react';
 import { saveSong } from '../services/storageService';
@@ -37,9 +37,13 @@ export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, onClose, on
       content
     };
     
-    await saveSong(newSong);
+    // FLUJO DE RESPUESTA INMEDIATA:
+    // Disparamos el guardado pero NO esperamos el await si la red está lenta
+    saveSong(newSong); 
+    
+    // Limpiamos estados y cerramos la vista de inmediato
     setIsSaving(false);
-    onSave();
+    onSave(); 
   };
 
   const handleAIFormat = async () => {
@@ -61,7 +65,6 @@ export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, onClose, on
         <Button variant="ghost" onClick={onClose}><X size={20} /></Button>
       </div>
 
-      {/* Form */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -70,7 +73,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, onClose, on
               type="text" 
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-2 text-zinc-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all"
+              className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-2 text-zinc-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition-all"
               placeholder="Ej: De Música Ligera"
             />
           </div>
@@ -80,7 +83,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, onClose, on
               type="text" 
               value={artist}
               onChange={(e) => setArtist(e.target.value)}
-              className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-2 text-zinc-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all"
+              className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-2 text-zinc-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition-all"
               placeholder="Ej: Soda Stereo"
             />
           </div>
@@ -92,7 +95,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, onClose, on
             <button 
               onClick={handleAIFormat}
               disabled={isFormatting || !content}
-              className="text-xs flex items-center gap-1.5 text-brand-600 dark:text-brand-300 hover:text-brand-500 dark:hover:text-brand-200 transition-colors disabled:opacity-50"
+              className="text-xs flex items-center gap-1.5 text-brand-600 dark:text-brand-300 hover:text-brand-500 transition-colors disabled:opacity-50"
             >
               <Wand2 size={14} />
               {isFormatting ? 'Formateando con IA...' : 'Limpiar y Formatear (IA)'}
@@ -101,14 +104,13 @@ export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, onClose, on
           <textarea 
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="flex-1 w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 font-mono text-sm leading-relaxed text-zinc-800 dark:text-zinc-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none resize-none"
-            placeholder="Copia y pega la letra y acordes desde Cifra Club o La Cuerda..."
+            className="flex-1 w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 font-mono text-sm leading-relaxed text-zinc-800 dark:text-zinc-300 focus:ring-2 focus:ring-brand-500 outline-none resize-none"
+            placeholder="Copia y pega la letra y acordes..."
           />
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 backdrop-blur-sm flex justify-end gap-3">
+      <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 flex justify-end gap-3">
         <Button variant="secondary" onClick={onClose} disabled={isSaving}>Cancelar</Button>
         <Button onClick={handleSave} className="flex items-center gap-2" isLoading={isSaving}>
           <Save size={18} />
