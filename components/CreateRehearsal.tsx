@@ -26,6 +26,10 @@ export const CreateRehearsal: React.FC<CreateRehearsalProps> = ({ onSave, onCanc
     setIsSubmitting(true);
     try {
         await onSave({ title, date, time, location });
+        // --- AQUÍ ESTÁ LA CORRECCIÓN ---
+        setIsSubmitting(false);
+        onCancel();
+        // -------------------------------
     } catch (err) {
         setIsSubmitting(false);
     }
