@@ -22,3 +22,13 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const db = getFirestore(app);
 // Fix: Re-exporting auth initialized via getAuth named export
 export const auth = getAuth(app);
+
+
+// Al final del archivo firebaseConfig.ts
+import { initializeFirestore, terminate } from 'firebase/firestore';
+
+// Opcional: Esto ayuda a que Firestore no se quede "colgado" esperando 
+// conexiones persistentes en entornos de desarrollo limitados como AI Studio.
+// Si notas lentitud extrema, añade esta línea después de 'db':
+// (Solo actívalo si el problema de lentitud persiste tras el cambio de CreateRehearsal)
+// enableIndexedDbPersistence(db).catch(() => {});

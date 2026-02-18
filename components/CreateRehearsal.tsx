@@ -16,28 +16,30 @@ export const CreateRehearsal: React.FC<CreateRehearsalProps> = ({ onSave, onCanc
   const [location, setLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !date || !time || !location) {
-      alert('Por favor completa todos los campos.');
-      return;
-    }
-    
+    if (!title || !date || !time || !location) return;
+
+    // Activamos visualmente el envío
     setIsSubmitting(true);
-    try {
-        await onSave({ title, date, time, location });
-        // --- AQUÍ ESTÁ LA CORRECCIÓN ---
-        setIsSubmitting(false);
-        onCancel();
-        // -------------------------------
-    } catch (err) {
-        setIsSubmitting(false);
-    }
+    
+    // FLUJO DE FUERZA BRUTA:
+    // 1. Disparamos la función de guardado (que es asíncrona en el padre)
+    // pero NO la esperamos con 'await'.
+    onSave({ title, date, time, location }); 
+    
+    // 2. Liberamos el estado de submit inmediatamente
+    setIsSubmitting(false); 
+    
+    // 3. Cerramos el formulario tras un micro-delay (10ms) para 
+    // asegurar que el hilo de ejecución de onSave comenzó.
+    setTimeout(() => {
+      onCancel(); 
+    }, 10);
   };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4">
-      {/* Header */}
       <div className="flex items-center gap-4 mb-2">
         <button 
           onClick={onCancel} 
@@ -53,8 +55,6 @@ export const CreateRehearsal: React.FC<CreateRehearsalProps> = ({ onSave, onCanc
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 md:p-8 shadow-xl">
         <form onSubmit={handleSubmit} className="space-y-6">
-          
-          {/* Title Section */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               {t('field_title')}
@@ -67,14 +67,14 @@ export const CreateRehearsal: React.FC<CreateRehearsalProps> = ({ onSave, onCanc
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-zinc-200 dark:border-zinc-700 rounded-lg leading-5 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 sm:text-sm transition-colors"
+                className="block w-full pl-10 pr-3 py-3 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 sm:text-sm transition-colors"
                 autoFocus
+                required
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Date */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {t('field_date')}
@@ -88,11 +88,11 @@ export const CreateRehearsal: React.FC<CreateRehearsalProps> = ({ onSave, onCanc
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
+                  required
                 />
               </div>
             </div>
 
-            {/* Time */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {t('field_time')}
@@ -106,12 +106,12 @@ export const CreateRehearsal: React.FC<CreateRehearsalProps> = ({ onSave, onCanc
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
+                  required
                 />
               </div>
             </div>
           </div>
 
-          {/* Location */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               {t('field_location')}
@@ -124,12 +124,12 @@ export const CreateRehearsal: React.FC<CreateRehearsalProps> = ({ onSave, onCanc
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-zinc-200 dark:border-zinc-700 rounded-lg leading-5 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
+                className="block w-full pl-10 pr-3 py-3 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
+                required
               />
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
             <Button type="button" variant="secondary" onClick={onCancel} disabled={isSubmitting}>
               {t('cancel')}
@@ -139,7 +139,6 @@ export const CreateRehearsal: React.FC<CreateRehearsalProps> = ({ onSave, onCanc
               {t('save')}
             </Button>
           </div>
-
         </form>
       </div>
     </div>
