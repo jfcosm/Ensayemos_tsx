@@ -33,14 +33,10 @@ export const subscribeToSongs = (
   );
 };
 
+// --- Songs (También la corregimos por si acaso) ---
 export const saveSong = async (song: Song): Promise<void> => {
-  try {
-    const docRef = doc(db, SONGS_COLLECTION, song.id);
-    await setDoc(docRef, song, { merge: true });
-  } catch (error) {
-    console.error("Error saving song:", error);
-    alert("Error al guardar en la nube. Revisa tus reglas de Firebase.");
-  }
+  const docRef = doc(db, SONGS_COLLECTION, song.id);
+  return await setDoc(docRef, song, { merge: true });
 };
 
 export const deleteSong = async (id: string): Promise<void> => {
@@ -70,14 +66,11 @@ export const subscribeToRehearsals = (
   );
 };
 
+// v2.7 - Optimized promise return to prevent UI hanging
 export const saveRehearsal = async (rehearsal: Rehearsal): Promise<void> => {
-  try {
-    const docRef = doc(db, REHEARSALS_COLLECTION, rehearsal.id);
-    await setDoc(docRef, rehearsal, { merge: true });
-  } catch (error) {
-    console.error("Error saving rehearsal:", error);
-    alert("Error al guardar ensayo. Revisa tus reglas de Firebase.");
-  }
+  const docRef = doc(db, REHEARSALS_COLLECTION, rehearsal.id);
+  // Retornamos directamente el await para que la cadena de promesas se cierre correctamente
+  return await setDoc(docRef, rehearsal, { merge: true });
 };
 
 export const deleteRehearsal = async (id: string): Promise<void> => {
