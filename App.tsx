@@ -1,5 +1,4 @@
-
-// v3.13 - Fixed Firebase Auth imports and enhanced state sync | MelodIA lab
+// v3.14 - Final Fix: Explicit Promise Return for Rehearsal Creation
 import React, { useState, useEffect } from 'react';
 import { ViewState, Song, Rehearsal, User } from './types';
 import { RehearsalView } from './components/RehearsalView';
@@ -32,7 +31,6 @@ import { subscribeToRehearsals, saveRehearsal, subscribeToSongs } from './servic
 import { getCurrentUser, logout } from './services/authService';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { auth } from './services/firebaseConfig';
-// Fix: Explicit modular import for onAuthStateChanged to resolve "no exported member" error
 import { onAuthStateChanged } from 'firebase/auth';
 
 function AppContent() {
@@ -57,7 +55,6 @@ function AppContent() {
     const isDarkMode = document.documentElement.classList.contains('dark');
     setIsDark(isDarkMode);
 
-    // Fix: Using onAuthStateChanged from modular firebase/auth
     const unsubAuth = onAuthStateChanged(auth, (fbUser) => {
         if (fbUser) {
             setIsAuthSynced(true);
@@ -209,31 +206,14 @@ function AppContent() {
           )}
 
           {view === ViewState.CREATE_REHEARSAL && (
-  <CreateRehearsal 
-    onSave={async (d) => {
-      const newR: Rehearsal = { 
-        id: crypto.randomUUID(), 
-        title: d.title, 
-        status: 'PROPOSED', 
-        options: [{ 
-          id: crypto.randomUUID(), 
-          date: d.date, 
-          time: d.time, 
-          location: d.location, 
-          voterIds: [currentUser.id] 
-        }], 
-        setlist: [], 
-        createdAt: Date.now() 
-      };
-      
-      // Guardamos y retornamos la promesa explícitamente
-      const result = await saveRehearsal(newR);
-      setView(ViewState.DASHBOARD);
-      return result; 
-    }} 
-    onCancel={() => setView(ViewState.DASHBOARD)} 
-  />
-)}
+            <CreateRehearsal onSave={async (d) => {
+                const newR: Rehearsal = { id: crypto.randomUUID(), title: d.title, status: 'PROPOSED', options: [{ id: crypto.randomUUID(), date: d.date, time: d.time, location: d.location, voterIds: [currentUser.id] }], setlist: [], createdAt: Date.now() };
+                // FIX: El return asegura que el componente CreateRehearsal sepa que la operación terminó
+                const result = await saveRehearsal(newR);
+                setView(ViewState.DASHBOARD);
+                return result; 
+            }} onCancel={() => setView(ViewState.DASHBOARD)} />
+          )}
 
           {view === ViewState.EDIT_SONG && (
             <SongEditor initialSong={selectedSong} onClose={() => setView(ViewState.SONG_LIBRARY)} onSave={() => setView(ViewState.SONG_LIBRARY)} />
@@ -243,13 +223,9 @@ function AppContent() {
         </main>
       )}
 
-      {/* NEW BRANDED FOOTER - Multi-language support v3.12 */}
       <footer className="bg-black text-white pt-20 pb-12 px-6 border-t border-zinc-900">
         <div className="max-w-6xl mx-auto">
-          
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-16 mb-16">
-            
-            {/* Left: Brand Identity */}
             <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="bg-brand-600 p-2.5 rounded-2xl text-white shadow-2xl shadow-brand-600/30">
@@ -261,8 +237,6 @@ function AppContent() {
                 {t('footer_gift_community')}
               </p>
             </div>
-
-            {/* Right: MelodIA lab branding & Pills */}
             <div className="flex flex-col md:items-end gap-8">
               <div className="md:text-right space-y-1">
                 <span className="block text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em]">{t('footer_powered_by')}</span>
@@ -270,7 +244,6 @@ function AppContent() {
                   MelodIA Lab
                 </h2>
               </div>
-              
               <div className="flex flex-wrap gap-4 md:justify-end">
                  <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-red-950/50 bg-red-950/20 text-red-500 text-[11px] font-black uppercase tracking-widest shadow-lg shadow-red-950/10">
                     <Heart size={16} fill="currentColor" className="animate-pulse" />
@@ -282,12 +255,8 @@ function AppContent() {
                  </div>
               </div>
             </div>
-
           </div>
-
           <hr className="border-zinc-900 mb-10" />
-
-          {/* Bottom Row: Metadata & Navigation */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] order-2 md:order-1">
               {t('footer_copyright')}
@@ -298,7 +267,6 @@ function AppContent() {
               <a href="#" className="hover:text-white transition-colors duration-300">{t('footer_terms')}</a>
             </div>
           </div>
-
         </div>
       </footer>
     </div>
