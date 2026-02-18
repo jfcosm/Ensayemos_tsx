@@ -52,23 +52,43 @@ function AppContent() {
   }, []);
 
   // FIX: Solo se dispara cuando el ID del usuario cambia realmente
-  useEffect(() => {
-    if (!currentUser?.id || !isAuthSynced) return;
-    
-    setIsLoading(true);
-    setDbError(null);
+  // v3.16 - Final Sync Shield | MelodIA Lab
+useEffect(() => {
+  // Verificación estricta: solo procedemos si id es un STRING válido
+  const userId = currentUser?.id;
+  
+  if (!userId || typeof userId !== 'string' || !isAuthSynced) {
+    return;
+  }
+  
+  setIsLoading(true);
+  setDbError(null);
 
-    const unsubRehearsals = subscribeToRehearsals(
-      currentUser.id,
-      (data) => {
-        setRehearsals(data);
-        setIsLoading(false);
-      },
-      (error: any) => {
-        setIsLoading(false);
-        if (error.code === 'permission-denied') setDbError(t('error_auth_title'));
-      }
-    );
+  // Suscripción a ensayos pasando explícitamente el string userId
+  const unsubRehearsals = subscribeToRehearsals(
+    userId,
+    (data) => {
+      setRehearsals(data);
+      setIsLoading(false);
+    },
+    (error: any) => {
+      setIsLoading(false);
+      if (error.code === 'permission-denied') setDbError(t('error_auth_title'));
+    }
+  );
+
+  // Suscripción a canciones pasando explícitamente el string userId
+  const unsubSongs = subscribeToSongs(
+    userId, 
+    (data) => setSongs(data), 
+    (err) => console.error("Error songs:", err)
+  );
+
+  return () => {
+    unsubRehearsals();
+    unsubSongs();
+  };
+}, [currentUser?.id, isAuthSynced]); // Eliminamos 't' para evitar re-suscripciones innecesarias
 
     const unsubSongs = subscribeToSongs(currentUser.id, (data) => setSongs(data), () => {});
 
