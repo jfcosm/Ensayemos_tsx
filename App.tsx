@@ -209,12 +209,31 @@ function AppContent() {
           )}
 
           {view === ViewState.CREATE_REHEARSAL && (
-            <CreateRehearsal onSave={async (d) => {
-                const newR: Rehearsal = { id: crypto.randomUUID(), title: d.title, status: 'PROPOSED', options: [{ id: crypto.randomUUID(), date: d.date, time: d.time, location: d.location, voterIds: [currentUser.id] }], setlist: [], createdAt: Date.now() };
-                await saveRehearsal(newR);
-                setView(ViewState.DASHBOARD);
-            }} onCancel={() => setView(ViewState.DASHBOARD)} />
-          )}
+  <CreateRehearsal 
+    onSave={async (d) => {
+      const newR: Rehearsal = { 
+        id: crypto.randomUUID(), 
+        title: d.title, 
+        status: 'PROPOSED', 
+        options: [{ 
+          id: crypto.randomUUID(), 
+          date: d.date, 
+          time: d.time, 
+          location: d.location, 
+          voterIds: [currentUser.id] 
+        }], 
+        setlist: [], 
+        createdAt: Date.now() 
+      };
+      
+      // Guardamos y retornamos la promesa explícitamente
+      const result = await saveRehearsal(newR);
+      setView(ViewState.DASHBOARD);
+      return result; 
+    }} 
+    onCancel={() => setView(ViewState.DASHBOARD)} 
+  />
+)}
 
           {view === ViewState.EDIT_SONG && (
             <SongEditor initialSong={selectedSong} onClose={() => setView(ViewState.SONG_LIBRARY)} onSave={() => setView(ViewState.SONG_LIBRARY)} />
