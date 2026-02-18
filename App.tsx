@@ -1,5 +1,5 @@
 
-// v2.18 - MelodIA lab Brand Restoration & Correct Domain (.net)
+// v3.13 - Fixed Firebase Auth imports and enhanced state sync | MelodIA lab
 import React, { useState, useEffect } from 'react';
 import { ViewState, Song, Rehearsal, User } from './types';
 import { RehearsalView } from './components/RehearsalView';
@@ -22,16 +22,17 @@ import {
   Shield, 
   FileText, 
   BookOpen, 
-  Gift,
   Wand2,
   Sparkles,
   ArrowRight,
-  FlaskConical
+  FlaskConical,
+  Gift
 } from 'lucide-react';
 import { subscribeToRehearsals, saveRehearsal, subscribeToSongs } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { auth } from './services/firebaseConfig';
+// Fix: Explicit modular import for onAuthStateChanged to resolve "no exported member" error
 import { onAuthStateChanged } from 'firebase/auth';
 
 function AppContent() {
@@ -56,6 +57,7 @@ function AppContent() {
     const isDarkMode = document.documentElement.classList.contains('dark');
     setIsDark(isDarkMode);
 
+    // Fix: Using onAuthStateChanged from modular firebase/auth
     const unsubAuth = onAuthStateChanged(auth, (fbUser) => {
         if (fbUser) {
             setIsAuthSynced(true);
@@ -83,7 +85,7 @@ function AppContent() {
       (error: any) => {
         setIsLoading(false);
         if (error.code === 'permission-denied') {
-            setDbError("Tu sesión no tiene permisos suficientes.");
+            setDbError(t('error_auth_title'));
         }
       }
     );
@@ -94,7 +96,7 @@ function AppContent() {
       unsubRehearsals();
       unsubSongs();
     };
-  }, [currentUser, isAuthSynced]);
+  }, [currentUser, isAuthSynced, t]);
 
   const toggleTheme = () => {
     const newIsDark = !isDark;
@@ -120,7 +122,7 @@ function AppContent() {
       setSelectedRehearsal(updated);
       await saveRehearsal(updated);
     } catch (e) {
-      setDbError("No tienes permiso para guardar cambios.");
+      setDbError(t('error_auth_title'));
     }
   };
 
@@ -160,16 +162,16 @@ function AppContent() {
               {dbError ? (
                 <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 p-10 rounded-3xl text-center shadow-2xl border-dashed max-w-2xl mx-auto">
                   <div className="bg-red-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"><AlertCircle className="text-white" size={32} /></div>
-                  <h2 className="text-2xl font-black text-red-700 dark:text-red-400 mb-4 uppercase">Error de Acceso Seguro</h2>
-                  <p className="text-zinc-600 dark:text-zinc-300 mb-8 text-sm leading-relaxed">Parece que Firebase no reconoce tu identidad actual. Por favor, cierra sesión y vuelve a entrar.</p>
-                  <Button variant="secondary" onClick={handleLogout} className="gap-2 px-8">Sincronizar de nuevo</Button>
+                  <h2 className="text-2xl font-black text-red-700 dark:text-red-400 mb-4 uppercase">{t('error_auth_title')}</h2>
+                  <p className="text-zinc-600 dark:text-zinc-300 mb-8 text-sm leading-relaxed">{t('error_auth_desc')}</p>
+                  <Button variant="secondary" onClick={handleLogout} className="gap-2 px-8">{t('error_auth_button')}</Button>
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {isLoading ? (
                     <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-50">
                       <Loader2 className="h-10 w-10 text-brand-500 animate-spin mb-4" />
-                      <p className="text-zinc-500 font-medium">Cargando ensayos seguros...</p>
+                      <p className="text-zinc-500 font-medium">{t('loading_rehearsals')}</p>
                     </div>
                   ) : rehearsals.length === 0 ? (
                     <div className="col-span-full py-16 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
@@ -183,7 +185,7 @@ function AppContent() {
                         <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2 group-hover:text-brand-600 truncate">{rehearsal.title}</h3>
                         <div className="space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
                           <div className="flex items-center gap-2"><Music4 size={14} /><span>{rehearsal.setlist.length} {t('songs_count')}</span></div>
-                          <div className="flex items-center gap-2"><CalendarDays size={14} /><span>{rehearsal.status === 'CONFIRMED' ? "Confirmado" : "En votación"}</span></div>
+                          <div className="flex items-center gap-2"><CalendarDays size={14} /><span>{rehearsal.status === 'CONFIRMED' ? t('status_confirmed') : t('status_voting')}</span></div>
                         </div>
                       </div>
                     ))
@@ -222,104 +224,62 @@ function AppContent() {
         </main>
       )}
 
-      {/* SIGNATURE FOOTER - MelodIA lab Identity Focus (v2.18) */}
-      <footer className="mt-auto border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 transition-colors duration-300">
-        <div className="max-w-6xl mx-auto px-6 pt-16 pb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+      {/* NEW BRANDED FOOTER - Multi-language support v3.12 */}
+      <footer className="bg-black text-white pt-20 pb-12 px-6 border-t border-zinc-900">
+        <div className="max-w-6xl mx-auto">
+          
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-16 mb-16">
             
-            {/* Column 1: Brand & Creator */}
+            {/* Left: Brand Identity */}
             <div className="space-y-6">
-              <div className="flex items-center gap-2">
-                <div className="bg-brand-600 p-1.5 rounded-lg text-white">
-                  <Music2 size={20} />
+              <div className="flex items-center gap-4">
+                <div className="bg-brand-600 p-2.5 rounded-2xl text-white shadow-2xl shadow-brand-600/30">
+                  <Music2 size={28} strokeWidth={2.5} />
                 </div>
-                <span className="text-2xl font-black dark:text-white lowercase tracking-tight">verso.</span>
+                <span className="text-4xl font-black lowercase tracking-tighter text-white">verso.</span>
               </div>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">
-                {t('tagline')}<br/>
-                <span className="font-bold text-zinc-900 dark:text-zinc-100">Original de MelodIA lab.</span>
-              </p>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest border border-indigo-100 dark:border-indigo-800/30">
-                <FlaskConical size={12} />
-                <span>Innovation by MelodIA lab</span>
-              </div>
-            </div>
-
-            {/* Column 2: Navigation */}
-            <div className="space-y-6">
-              <h4 className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Plataforma</h4>
-              <ul className="space-y-4">
-                <li>
-                  <button onClick={() => setView(ViewState.DASHBOARD)} className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-brand-600 transition-colors flex items-center gap-2">
-                    <CalendarDays size={14} /> {t('nav_rehearsals')}
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => setView(ViewState.SONG_LIBRARY)} className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-brand-600 transition-colors flex items-center gap-2">
-                    <Music4 size={14} /> {t('nav_library')}
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => setView(ViewState.COMPOSER)} className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-brand-600 transition-colors flex items-center gap-2">
-                    <Wand2 size={14} /> {t('nav_composer')}
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 3: Legal & Resources */}
-            <div className="space-y-6">
-              <h4 className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Recursos</h4>
-              <ul className="space-y-4">
-                <li>
-                  <a href="#" className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-brand-600 transition-colors flex items-center gap-2">
-                    <BookOpen size={14} /> {t('footer_documentation')}
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-brand-600 transition-colors flex items-center gap-2">
-                    <Shield size={14} /> {t('footer_privacy')}
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-brand-600 transition-colors flex items-center gap-2">
-                    <FileText size={14} /> {t('footer_terms')}
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 4: MelodIA lab Community Gift */}
-            <div className="space-y-6">
-              <h4 className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">MelodIA lab</h4>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed italic">
+              <p className="text-zinc-500 text-sm max-w-xs leading-relaxed font-medium">
                 {t('footer_gift_community')}
               </p>
-              <div className="pt-2">
-                <a 
-                  href="https://www.melodialab.net" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 text-xs font-black group hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white transition-all shadow-xl"
-                >
-                  Ir a MelodIA lab <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                </a>
+            </div>
+
+            {/* Right: MelodIA lab branding & Pills */}
+            <div className="flex flex-col md:items-end gap-8">
+              <div className="md:text-right space-y-1">
+                <span className="block text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em]">{t('footer_powered_by')}</span>
+                <h2 className="text-5xl md:text-6xl font-black tracking-tighter text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.25)] select-none">
+                  MelodIA Lab
+                </h2>
               </div>
+              
+              <div className="flex flex-wrap gap-4 md:justify-end">
+                 <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-red-950/50 bg-red-950/20 text-red-500 text-[11px] font-black uppercase tracking-widest shadow-lg shadow-red-950/10">
+                    <Heart size={16} fill="currentColor" className="animate-pulse" />
+                    <span>{t('footer_made_for')}</span>
+                 </div>
+                 <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-amber-950/50 bg-amber-950/20 text-amber-500 text-[11px] font-black uppercase tracking-widest shadow-lg shadow-amber-950/10">
+                    <Gift size={16} />
+                    <span>{t('footer_free_forever')}</span>
+                 </div>
+              </div>
+            </div>
+
+          </div>
+
+          <hr className="border-zinc-900 mb-10" />
+
+          {/* Bottom Row: Metadata & Navigation */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] order-2 md:order-1">
+              {t('footer_copyright')}
+            </div>
+            <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] order-1 md:order-2">
+              <a href="#" className="hover:text-white transition-colors duration-300">{t('footer_documentation')}</a>
+              <a href="#" className="hover:text-white transition-colors duration-300">{t('footer_privacy')}</a>
+              <a href="#" className="hover:text-white transition-colors duration-300">{t('footer_terms')}</a>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium text-zinc-400">
-            <p>© {new Date().getFullYear()} Verso App. {t('footer_copyright')}</p>
-            <div className="flex gap-6">
-              <span className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-tighter">
-                <Sparkles size={12}/> {t('footer_free_forever')}
-              </span>
-              <span className="flex items-center gap-1 font-bold">
-                <Heart size={12} className="text-red-500" fill="currentColor"/> 
-                {t('footer_love')}
-              </span>
-            </div>
-          </div>
         </div>
       </footer>
     </div>

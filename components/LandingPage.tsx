@@ -1,5 +1,4 @@
-
-// v2.19 - New Auth Flow with Custom Google Button
+// v3.12 - Fully Internationalized Landing Page
 import React, { useState } from 'react';
 import { User } from '../types';
 import { loginWithGoogle } from '../services/authService';
@@ -32,11 +31,10 @@ export const LandingPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLog
       if (user) {
         onLogin(user);
       } else {
-        // Si el usuario simplemente cerró el popup, no mostramos error crítico
         setIsAuthenticating(false);
       }
     } catch (err) {
-      setError("No pudimos conectar con Google. Por favor intenta de nuevo.");
+      setError(t('login_error'));
       setIsAuthenticating(false);
     }
   };
@@ -63,7 +61,6 @@ export const LandingPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLog
     <div className="flex-1 w-full bg-zinc-50 dark:bg-zinc-950 transition-colors duration-500 overflow-x-hidden">
       {/* Hero Section */}
       <section className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 pt-20 pb-32">
-        {/* Background Animation (Equalizer) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-20 dark:opacity-30">
           <div className="flex justify-center items-end gap-4 md:gap-12 h-full w-full max-w-7xl mx-auto px-10">
               <div className="w-16 md:w-32 h-[40%] bg-gradient-to-t from-red-600 to-transparent blur-[60px] rounded-t-full animate-pulse"></div>
@@ -75,7 +72,7 @@ export const LandingPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLog
         <div className="relative z-10 max-w-5xl mx-auto text-center space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-50 dark:bg-brand-900/20 border border-brand-100 dark:border-brand-800 animate-in fade-in slide-in-from-top-4 duration-1000">
              <Zap size={14} className="text-brand-600" />
-             <span className="text-xs font-bold uppercase tracking-widest text-brand-700 dark:text-brand-400">Versión 2.19 Estable</span>
+             <span className="text-xs font-bold uppercase tracking-widest text-brand-700 dark:text-brand-400">VERSION 2.19 STABLE</span>
           </div>
 
           <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] text-zinc-900 dark:text-white transition-all duration-700">
@@ -86,7 +83,7 @@ export const LandingPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLog
           </h1>
           
           <p className="text-lg md:text-xl text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto font-medium">
-            La plataforma definitiva para bandas que quieren dejar de perder el tiempo en chats y empezar a sonar mejor.
+            {t('landing_hero_platform')}
           </p>
 
           <div className="flex flex-col items-center gap-6 pt-4">
@@ -94,7 +91,7 @@ export const LandingPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLog
                {isAuthenticating ? (
                   <div className="flex items-center gap-4 px-10 py-2">
                     <Loader2 className="animate-spin text-brand-500" size={24} />
-                    <span className="text-sm font-bold text-zinc-500">Iniciando sesión segura...</span>
+                    <span className="text-sm font-bold text-zinc-500">Connecting...</span>
                   </div>
                ) : (
                   <button 
@@ -152,13 +149,13 @@ export const LandingPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLog
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
            <div className="space-y-8">
               <h2 className="text-4xl md:text-6xl font-black text-zinc-900 dark:text-white tracking-tighter leading-none">
-                Toda tu música <br/>en el <span className="text-brand-600">bolsillo</span>.
+                {t('landing_hero_pocket').split(' pocket')[0]} <br/> {t('landing_hero_pocket').includes('pocket') ? 'pocket' : ''} <span className="text-brand-600">{t('landing_hero_pocket').split(' ').pop()}</span>.
               </h2>
               <div className="space-y-6">
                  {[
-                   { t: "Gestión de Repertoio", d: "Sube letras y acordes con un click." },
-                   { t: "IA Formatter", d: "Gemini limpia y ordena tus canciones automáticamente." },
-                   { t: "Modo Ensayo", d: "Visualización optimizada para tablets y móviles." }
+                   { t: t('landing_feat_repertoire'), d: t('landing_feat_repertoire_desc') },
+                   { t: t('landing_feat_ia'), d: t('landing_feat_ia_desc') },
+                   { t: t('landing_feat_mode'), d: t('landing_feat_mode_desc') }
                  ].map((item, i) => (
                    <div key={i} className="flex gap-4">
                       <div className="shrink-0 w-6 h-6 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600"><CheckCircle2 size={14}/></div>
@@ -183,7 +180,7 @@ export const LandingPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLog
                     <div className="flex items-center gap-3">
                        <PlayCircle className="text-brand-600" />
                        <div className="text-left">
-                          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Ensayando ahora</p>
+                          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('tour_mockup_playing')}</p>
                           <p className="text-sm font-bold text-zinc-900 dark:text-white">De Música Ligera</p>
                        </div>
                     </div>
@@ -197,16 +194,16 @@ export const LandingPage: React.FC<{ onLogin: (user: User) => void }> = ({ onLog
       <section className="py-24 px-6 bg-brand-600 dark:bg-brand-700 text-white text-center rounded-[4rem] mx-4 mb-20 shadow-2xl overflow-hidden relative">
          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[100px] rounded-full"></div>
          <div className="relative z-10 max-w-3xl mx-auto space-y-8">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tighter">¿Listo para sonar <br/>como nunca?</h2>
-            <p className="text-brand-100 text-lg">Únete a cientos de bandas que ya coordinan sus ensayos con Verso.</p>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter">{t('landing_cta_title')}</h2>
+            <p className="text-brand-100 text-lg">{t('landing_cta_subtitle')}</p>
             <div className="flex flex-col items-center gap-4">
               <button 
                 onClick={() => document.documentElement.scrollTop = 0}
                 className="bg-white text-brand-600 px-10 py-4 rounded-2xl font-black text-xl hover:bg-zinc-100 transition-all flex items-center gap-3 shadow-xl"
               >
-                Empezar gratis <ArrowRight />
+                {t('landing_cta_button')} <ArrowRight />
               </button>
-              <p className="text-brand-200 text-xs font-bold uppercase tracking-widest">No requiere tarjeta de crédito</p>
+              <p className="text-brand-200 text-xs font-bold uppercase tracking-widest">{t('landing_cta_no_card')}</p>
             </div>
          </div>
       </section>
