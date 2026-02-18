@@ -205,11 +205,17 @@ function AppContent() {
             }} onCancel={() => setView(ViewState.DASHBOARD)} />
           )}
 
-          {view === ViewState.EDIT_SONG && (
-            <SongEditor initialSong={selectedSong} onClose={() => setView(ViewState.SONG_LIBRARY)} onSave={async (newSong) => {
-              if (currentUser) await saveSong(newSong, currentUser.id);
-              setView(ViewState.SONG_LIBRARY);
-            }} />
+          {view === ViewState.EDIT_SONG && currentUser && (
+            <SongEditor 
+              initialSong={selectedSong} 
+              userId={currentUser.id} // <-- Pasamos el ID del usuario logueado
+              onClose={() => setView(ViewState.SONG_LIBRARY)} 
+              onSave={async (newSong) => {
+                // Guardamos la canción con el ownerId correcto
+                await saveSong(newSong, currentUser.id);
+                setView(ViewState.SONG_LIBRARY);
+              }} 
+            />
           )}
           
           {view === ViewState.COMPOSER && <SongComposer onSongCreated={() => setView(ViewState.SONG_LIBRARY)} />}

@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Song } from '../types';
 import { Button } from './Button';
 import { Save, Wand2, X, Music2 } from 'lucide-react';
-import { saveSong } from '../services/storageService';
 import { formatSongContent } from '../services/geminiService';
 
 interface SongEditorProps {
   initialSong?: Song | null;
+  userId: string; // <-- Importante: Agregamos el userId aquí
   onClose: () => void;
-  onSave: () => void;
+  onSave: (song: Song) => void; // <-- Ahora onSave envía la canción de vuelta
 }
 
-export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, onClose, onSave }) => {
+export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, userId, onClose, onSave }) => {
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
   const [content, setContent] = useState('');
@@ -30,20 +30,19 @@ export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, onClose, on
     if (!title) return alert('El título es obligatorio');
     
     setIsSaving(true);
+    
     const newSong: Song = {
       id: initialSong?.id || crypto.randomUUID(),
       title,
-      artist,
+      artist: artist || 'Artista Desconocido',
       content
     };
     
-    // FLUJO DE RESPUESTA INMEDIATA:
-    // Disparamos el guardado pero NO esperamos el await si la red está lenta
-    saveSong(newSong); 
+    // Enviamos la canción al padre (App.tsx) para que él la guarde con el userId
+    onSave(newSong);
     
-    // Limpiamos estados y cerramos la vista de inmediato
+    // Respuesta inmediata para evitar el spinner infinito
     setIsSaving(false);
-    onSave(); 
   };
 
   const handleAIFormat = async () => {
@@ -56,7 +55,6 @@ export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, onClose, on
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-2xl">
-      {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 backdrop-blur-sm">
         <h2 className="text-xl font-bold flex items-center gap-2 text-zinc-900 dark:text-white">
           <Music2 className="text-brand-500 dark:text-brand-400" />
@@ -73,7 +71,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, onClose, on
               type="text" 
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-2 text-zinc-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+              className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-2 text-zinc-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none"
               placeholder="Ej: De Música Ligera"
             />
           </div>
@@ -83,7 +81,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, onClose, on
               type="text" 
               value={artist}
               onChange={(e) => setArtist(e.target.value)}
-              className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-2 text-zinc-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+              className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-2 text-zinc-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none"
               placeholder="Ej: Soda Stereo"
             />
           </div>
@@ -98,7 +96,7 @@ export const SongEditor: React.FC<SongEditorProps> = ({ initialSong, onClose, on
               className="text-xs flex items-center gap-1.5 text-brand-600 dark:text-brand-300 hover:text-brand-500 transition-colors disabled:opacity-50"
             >
               <Wand2 size={14} />
-              {isFormatting ? 'Formateando con IA...' : 'Limpiar y Formatear (IA)'}
+              {isFormatting ? 'Formateando...' : 'Limpiar y Formatear (IA)'}
             </button>
           </div>
           <textarea 
