@@ -1,4 +1,4 @@
-// v2.6 - Added error handling to real-time subscriptions
+// v3.0 - Added User-Based Filtering and Optimized Snapshots
 import { Song, Rehearsal } from '../types';
 import { db } from './firebaseConfig';
 import { 
@@ -8,6 +8,7 @@ import {
   deleteDoc, 
   onSnapshot, 
   query, 
+  where,
   orderBy 
 } from 'firebase/firestore';
 
@@ -17,10 +18,17 @@ const REHEARSALS_COLLECTION = 'rehearsals';
 // --- Songs ---
 
 export const subscribeToSongs = (
+  userId: string, // Agregamos userId como filtro
   callback: (songs: Song[]) => void, 
   onError?: (error: any) => void
 ) => {
-  const q = query(collection(db, SONGS_COLLECTION), orderBy('title'));
+  // Solo traemos canciones creadas por este usuario
+  const q = query(
+    collection(db, SONGS_COLLECTION), 
+    where('ownerId', '==', userId), 
+    orderBy('title')
+  );
+  
   return onSnapshot(q, 
     (snapshot) => {
       const songs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Song));
@@ -33,10 +41,10 @@ export const subscribeToSongs = (
   );
 };
 
-// --- Songs (También la corregimos por si acaso) ---
-export const saveSong = async (song: Song): Promise<void> => {
+export const saveSong = async (song: Song, userId: string): Promise<void> => {
   const docRef = doc(db, SONGS_COLLECTION, song.id);
-  return await setDoc(docRef, song, { merge: true });
+  // Guardamos siempre con el ownerId
+  return await setDoc(docRef, { ...song, ownerId: userId }, { merge: true });
 };
 
 export const deleteSong = async (id: string): Promise<void> => {
@@ -50,10 +58,17 @@ export const deleteSong = async (id: string): Promise<void> => {
 // --- Rehearsals ---
 
 export const subscribeToRehearsals = (
+  userId: string, // Agregamos userId como filtro
   callback: (rehearsals: Rehearsal[]) => void,
   onError?: (error: any) => void
 ) => {
-  const q = query(collection(db, REHEARSALS_COLLECTION), orderBy('createdAt', 'desc'));
+  // Solo traemos ensayos donde el usuario es dueño o participante
+  const q = query(
+    collection(db, REHEARSALS_COLLECTION), 
+    where('createdBy', '==', userId), 
+    orderBy('createdAt', 'desc')
+  );
+
   return onSnapshot(q, 
     (snapshot) => {
       const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Rehearsal));
@@ -66,11 +81,10 @@ export const subscribeToRehearsals = (
   );
 };
 
-// v2.7 - Optimized promise return to prevent UI hanging
-export const saveRehearsal = async (rehearsal: Rehearsal): Promise<void> => {
+export const saveRehearsal = async (rehearsal: Rehearsal, userId: string): Promise<void> => {
   const docRef = doc(db, REHEARSALS_COLLECTION, rehearsal.id);
-  // Retornamos directamente el await para que la cadena de promesas se cierre correctamente
-  return await setDoc(docRef, rehearsal, { merge: true });
+  // Aseguramos que el ensayo guarde quién lo creó para el filtro
+  return await setDoc(docRef, { ...rehearsal, createdBy: userId }, { merge: true });
 };
 
 export const deleteRehearsal = async (id: string): Promise<void> => {

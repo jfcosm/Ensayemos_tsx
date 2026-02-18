@@ -1,8 +1,6 @@
-
-// v3.10 - Standardized Firebase v9 Modular Imports
+// v3.11 - Added Offline Persistence for Instant Loading
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-// Fix: Corrected import for getAuth to resolve "no exported member" error in modular environments
+import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -15,20 +13,18 @@ const firebaseConfig = {
   measurementId: "G-FRLJ7XSEB6"
 };
 
-// Singleton pattern: prevent double initialization and ensure version consistency
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Exports linked to the correct app instance
 export const db = getFirestore(app);
-// Fix: Re-exporting auth initialized via getAuth named export
 export const auth = getAuth(app);
 
-
-// Al final del archivo firebaseConfig.ts
-import { initializeFirestore, terminate } from 'firebase/firestore';
-
-// Opcional: Esto ayuda a que Firestore no se quede "colgado" esperando 
-// conexiones persistentes en entornos de desarrollo limitados como AI Studio.
-// Si notas lentitud extrema, añade esta línea después de 'db':
-// (Solo actívalo si el problema de lentitud persiste tras el cambio de CreateRehearsal)
-// enableIndexedDbPersistence(db).catch(() => {});
+// Habilitar persistencia de datos local
+enableIndexedDbPersistence(db).catch((err) => {
+    if (err.code === 'failed-precondition') {
+        // Probablemente múltiples pestañas abiertas
+        console.warn("Persistencia de Firestore deshabilitada (múltiples pestañas).");
+    } else if (err.code === 'unimplemented') {
+        // El navegador no lo soporta
+        console.warn("El navegador no soporta persistencia de Firestore.");
+    }
+});
