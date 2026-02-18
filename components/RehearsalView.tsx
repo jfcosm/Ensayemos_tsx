@@ -38,13 +38,19 @@ export const RehearsalView: React.FC<RehearsalViewProps> = ({ rehearsal, current
   const [expandedSongId, setExpandedSongId] = useState<string | null>(null);
   const [editingSongId, setEditingSongId] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Subscribe to songs instead of one-time fetch
-    const unsubscribe = subscribeToSongs((songs) => {
-        setAvailableSongs(songs);
-    });
-    return () => unsubscribe();
-  }, []);
+// Busca el useEffect al inicio del componente RehearsalView y reemplázalo:
+useEffect(() => {
+  if (!currentUser?.id) return;
+
+  // Pasamos explícitamente el ID del usuario como primer argumento
+  const unsubscribe = subscribeToSongs(currentUser.id, (songs) => {
+      setAvailableSongs(songs);
+  }, (error) => {
+      console.error("Error cargando canciones en vista de ensayo:", error);
+  });
+  
+  return () => unsubscribe();
+}, [currentUser?.id]); // Dependencia del ID para mayor seguridad
 
   const handleToggleVote = async (optionId: string) => {
     const updatedOptions = rehearsal.options.map(opt => {
