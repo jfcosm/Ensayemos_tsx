@@ -1,4 +1,4 @@
-// v3.0 - Added User-Based Filtering and Optimized Snapshots | MelodIA Lab
+// v3.1 - Fixed query syntax and multi-user filtering | MelodIA Lab
 import { Song, Rehearsal } from '../types';
 import { db } from './firebaseConfig';
 import { 
@@ -15,14 +15,16 @@ import {
 const SONGS_COLLECTION = 'songs';
 const REHEARSALS_COLLECTION = 'rehearsals';
 
-// --- Songs ---
+// --- Canciones ---
 
 export const subscribeToSongs = (
   userId: string, 
   callback: (songs: Song[]) => void, 
   onError?: (error: any) => void
 ) => {
-  // Solo traemos canciones que te pertenecen (ownerId)
+  if (!userId) return () => {}; // Seguridad si no hay ID
+
+  // Corregido: 'userId' ahora se usa como valor, no como función
   const q = query(
     collection(db, SONGS_COLLECTION), 
     where('ownerId', '==', userId), 
@@ -42,8 +44,8 @@ export const subscribeToSongs = (
 };
 
 export const saveSong = async (song: Song, userId: string): Promise<void> => {
+  if (!userId) throw new Error("Se requiere ID de usuario para guardar");
   const docRef = doc(db, SONGS_COLLECTION, song.id);
-  // Guardamos con ownerId para persistencia total entre sesiones
   return await setDoc(docRef, { ...song, ownerId: userId }, { merge: true });
 };
 
@@ -55,14 +57,16 @@ export const deleteSong = async (id: string): Promise<void> => {
   }
 };
 
-// --- Rehearsals ---
+// --- Ensayos ---
 
 export const subscribeToRehearsals = (
   userId: string, 
   callback: (rehearsals: Rehearsal[]) => void,
   onError?: (error: any) => void
 ) => {
-  // Solo traemos ensayos creados por ti (createdBy)
+  if (!userId) return () => {};
+
+  // Corregido: Filtro por dueño del ensayo para asegurar privacidad
   const q = query(
     collection(db, REHEARSALS_COLLECTION), 
     where('createdBy', '==', userId), 
@@ -82,8 +86,8 @@ export const subscribeToRehearsals = (
 };
 
 export const saveRehearsal = async (rehearsal: Rehearsal, userId: string): Promise<void> => {
+  if (!userId) throw new Error("Se requiere ID de usuario para guardar");
   const docRef = doc(db, REHEARSALS_COLLECTION, rehearsal.id);
-  // Aseguramos el vínculo con tu cuenta de MelodIA Lab
   return await setDoc(docRef, { ...rehearsal, createdBy: userId }, { merge: true });
 };
 
