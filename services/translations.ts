@@ -23,7 +23,8 @@ type TranslationKey =
   | 'landing_hero_platform' | 'landing_hero_pocket' | 'landing_feat_repertoire' | 'landing_feat_repertoire_desc'
   | 'landing_feat_ia' | 'landing_feat_ia_desc' | 'landing_feat_mode' | 'landing_feat_mode_desc'
   | 'landing_cta_title' | 'landing_cta_subtitle' | 'landing_cta_button' | 'landing_cta_no_card'
-  | 'error_auth_title' | 'error_auth_desc' | 'error_auth_button' | 'loading_rehearsals';
+  | 'error_auth_title' | 'error_auth_desc' | 'error_auth_button' | 'loading_rehearsals'
+  | 'tab_details' | 'tab_setlist' | 'btn_invite' | 'btn_copied' | 'section_options';
 
 export const translations: Record<Language, Record<TranslationKey, string>> = {
   es: {
@@ -122,7 +123,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "Error de Acceso Seguro",
     error_auth_desc: "Parece que Firebase no reconoce tu identidad actual. Por favor, cierra sesión y vuelve a entrar.",
     error_auth_button: "Sincronizar de nuevo",
-    loading_rehearsals: "Cargando ensayos seguros..."
+    loading_rehearsals: "Cargando ensayos seguros...",
+    tab_details: "Detalles",
+    tab_setlist: "Setlist",
+    btn_invite: "Invitar",
+    btn_copied: "¡Copiado!",
+    section_options: "Opciones de Fecha y Lugar"
   },
   en: {
     app_name: "Verso",
@@ -220,7 +226,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "Secure Access Error",
     error_auth_desc: "Firebase doesn't recognize your identity. Please log out and back in.",
     error_auth_button: "Sync again",
-    loading_rehearsals: "Loading secure rehearsals..."
+    loading_rehearsals: "Loading secure rehearsals...",
+    tab_details: "Details",
+    tab_setlist: "Setlist",
+    btn_invite: "Invite",
+    btn_copied: "Copied!",
+    section_options: "Date and Location Options"
   },
   it: {
     app_name: "Verso",
@@ -318,7 +329,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "Errore di Accesso Sicuro",
     error_auth_desc: "Sembra che Firebase non riconosca la tua identità attuale. Per favore, chiudi la sessione e rientra.",
     error_auth_button: "Sincronizza di nuovo",
-    loading_rehearsals: "Caricamento prove sicure..."
+    loading_rehearsals: "Caricamento prove sicure...",
+    tab_details: "Dettagli",
+    tab_setlist: "Setlist",
+    btn_invite: "Invita",
+    btn_copied: "Copiato!",
+    section_options: "Opzioni di Data e Luogo"
   },
   fr: {
     app_name: "Verso",
@@ -416,7 +432,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "Erreur d'Accès Sécurisé",
     error_auth_desc: "Firebase ne reconnaît pas votre identité. Veuillez vous déconnecter et vous reconnecter.",
     error_auth_button: "Synchroniser à nouveau",
-    loading_rehearsals: "Chargement des répétitions..."
+    loading_rehearsals: "Chargement des répétitions...",
+    tab_details: "Détails",
+    tab_setlist: "Setlist",
+    btn_invite: "Inviter",
+    btn_copied: "Copié !",
+    section_options: "Options de Date et Lieu"
   },
   de: {
     app_name: "Verso",
@@ -514,7 +535,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "Sicherheitszugriffsfehler",
     error_auth_desc: "Firebase erkennt Ihre Identität nicht. Bitte melden Sie sich ab und wieder an.",
     error_auth_button: "Erneut synchronisieren",
-    loading_rehearsals: "Sichere Proben werden geladen..."
+    loading_rehearsals: "Sichere Proben werden geladen...",
+    tab_details: "Details",
+    tab_setlist: "Setlist",
+    btn_invite: "Einladen",
+    btn_copied: "Kopiert!",
+    section_options: "Datum und Ort Optionen"
   },
   hi: {
     app_name: "Verso",
@@ -612,7 +638,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "सुरक्षित पहुँच त्रुटि",
     error_auth_desc: "ऐसा लगता है कि Firebase आपकी वर्तमान पहचान को नहीं पहचानता है। कृपया लॉग आउट करें और वापस आएं।",
     error_auth_button: "फिर से सिंक करें",
-    loading_rehearsals: "सुरक्षित रिहर्सल लोड हो रही हैं..."
+    loading_rehearsals: "सुरक्षित रिहर्सल लोड हो रही हैं...",
+    tab_details: "विवरण",
+    tab_setlist: "सेटलिस्ट",
+    btn_invite: "आमंत्रित करें",
+    btn_copied: "कॉपीड!",
+    section_options: "दिनांक और स्थान विकल्प"
   },
   ja: {
     app_name: "Verso",
@@ -710,7 +741,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "安全なアクセスエラー",
     error_auth_desc: "Firebaseが現在の本人確認を認識できません。一度ログアウトしてから再度ログインしてください。",
     error_auth_button: "再同期する",
-    loading_rehearsals: "安全なリハーサルを読み込み中..."
+    loading_rehearsals: "安全なリハーサルを読み込み中...",
+    tab_details: "詳細",
+    tab_setlist: "セットリスト",
+    btn_invite: "招待する",
+    btn_copied: "コピーしました！",
+    section_options: "日時と場所のオプション"
   },
   ko: {
     app_name: "Verso",
@@ -808,7 +844,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "안전한 액세스 오류",
     error_auth_desc: "Firebase가 현재 신원을 인식하지 못하는 것 같습니다. 로그아웃 후 다시 로그인해 주세요.",
     error_auth_button: "다시 동기화",
-    loading_rehearsals: "안전한 리허설 로드 중..."
+    loading_rehearsals: "안전한 리허설 로드 중...",
+    tab_details: "상세 내용",
+    tab_setlist: "세트리스트",
+    btn_invite: "초대",
+    btn_copied: "복사됨!",
+    section_options: "날짜 및 장소 옵션"
   },
   zh: {
     app_name: "Verso",
@@ -906,7 +947,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "安全访问错误",
     error_auth_desc: "Firebase 似乎无法识别你当前的身份。请退出并重新登录。",
     error_auth_button: "重新同步",
-    loading_rehearsals: "正在加载安全排练..."
+    loading_rehearsals: "正在加载安全排练...",
+    tab_details: "Details",
+    tab_setlist: "Setlist",
+    btn_invite: "Invite",
+    btn_copied: "Copied!",
+    section_options: "Date and Location Options"
   },
   gu: {
     app_name: "Verso",
@@ -1004,7 +1050,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "સુરક્ષિત એક્સેસ ભૂલ",
     error_auth_desc: "લાગે છે કે Firebase તમારી વર્તમાન ઓળખને ઓળખતું નથી. કૃપા કરીને લોગ આઉટ કરો અને ફરી આવો.",
     error_auth_button: "ફરીથી સિંક કરો",
-    loading_rehearsals: "સુરક્ષિત રિહર્સલ્સ લોડ થઈ રહ્યાં છે..."
+    loading_rehearsals: "સુરક્ષિત રિહર્સલ્સ લોડ થઈ રહ્યાં છે...",
+    tab_details: "Details",
+    tab_setlist: "Setlist",
+    btn_invite: "Invite",
+    btn_copied: "Copied!",
+    section_options: "Date and Location Options"
   },
   ta: {
     app_name: "Verso",
@@ -1102,7 +1153,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "பாதுகாப்பான அணுகல் பிழை",
     error_auth_desc: "Firebase உங்கள் தற்போதைய அடையாளத்தை அடையாளம் காணவில்லை எனத் தெரிகிறது. தயவுசெய்து வெளியேறி மீண்டும் உள்நுழையவும்.",
     error_auth_button: "மீண்டும் ஒத்திசைக்கவும்",
-    loading_rehearsals: "பாதுகாப்பான ஒத்திகைகள் ஏற்றப்படுகின்றன..."
+    loading_rehearsals: "பாதுகாப்பான ஒத்திகைகள் ஏற்றப்படுகின்றன...",
+    tab_details: "Details",
+    tab_setlist: "Setlist",
+    btn_invite: "Invite",
+    btn_copied: "Copied!",
+    section_options: "Date and Location Options"
   },
   uk: {
     app_name: "Verso",
@@ -1200,7 +1256,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "Помилка безпечного доступу",
     error_auth_desc: "Здається, Firebase не розпізнає вашу поточну особу. Будь ласка, вийдіть і увійдіть знову.",
     error_auth_button: "Синхронізувати знову",
-    loading_rehearsals: "Завантаження безпечних репетицій..."
+    loading_rehearsals: "Завантаження безпечних репетицій...",
+    tab_details: "Details",
+    tab_setlist: "Setlist",
+    btn_invite: "Invite",
+    btn_copied: "Copied!",
+    section_options: "Date and Location Options"
   },
   sv: {
     app_name: "Verso",
@@ -1298,7 +1359,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "Säkerhetsåtkomstfel",
     error_auth_desc: "Det verkar som att Firebase inte känner igen din identitet. Logga ut och in igen.",
     error_auth_button: "Synka igen",
-    loading_rehearsals: "Laddar säkra rep..."
+    loading_rehearsals: "Laddar säkra rep...",
+    tab_details: "Details",
+    tab_setlist: "Setlist",
+    btn_invite: "Invite",
+    btn_copied: "Copied!",
+    section_options: "Date and Location Options"
   },
   fi: {
     app_name: "Verso",
@@ -1396,7 +1462,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "Turvallisen pääsyn virhe",
     error_auth_desc: "Firebase ei tunnista henkilöllisyyttäsi. Kirjaudu ulos ja takaisin sisään.",
     error_auth_button: "Synkronoi uudelleen",
-    loading_rehearsals: "Ladataan treenejä..."
+    loading_rehearsals: "Ladataan treenejä...",
+    tab_details: "Details",
+    tab_setlist: "Setlist",
+    btn_invite: "Invite",
+    btn_copied: "Copied!",
+    section_options: "Date and Location Options"
   },
   nl: {
     app_name: "Verso",
@@ -1494,7 +1565,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "Fout bij Veilige Toegang",
     error_auth_desc: "Firebase herkent uw identiteit niet. Log uit en log opnieuw in.",
     error_auth_button: "Opnieuw synchroniseren",
-    loading_rehearsals: "Veilige repetities laden..."
+    loading_rehearsals: "Veilige repetities laden...",
+    tab_details: "Details",
+    tab_setlist: "Setlist",
+    btn_invite: "Invite",
+    btn_copied: "Copied!",
+    section_options: "Date and Location Options"
   },
   is: {
     app_name: "Verso",
@@ -1592,7 +1668,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "Öruggur aðgangsvilla",
     error_auth_desc: "Firebase þekkir ekki auðkenni þitt. Vinsamlegast skráðu þig út og aftur inn.",
     error_auth_button: "Samstilla aftur",
-    loading_rehearsals: "Hleður öruggum æfingum..."
+    loading_rehearsals: "Hleður öruggum æfingum...",
+    tab_details: "Details",
+    tab_setlist: "Setlist",
+    btn_invite: "Invite",
+    btn_copied: "Copied!",
+    section_options: "Date and Location Options"
   },
   arn: {
     app_name: "Verso",
@@ -1690,7 +1771,12 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "Weda Konun Securo",
     error_auth_desc: "Firebase kimlai tami küpan. Tripan ka konun wiño.",
     error_auth_button: "Wiño konun",
-    loading_rehearsals: "Kintun pepiluwün..."
+    loading_rehearsals: "Kintun pepiluwün...",
+    tab_details: "Details",
+    tab_setlist: "Setlist",
+    btn_invite: "Invite",
+    btn_copied: "Copied!",
+    section_options: "Date and Location Options"
   },
   pl: {
     app_name: "Verso",
@@ -1788,6 +1874,11 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_title: "Błąd Bezpiecznego Dostępu",
     error_auth_desc: "Firebase nie rozpoznaje Twojej tożsamości. Wyloguj się i zaloguj ponownie.",
     error_auth_button: "Zsynchronizuj ponownie",
-    loading_rehearsals: "Ładowanie bezpiecznych prób..."
+    loading_rehearsals: "Ładowanie bezpiecznych prób...",
+    tab_details: "Details",
+    tab_setlist: "Setlist",
+    btn_invite: "Invite",
+    btn_copied: "Copied!",
+    section_options: "Date and Location Options"
   }
 };

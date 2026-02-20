@@ -10,6 +10,7 @@ import { SongLibrary } from './components/SongLibrary';
 import { Navbar } from './components/Navbar';
 import { Button } from './components/Button';
 import { SongComposer } from './components/SongComposer';
+import { Footer } from './components/Footer';
 import { Plus, Music4, CalendarDays, Loader2, AlertCircle, Heart, Music2 } from 'lucide-react';
 import { subscribeToRehearsals, saveRehearsal, subscribeToSongs, saveSong } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
@@ -24,7 +25,7 @@ function AppContent() {
   const [selectedRehearsal, setSelectedRehearsal] = useState<Rehearsal | null>(null);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [activePlaylist, setActivePlaylist] = useState<Song[]>([]);
-  
+
   const [rehearsals, setRehearsals] = useState<Rehearsal[]>([]);
   const [songs, setSongs] = useState<Song[]>([]);
   const [isDark, setIsDark] = useState(true);
@@ -41,12 +42,12 @@ function AppContent() {
     setIsDark(isDarkMode);
 
     const unsubAuth = onAuthStateChanged(auth, (fbUser) => {
-        if (fbUser) {
-            setIsAuthSynced(true);
-        } else {
-            setIsAuthSynced(false);
-            if (!localUser) setIsLoading(false);
-        }
+      if (fbUser) {
+        setIsAuthSynced(true);
+      } else {
+        setIsAuthSynced(false);
+        if (!localUser) setIsLoading(false);
+      }
     });
 
     return () => unsubAuth();
@@ -55,12 +56,12 @@ function AppContent() {
   // 2. Suscripción a Datos (Blindada contra el error "Unsupported field value: a function")
   useEffect(() => {
     const userId = currentUser?.id;
-    
+
     // Verificación estricta para evitar que Firestore reciba datos inválidos
     if (!userId || typeof userId !== 'string' || !isAuthSynced) {
       return;
     }
-    
+
     setIsLoading(true);
     setDbError(null);
 
@@ -77,8 +78,8 @@ function AppContent() {
     );
 
     const unsubSongs = subscribeToSongs(
-      userId, 
-      (data) => setSongs(data), 
+      userId,
+      (data) => setSongs(data),
       (err) => console.error("Error songs:", err)
     );
 
@@ -86,7 +87,7 @@ function AppContent() {
       unsubRehearsals();
       unsubSongs();
     };
-  }, [currentUser?.id, isAuthSynced]); 
+  }, [currentUser?.id, isAuthSynced]);
 
   const toggleTheme = () => {
     const newIsDark = !isDark;
@@ -119,11 +120,11 @@ function AppContent() {
 
   if (view === ViewState.PLAY_MODE && selectedSong) {
     return (
-      <ChordViewer 
-        currentSong={selectedSong} 
-        playlist={activePlaylist} 
-        onSongChange={(id) => setSelectedSong(activePlaylist.find(s => s.id === id) || null)} 
-        onClose={() => setView(ViewState.REHEARSAL_DETAIL)} 
+      <ChordViewer
+        currentSong={selectedSong}
+        playlist={activePlaylist}
+        onSongChange={(id) => setSelectedSong(activePlaylist.find(s => s.id === id) || null)}
+        onClose={() => setView(ViewState.REHEARSAL_DETAIL)}
       />
     );
   }
@@ -191,47 +192,48 @@ function AppContent() {
           )}
 
           {view === ViewState.REHEARSAL_DETAIL && selectedRehearsal && (
-            <RehearsalView currentUser={currentUser!} rehearsal={selectedRehearsal} onBack={() => setView(ViewState.DASHBOARD)} onUpdate={handleUpdateRehearsal} onPlaySong={(id) => { 
-                const playlist = selectedRehearsal.setlist.map(sid => songs.find(s => s.id === sid)).filter(Boolean) as Song[];
-                setActivePlaylist(playlist);
-                setSelectedSong(playlist.find(p => p.id === id) || null);
-                setView(ViewState.PLAY_MODE);
+            <RehearsalView currentUser={currentUser!} rehearsal={selectedRehearsal} onBack={() => setView(ViewState.DASHBOARD)} onUpdate={handleUpdateRehearsal} onPlaySong={(id) => {
+              const playlist = selectedRehearsal.setlist.map(sid => songs.find(s => s.id === sid)).filter(Boolean) as Song[];
+              setActivePlaylist(playlist);
+              setSelectedSong(playlist.find(p => p.id === id) || null);
+              setView(ViewState.PLAY_MODE);
             }} />
           )}
 
           {view === ViewState.CREATE_REHEARSAL && (
             <CreateRehearsal onSave={async (d) => {
-                if (!currentUser?.id) return;
-                const newR: Rehearsal = { 
-                  id: crypto.randomUUID(), 
-                  title: d.title, 
-                  status: 'PROPOSED', 
-                  options: [{ id: crypto.randomUUID(), date: d.date, time: d.time, location: d.location, voterIds: [currentUser.id] }], 
-                  setlist: [], 
-                  createdAt: Date.now() 
-                };
-                await saveRehearsal(newR, currentUser.id);
-                setView(ViewState.DASHBOARD);
+              if (!currentUser?.id) return;
+              const newR: Rehearsal = {
+                id: crypto.randomUUID(),
+                title: d.title,
+                status: 'PROPOSED',
+                options: [{ id: crypto.randomUUID(), date: d.date, time: d.time, location: d.location, voterIds: [currentUser.id] }],
+                setlist: [],
+                createdAt: Date.now()
+              };
+              await saveRehearsal(newR, currentUser.id);
+              setView(ViewState.DASHBOARD);
             }} onCancel={() => setView(ViewState.DASHBOARD)} />
           )}
 
           {view === ViewState.EDIT_SONG && currentUser && (
-            <SongEditor 
-              initialSong={selectedSong} 
-              userId={currentUser.id} 
-              onClose={() => setView(ViewState.SONG_LIBRARY)} 
+            <SongEditor
+              initialSong={selectedSong}
+              userId={currentUser.id}
+              onClose={() => setView(ViewState.SONG_LIBRARY)}
               onSave={async (newSong) => {
                 await saveSong(newSong, currentUser.id);
                 setView(ViewState.SONG_LIBRARY);
-              }} 
+              }}
             />
           )}
-          
+
           {view === ViewState.COMPOSER && <SongComposer onSongCreated={() => setView(ViewState.SONG_LIBRARY)} />}
         </main>
       )}
+      <Footer />
     </div>
   );
 }
 
-export default function App() { return ( <LanguageProvider><AppContent /></LanguageProvider> ); }
+export default function App() { return (<LanguageProvider><AppContent /></LanguageProvider>); }

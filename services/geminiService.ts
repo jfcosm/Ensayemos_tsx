@@ -6,14 +6,14 @@ import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
  * Uses Gemini to format raw pasted lyrics/chords into a clean, standard format.
  */
 export const formatSongContent = async (rawText: string): Promise<string> => {
-  try {
-    // Directly use process.env.API_KEY for initialization as per guidelines.
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    try {
+        // Directly use process.env.API_KEY for initialization as per guidelines.
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-    // Use 'gemini-3-flash-preview' for basic text formatting tasks.
-    const response: GenerateContentResponse = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: `
+        // Use 'gemini-3-flash-preview' for basic text formatting tasks.
+        const response: GenerateContentResponse = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `
         You are a professional music editor. I will provide you with raw text that contains lyrics and chords, likely copied from a website. 
         Please format this text to be clean and readable for a musician.
         
@@ -27,15 +27,15 @@ export const formatSongContent = async (rawText: string): Promise<string> => {
         Raw Text:
         ${rawText}
       `,
-    });
+        });
 
-    // Access .text property directly (not a method).
-    return response.text || rawText;
-  } catch (error) {
-    console.error("Error formatting song with Gemini:", error);
-    // Fallback to original text if API fails.
-    return rawText;
-  }
+        // Access .text property directly (not a method).
+        return response.text || rawText;
+    } catch (error) {
+        console.error("Error formatting song with Gemini:", error);
+        // Fallback to original text if API fails.
+        return rawText;
+    }
 };
 
 /**
@@ -46,7 +46,7 @@ export const suggestSetlistIdeas = async (genre: string): Promise<string[]> => {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         // Use 'gemini-3-flash-preview' for simple list generation.
         const response: GenerateContentResponse = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-2.5-flash',
             contents: `Suggest 5 popular songs for a band playing ${genre} music. Return only the song titles separated by commas.`,
         });
         const text = response.text || "";
@@ -71,7 +71,7 @@ export const generateSongFromParams = async (params: {
 }): Promise<string> => {
     try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        
+
         // Map language code to full language name for the prompt.
         const langMap: Record<string, string> = {
             'es': 'Spanish',
@@ -119,7 +119,7 @@ export const generateSongFromParams = async (params: {
 
         // Use 'gemini-3-pro-preview' for complex creative writing tasks.
         const response: GenerateContentResponse = await ai.models.generateContent({
-            model: 'gemini-3-pro-preview',
+            model: 'gemini-2.5-pro',
             contents: prompt,
         });
 
