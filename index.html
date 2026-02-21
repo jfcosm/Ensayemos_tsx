@@ -1,67 +1,41 @@
 <!DOCTYPE html>
 <html lang="es" class="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Verso | MelodIA lab</title>
-    <script>
-      try {
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.classList.add('dark')
-        } else {
-          document.documentElement.classList.remove('dark')
-        }
-      } catch (_) {}
 
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              brand: {
-                50: '#fef2f2',
-                100: '#fee2e2',
-                200: '#fecaca',
-                300: '#fca5a5',
-                400: '#f87171',
-                500: '#ef4444',
-                600: '#dc2626',
-                700: '#b91c1c',
-                800: '#991b1b',
-                900: '#7f1d1d',
-              }
-            }
-          }
-        }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verso | MelodIA lab</title>
+  <script>
+    try {
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
       }
-    </script>
-    <style>
-      .chord-scroll::-webkit-scrollbar { width: 8px; }
-      .chord-scroll::-webkit-scrollbar-track { background: transparent; }
-      .chord-scroll::-webkit-scrollbar-thumb { background: #991b1b; border-radius: 4px; }
-      html:not(.dark) .chord-scroll::-webkit-scrollbar-thumb { background: #ef4444; }
-      body { margin: 0; padding: 0; min-height: 100vh; background-color: #09090b; }
-    </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react/": "https://esm.sh/react@18.2.0/",
-    "react-dom": "https://esm.sh/react-dom@18.2.0",
-    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
-    "lucide-react": "https://esm.sh/lucide-react@0.344.0?external=react",
-    "@google/genai": "https://esm.sh/@google/genai@1.30.0",
-    "firebase/app": "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js",
-    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js",
-    "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js",
-    "firebase/": "https://esm.sh/firebase@^12.9.0/"
-  }
-}
-</script>
+    } catch (_) { }
+
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+          "react/": "https://esm.sh/react@18.2.0/",
+            "react-dom": "https://esm.sh/react-dom@18.2.0",
+              "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+                "lucide-react": "https://esm.sh/lucide-react@0.344.0?external=react",
+                  "@google/genai": "https://esm.sh/@google/genai@1.30.0",
+                    "firebase/app": "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js",
+                      "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js",
+                        "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js",
+                          "firebase/": "https://esm.sh/firebase@^12.9.0/"
+      }
+    }
+  </script>
   <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 antialiased selection:bg-brand-500 selection:text-white transition-colors duration-300">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+
+<body
+  class="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 antialiased selection:bg-brand-500 selection:text-white transition-colors duration-300">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>
