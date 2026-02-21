@@ -1,5 +1,5 @@
 // v3.1 - Fixed query syntax and multi-user filtering | MelodIA Lab
-import { Song, Rehearsal } from '../types';
+import { Song, Rehearsal, Setlist } from '../types';
 import { db } from './firebaseConfig';
 import {
   collection,
@@ -14,6 +14,7 @@ import {
 
 const SONGS_COLLECTION = 'songs';
 const REHEARSALS_COLLECTION = 'rehearsals';
+const SETLISTS_COLLECTION = 'setlists';
 
 // --- Canciones ---
 
@@ -56,6 +57,47 @@ export const deleteSong = async (id: string): Promise<void> => {
     await deleteDoc(doc(db, SONGS_COLLECTION, id));
   } catch (error) {
     console.error("Error deleting song:", error);
+  }
+};
+
+// --- Setlists ---
+
+export const subscribeToSetlists = (
+  userId: string,
+  callback: (setlists: Setlist[]) => void,
+  onError?: (error: any) => void
+) => {
+  if (!userId) return () => { };
+
+  const q = query(
+    collection(db, SETLISTS_COLLECTION),
+    where('ownerId', '==', userId)
+  );
+
+  return onSnapshot(q,
+    (snapshot) => {
+      let setlists = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Setlist));
+      setlists.sort((a, b) => b.createdAt - a.createdAt); // Client sorting by date
+      callback(setlists);
+    },
+    (error) => {
+      console.error("Firestore Setlists Error:", error);
+      if (onError) onError(error);
+    }
+  );
+};
+
+export const saveSetlist = async (setlist: Setlist, userId: string): Promise<void> => {
+  if (!userId) throw new Error("Se requiere ID de usuario para guardar");
+  const docRef = doc(db, SETLISTS_COLLECTION, setlist.id);
+  return await setDoc(docRef, { ...setlist, ownerId: userId }, { merge: true });
+};
+
+export const deleteSetlist = async (id: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, SETLISTS_COLLECTION, id));
+  } catch (error) {
+    console.error("Error deleting setlist:", error);
   }
 };
 

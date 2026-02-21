@@ -1,6 +1,6 @@
 // v3.17 - Cleaned Sync Logic & Multi-User Shield | MelodIA Lab
 import React, { useState, useEffect } from 'react';
-import { ViewState, Song, Rehearsal, User } from './types';
+import { ViewState, Song, Rehearsal, User, Setlist } from './types';
 import { RehearsalView } from './components/RehearsalView';
 import { SongEditor } from './components/SongEditor';
 import { ChordViewer } from './components/ChordViewer';
@@ -11,9 +11,10 @@ import { Navbar } from './components/Navbar';
 import { Button } from './components/Button';
 import { SongComposer } from './components/SongComposer';
 import { Footer } from './components/Footer';
-import { Plus, Music4, CalendarDays, Loader2, AlertCircle, Heart, Music2 } from 'lucide-react';
-import { subscribeToRehearsals, saveRehearsal, subscribeToSongs, saveSong } from './services/storageService';
+import { Plus, Music4, CalendarDays, Loader2, AlertCircle, Heart, Music2, ListMusic } from 'lucide-react';
+import { subscribeToRehearsals, saveRehearsal, subscribeToSongs, saveSong, subscribeToSetlists, saveSetlist } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
+import { SetlistEditor } from './components/SetlistEditor';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { auth } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -24,10 +25,12 @@ function AppContent() {
   const [view, setView] = useState<ViewState>(ViewState.DASHBOARD);
   const [selectedRehearsal, setSelectedRehearsal] = useState<Rehearsal | null>(null);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+  const [selectedSetlist, setSelectedSetlist] = useState<Setlist | null>(null);
   const [activePlaylist, setActivePlaylist] = useState<Song[]>([]);
 
   const [rehearsals, setRehearsals] = useState<Rehearsal[]>([]);
   const [songs, setSongs] = useState<Song[]>([]);
+  const [setlists, setSetlists] = useState<Setlist[]>([]);
   const [isDark, setIsDark] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
@@ -83,9 +86,16 @@ function AppContent() {
       (err) => console.error("Error songs:", err)
     );
 
+    const unsubSetlists = subscribeToSetlists(
+      userId,
+      (data) => setSetlists(data),
+      (err) => console.error("Error setlists:", err)
+    );
+
     return () => {
       unsubRehearsals();
       unsubSongs();
+      unsubSetlists();
     };
   }, [currentUser?.id, isAuthSynced]);
 
@@ -188,7 +198,26 @@ function AppContent() {
           )}
 
           {view === ViewState.SONG_LIBRARY && (
-            <SongLibrary songs={songs} onCreateNew={() => { setSelectedSong(null); setView(ViewState.EDIT_SONG); }} onEdit={(s) => { setSelectedSong(s); setView(ViewState.EDIT_SONG); }} />
+            <SongLibrary
+              songs={songs}
+              setlists={setlists}
+              onCreateNewSong={() => {
+                setSelectedSong(null);
+                setView(ViewState.EDIT_SONG);
+              }}
+              onEditSong={(song) => {
+                setSelectedSong(song);
+                setView(ViewState.EDIT_SONG);
+              }}
+              onCreateNewSetlist={() => {
+                setSelectedSetlist(null);
+                setView(ViewState.EDIT_SETLIST);
+              }}
+              onEditSetlist={(setlist) => {
+                setSelectedSetlist(setlist);
+                setView(ViewState.EDIT_SETLIST);
+              }}
+            />
           )}
 
           {view === ViewState.REHEARSAL_DETAIL && selectedRehearsal && (
@@ -223,6 +252,18 @@ function AppContent() {
               onClose={() => setView(ViewState.SONG_LIBRARY)}
               onSave={async (newSong) => {
                 await saveSong(newSong, currentUser.id);
+                setView(ViewState.SONG_LIBRARY);
+              }}
+            />
+          )}
+
+          {view === ViewState.EDIT_SETLIST && currentUser && (
+            <SetlistEditor
+              initialSetlist={selectedSetlist}
+              availableSongs={songs}
+              onClose={() => setView(ViewState.SONG_LIBRARY)}
+              onSave={async (newSetlist) => {
+                await saveSetlist(newSetlist, currentUser.id);
                 setView(ViewState.SONG_LIBRARY);
               }}
             />

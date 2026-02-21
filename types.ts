@@ -4,6 +4,7 @@ export enum ViewState {
   REHEARSAL_DETAIL = 'REHEARSAL_DETAIL',
   SONG_LIBRARY = 'SONG_LIBRARY',
   EDIT_SONG = 'EDIT_SONG',
+  EDIT_SETLIST = 'EDIT_SETLIST',
   PLAY_MODE = 'PLAY_MODE',
   COMPOSER = 'COMPOSER'
 }
@@ -23,6 +24,15 @@ export interface Song {
   key?: string;
 }
 
+export interface Setlist {
+  id: string;
+  title: string;
+  description: string;
+  songs: string[]; // Array of Song IDs
+  ownerId: string;
+  createdAt: number;
+}
+
 export interface RehearsalOption {
   id: string;
   date: string; // ISO string
@@ -37,7 +47,8 @@ export interface Rehearsal {
   status: 'PROPOSED' | 'CONFIRMED' | 'COMPLETED';
   options: RehearsalOption[];
   confirmedOptionId?: string;
-  setlist: string[]; // Array of Song IDs
+  linkedSetlistId?: string; // ID of the associated Setlist
+  setlist: string[]; // Array of Song IDs (legacy or custom override)
   createdAt: number;
 }
 

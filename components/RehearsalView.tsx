@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Rehearsal, Song, RehearsalOption, User } from '../types';
 import { Button } from './Button';
 import { Calendar, MapPin, Clock, CheckCircle2, Plus, Trash2, ArrowLeft, PlayCircle, Music, ChevronDown, ChevronUp, Save, Search, Pencil, Share2, ThumbsUp } from 'lucide-react';
-import { subscribeToSongs, saveSong } from '../services/storageService';
+import { subscribeToSongs, saveSong, subscribeToSetlists } from '../services/storageService';
 import { formatSongContent } from '../services/geminiService';
 import { useLanguage } from '../contexts/LanguageContext';
+import { Setlist } from '../types';
 
 interface RehearsalViewProps {
   rehearsal: Rehearsal;
@@ -18,6 +19,7 @@ export const RehearsalView: React.FC<RehearsalViewProps> = ({ rehearsal, current
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<'info' | 'setlist'>('info');
   const [availableSongs, setAvailableSongs] = useState<Song[]>([]);
+  const [availableSetlists, setAvailableSetlists] = useState<Setlist[]>([]);
   const [showAddSection, setShowAddSection] = useState(false);
   const [addMode, setAddMode] = useState<'search' | 'create'>('create');
   const [copySuccess, setCopySuccess] = useState(false);
@@ -39,16 +41,26 @@ export const RehearsalView: React.FC<RehearsalViewProps> = ({ rehearsal, current
   useEffect(() => {
     if (!currentUser?.id) return;
 
-    const unsubscribe = subscribeToSongs(
+    const unsubscribeSongs = subscribeToSongs(
       currentUser.id,
       (songs) => {
         setAvailableSongs(songs);
       },
-      (error) => {
-        console.error("Error en RehearsalView:", error);
-      }
+      (error) => console.error("Error songs:", error)
     );
-    return () => unsubscribe();
+
+    const unsubscribeSetlists = subscribeToSetlists(
+      currentUser.id,
+      (setlists) => {
+        setAvailableSetlists(setlists);
+      },
+      (error) => console.error("Error setlists:", error)
+    );
+
+    return () => {
+      unsubscribeSongs();
+      unsubscribeSetlists();
+    };
   }, [currentUser?.id]);
 
   const handleToggleVote = async (optionId: string) => {
@@ -177,7 +189,18 @@ export const RehearsalView: React.FC<RehearsalViewProps> = ({ rehearsal, current
     });
   };
 
-  const setlistSongs = rehearsal.setlist.map(id => availableSongs.find(s => s.id === id)).filter(Boolean) as Song[];
+  const activeSetlistId = rehearsal.linkedSetlistId;
+  const activeSetlist = availableSetlists.find(s => s.id === activeSetlistId);
+  const displayedSongIds = activeSetlist ? activeSetlist.songs : rehearsal.setlist;
+  const setlistSongs = displayedSongIds.map(id => availableSongs.find(s => s.id === id)).filter(Boolean) as Song[];
+
+  const handleLinkSetlist = (setlistId: string) => {
+    onUpdate({ ...rehearsal, linkedSetlistId: setlistId, setlist: [] }); // Clear individual setlist to avoid conflicts
+  };
+
+  const handleUnlinkSetlist = () => {
+    onUpdate({ ...rehearsal, linkedSetlistId: undefined });
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
@@ -207,7 +230,7 @@ export const RehearsalView: React.FC<RehearsalViewProps> = ({ rehearsal, current
               onClick={() => setActiveTab('setlist')}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'setlist' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white' : 'text-zinc-500 dark:text-zinc-400'}`}
             >
-              {t('tab_setlist')} ({rehearsal.setlist.length})
+              {t('tab_setlist')} ({displayedSongIds.length})
             </button>
           </div>
         </div>
@@ -297,134 +320,175 @@ export const RehearsalView: React.FC<RehearsalViewProps> = ({ rehearsal, current
             </div>
           </div>
         </div>
-      )}
+      )
+      }
 
-      {activeTab === 'setlist' && (
-        <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Canciones del Ensayo</h3>
-            <Button
-              onClick={() => setShowAddSection(!showAddSection)}
-              variant={showAddSection ? "secondary" : "primary"}
-              className="gap-2"
-            >
-              {showAddSection ? <ChevronUp size={18} /> : <Plus size={18} />}
-              {showAddSection ? 'Cerrar' : 'Agregar Canción'}
-            </Button>
-          </div>
+      {
+        activeTab === 'setlist' && (
+          <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
 
-          {showAddSection && (
-            <div className="bg-white dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 mb-6">
-              <div className="flex gap-4 mb-4 border-b border-zinc-200 dark:border-zinc-800 pb-2">
-                <button
-                  onClick={() => setAddMode('create')}
-                  className={`text-sm font-medium pb-2 ${addMode === 'create' ? 'text-brand-600 border-b-2 border-brand-600' : 'text-zinc-500'}`}
-                >
-                  Crear Nueva
-                </button>
-                <button
-                  onClick={() => setAddMode('search')}
-                  className={`text-sm font-medium pb-2 ${addMode === 'search' ? 'text-brand-600 border-b-2 border-brand-600' : 'text-zinc-500'}`}
-                >
-                  Buscar Existente
-                </button>
+            {/* Linked Setlist Banner */}
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-xl shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-1">Repertorio Activo</h3>
+                {activeSetlist ? (
+                  <div>
+                    <p className="font-bold text-lg text-brand-600 dark:text-brand-400 capitalize">{activeSetlist.title}</p>
+                    <p className="text-sm text-zinc-500">{activeSetlist.description || 'Setlist de la Biblioteca'}</p>
+                  </div>
+                ) : (
+                  <p className="font-bold text-lg text-zinc-900 dark:text-white capitalize">Canciones Sueltas (Personalizado)</p>
+                )}
               </div>
 
-              {addMode === 'create' && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input type="text" placeholder="Título" value={newSongTitle} onChange={e => setNewSongTitle(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border p-2.5 rounded-lg" />
-                    <input type="text" placeholder="Artista" value={newSongArtist} onChange={e => setNewSongArtist(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border p-2.5 rounded-lg" />
-                  </div>
-                  <textarea placeholder="Letra y acordes..." value={newSongContent} onChange={e => setNewSongContent(e.target.value)} className="w-full h-40 bg-zinc-50 dark:bg-zinc-950 border p-3 rounded-lg font-mono" />
-                  <Button onClick={handleCreateAndAddSong} className="w-full gap-2">
-                    <Save size={18} /> Guardar y Agregar
-                  </Button>
-                </div>
-              )}
-
-              {addMode === 'search' && (
-                <div>
-                  <div className="relative mb-3">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
-                    <input type="text" placeholder="Buscar..." className="w-full pl-9 bg-zinc-50 dark:bg-zinc-950 border p-2.5 rounded-lg" />
-                  </div>
-                  <div className="max-h-48 overflow-y-auto space-y-2">
-                    {availableSongs.filter(s => !rehearsal.setlist.includes(s.id)).map(song => (
-                      <div key={song.id} className="flex items-center justify-between p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg cursor-pointer" onClick={() => handleAddSongToSetlist(song.id)}>
-                        <div className="flex items-center gap-3">
-                          <Music size={16} className="text-zinc-400" />
-                          <div>
-                            <div className="text-zinc-900 dark:text-white text-sm font-medium">{song.title}</div>
-                            <div className="text-zinc-500 text-xs">{song.artist}</div>
-                          </div>
-                        </div>
-                        <Plus size={16} className="text-zinc-400" />
-                      </div>
+              <div className="w-full md:w-auto flex items-center gap-2">
+                {!activeSetlist ? (
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value) handleLinkSetlist(e.target.value);
+                    }}
+                    className="bg-zinc-100 dark:bg-zinc-800 border-none text-sm p-2 rounded-lg text-zinc-700 dark:text-zinc-300 outline-none w-full cursor-pointer"
+                  >
+                    <option value="">+ Asociar Setlist de Biblioteca</option>
+                    {availableSetlists.map(s => (
+                      <option key={s.id} value={s.id}>{s.title} ({s.songs.length} canciones)</option>
                     ))}
-                  </div>
-                </div>
+                  </select>
+                ) : (
+                  <Button variant="secondary" onClick={handleUnlinkSetlist} className="w-full md:w-auto text-xs py-1.5 h-auto border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                    Desvincular Setlist
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center mt-8">
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Canciones del Ensayo</h3>
+              {!activeSetlist && (
+                <Button
+                  onClick={() => setShowAddSection(!showAddSection)}
+                  variant={showAddSection ? "secondary" : "primary"}
+                  className="gap-2"
+                >
+                  {showAddSection ? <ChevronUp size={18} /> : <Plus size={18} />}
+                  {showAddSection ? 'Cerrar' : 'Agregar Canción'}
+                </Button>
               )}
             </div>
-          )}
 
-          <div className="grid gap-3">
-            {setlistSongs.map((song, index) => {
-              const isEditing = editingSongId === song.id;
+            {showAddSection && !activeSetlist && (
+              <div className="bg-white dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 mb-6">
+                <div className="flex gap-4 mb-4 border-b border-zinc-200 dark:border-zinc-800 pb-2">
+                  <button
+                    onClick={() => setAddMode('create')}
+                    className={`text-sm font-medium pb-2 ${addMode === 'create' ? 'text-brand-600 border-b-2 border-brand-600' : 'text-zinc-500'}`}
+                  >
+                    Crear Nueva
+                  </button>
+                  <button
+                    onClick={() => setAddMode('search')}
+                    className={`text-sm font-medium pb-2 ${addMode === 'search' ? 'text-brand-600 border-b-2 border-brand-600' : 'text-zinc-500'}`}
+                  >
+                    Buscar Existente
+                  </button>
+                </div>
 
-              if (isEditing) {
-                return (
-                  <div key={song.id} className="bg-white dark:bg-zinc-900 p-4 rounded-xl border border-brand-500 shadow-lg">
-                    <h4 className="text-sm font-bold text-brand-600 mb-3">Editando: {song.title}</h4>
-                    <div className="space-y-3">
-                      <input value={newSongTitle} onChange={e => setNewSongTitle(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border p-2 rounded text-sm" />
-                      <input value={newSongArtist} onChange={e => setNewSongArtist(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border p-2 rounded text-sm" />
-                      <textarea value={newSongContent} onChange={e => setNewSongContent(e.target.value)} className="w-full h-32 bg-zinc-50 dark:bg-zinc-950 border p-2 rounded text-sm font-mono" />
-                      <div className="flex justify-end gap-2">
-                        <Button variant="secondary" onClick={() => setEditingSongId(null)} className="h-8">Cancelar</Button>
-                        <Button onClick={handleUpdateSong} className="h-8">Guardar</Button>
+                {addMode === 'create' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <input type="text" placeholder="Título" value={newSongTitle} onChange={e => setNewSongTitle(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border p-2.5 rounded-lg" />
+                      <input type="text" placeholder="Artista" value={newSongArtist} onChange={e => setNewSongArtist(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border p-2.5 rounded-lg" />
+                    </div>
+                    <textarea placeholder="Letra y acordes..." value={newSongContent} onChange={e => setNewSongContent(e.target.value)} className="w-full h-40 bg-zinc-50 dark:bg-zinc-950 border p-3 rounded-lg font-mono" />
+                    <Button onClick={handleCreateAndAddSong} className="w-full gap-2">
+                      <Save size={18} /> Guardar y Agregar
+                    </Button>
+                  </div>
+                )}
+
+                {addMode === 'search' && (
+                  <div>
+                    <div className="relative mb-3">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                      <input type="text" placeholder="Buscar..." className="w-full pl-9 bg-zinc-50 dark:bg-zinc-950 border p-2.5 rounded-lg" />
+                    </div>
+                    <div className="max-h-48 overflow-y-auto space-y-2">
+                      {availableSongs.filter(s => !rehearsal.setlist.includes(s.id)).map(song => (
+                        <div key={song.id} className="flex items-center justify-between p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg cursor-pointer" onClick={() => handleAddSongToSetlist(song.id)}>
+                          <div className="flex items-center gap-3">
+                            <Music size={16} className="text-zinc-400" />
+                            <div>
+                              <div className="text-zinc-900 dark:text-white text-sm font-medium">{song.title}</div>
+                              <div className="text-zinc-500 text-xs">{song.artist}</div>
+                            </div>
+                          </div>
+                          <Plus size={16} className="text-zinc-400" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="grid gap-3">
+              {setlistSongs.map((song, index) => {
+                const isEditing = editingSongId === song.id;
+
+                if (isEditing) {
+                  return (
+                    <div key={song.id} className="bg-white dark:bg-zinc-900 p-4 rounded-xl border border-brand-500 shadow-lg">
+                      <h4 className="text-sm font-bold text-brand-600 mb-3">Editando: {song.title}</h4>
+                      <div className="space-y-3">
+                        <input value={newSongTitle} onChange={e => setNewSongTitle(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border p-2 rounded text-sm" />
+                        <input value={newSongArtist} onChange={e => setNewSongArtist(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border p-2 rounded text-sm" />
+                        <textarea value={newSongContent} onChange={e => setNewSongContent(e.target.value)} className="w-full h-32 bg-zinc-50 dark:bg-zinc-950 border p-2 rounded text-sm font-mono" />
+                        <div className="flex justify-end gap-2">
+                          <Button variant="secondary" onClick={() => setEditingSongId(null)} className="h-8">Cancelar</Button>
+                          <Button onClick={handleUpdateSong} className="h-8">Guardar</Button>
+                        </div>
                       </div>
                     </div>
+                  );
+                }
+
+                return (
+                  <div key={song.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+                    <div className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-4 flex-1 cursor-pointer" onClick={() => toggleExpand(song.id)}>
+                        <span className="text-zinc-400 font-mono text-sm w-6 text-center">{index + 1}</span>
+                        <div>
+                          <h4 className="text-zinc-900 dark:text-white font-medium flex items-center gap-2">
+                            {song.title}
+                            {expandedSongId === song.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                          </h4>
+                          <p className="text-zinc-500 text-sm">{song.artist}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button className="p-2 text-zinc-400 hover:text-brand-500" onClick={() => startEditing(song)}><Pencil size={16} /></button>
+                        <button className="p-2 text-zinc-400 hover:text-red-500" onClick={() => handleRemoveSongFromSetlist(song.id)}><Trash2 size={16} /></button>
+                        <Button variant="primary" className="gap-2 ml-2" onClick={() => onPlaySong(song.id)}>
+                          <PlayCircle size={18} /> Ver / Ensayar
+                        </Button>
+                      </div>
+                    </div>
+
+                    {expandedSongId === song.id && (
+                      <div className="border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-6">
+                        <pre className="font-mono text-sm whitespace-pre-wrap leading-relaxed text-zinc-700 dark:text-zinc-300">
+                          {song.content}
+                        </pre>
+                      </div>
+                    )}
                   </div>
                 );
-              }
-
-              return (
-                <div key={song.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
-                  <div className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4 flex-1 cursor-pointer" onClick={() => toggleExpand(song.id)}>
-                      <span className="text-zinc-400 font-mono text-sm w-6 text-center">{index + 1}</span>
-                      <div>
-                        <h4 className="text-zinc-900 dark:text-white font-medium flex items-center gap-2">
-                          {song.title}
-                          {expandedSongId === song.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                        </h4>
-                        <p className="text-zinc-500 text-sm">{song.artist}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button className="p-2 text-zinc-400 hover:text-brand-500" onClick={() => startEditing(song)}><Pencil size={16} /></button>
-                      <button className="p-2 text-zinc-400 hover:text-red-500" onClick={() => handleRemoveSongFromSetlist(song.id)}><Trash2 size={16} /></button>
-                      <Button variant="primary" className="gap-2 ml-2" onClick={() => onPlaySong(song.id)}>
-                        <PlayCircle size={18} /> Ver / Ensayar
-                      </Button>
-                    </div>
-                  </div>
-
-                  {expandedSongId === song.id && (
-                    <div className="border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-6">
-                      <pre className="font-mono text-sm whitespace-pre-wrap leading-relaxed text-zinc-700 dark:text-zinc-300">
-                        {song.content}
-                      </pre>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+              })}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 };
