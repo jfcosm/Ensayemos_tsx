@@ -1,15 +1,15 @@
 // v3.1 - Fixed query syntax and multi-user filtering | MelodIA Lab
 import { Song, Rehearsal } from '../types';
 import { db } from './firebaseConfig';
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  deleteDoc, 
-  onSnapshot, 
-  query, 
+import {
+  collection,
+  doc,
+  setDoc,
+  deleteDoc,
+  onSnapshot,
+  query,
   where,
-  orderBy 
+  orderBy
 } from 'firebase/firestore';
 
 const SONGS_COLLECTION = 'songs';
@@ -18,22 +18,24 @@ const REHEARSALS_COLLECTION = 'rehearsals';
 // --- Canciones ---
 
 export const subscribeToSongs = (
-  userId: string, 
-  callback: (songs: Song[]) => void, 
+  userId: string,
+  callback: (songs: Song[]) => void,
   onError?: (error: any) => void
 ) => {
-  if (!userId) return () => {}; // Seguridad si no hay ID
+  if (!userId) return () => { }; // Seguridad si no hay ID
 
-  // Corregido: 'userId' ahora se usa como valor, no como función
+  // REMOVED 'orderBy' to prevent Firebase Index Missing errors on production
+  // We will sort on the client side instead.
   const q = query(
-    collection(db, SONGS_COLLECTION), 
-    where('ownerId', '==', userId), 
-    orderBy('title')
+    collection(db, SONGS_COLLECTION),
+    where('ownerId', '==', userId)
   );
-  
-  return onSnapshot(q, 
+
+  return onSnapshot(q,
     (snapshot) => {
-      const songs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Song));
+      let songs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Song));
+      // Client-side sorting
+      songs.sort((a, b) => a.title.localeCompare(b.title));
       callback(songs);
     },
     (error) => {
@@ -60,22 +62,23 @@ export const deleteSong = async (id: string): Promise<void> => {
 // --- Ensayos ---
 
 export const subscribeToRehearsals = (
-  userId: string, 
+  userId: string,
   callback: (rehearsals: Rehearsal[]) => void,
   onError?: (error: any) => void
 ) => {
-  if (!userId) return () => {};
+  if (!userId) return () => { };
 
-  // Corregido: Filtro por dueño del ensayo para asegurar privacidad
+  // REMOVED 'orderBy' to prevent Firebase Index Missing errors.
   const q = query(
-    collection(db, REHEARSALS_COLLECTION), 
-    where('createdBy', '==', userId), 
-    orderBy('createdAt', 'desc')
+    collection(db, REHEARSALS_COLLECTION),
+    where('createdBy', '==', userId)
   );
 
-  return onSnapshot(q, 
+  return onSnapshot(q,
     (snapshot) => {
-      const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Rehearsal));
+      let list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Rehearsal));
+      // Client-side sorting
+      list.sort((a, b) => b.createdAt - a.createdAt);
       callback(list);
     },
     (error) => {
