@@ -3,6 +3,21 @@
         {
             "source": "/__/auth/(.*)",
             "destination": "https://ensayamos-4581f.firebaseapp.com/__/auth/$1"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ],
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "Cross-Origin-Opener-Policy",
+                    "value": "same-origin-allow-popups"
+                }
+            ]
         }
     ]
 }
