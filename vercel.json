@@ -1,4 +1,17 @@
 {
+    "redirects": [
+        {
+            "source": "/(.*)",
+            "has": [
+                {
+                    "type": "host",
+                    "value": "www.verso.social"
+                }
+            ],
+            "destination": "https://verso.social/$1",
+            "permanent": true
+        }
+    ],
     "rewrites": [
         {
             "source": "/__/auth/(.*)",
