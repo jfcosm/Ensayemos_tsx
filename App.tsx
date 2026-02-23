@@ -15,6 +15,7 @@ import { Plus, Music4, CalendarDays, Loader2, AlertCircle, Heart, Music2, ListMu
 import { subscribeToRehearsals, saveRehearsal, subscribeToSongs, saveSong, subscribeToSetlists, saveSetlist } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
 import { SetlistEditor } from './components/SetlistEditor';
+import { SetlistViewer } from './components/SetlistViewer';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { auth } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -217,6 +218,10 @@ function AppContent() {
                 setSelectedSetlist(setlist);
                 setView(ViewState.EDIT_SETLIST);
               }}
+              onViewSetlist={(setlist) => {
+                setSelectedSetlist(setlist);
+                setView(ViewState.VIEW_SETLIST);
+              }}
             />
           )}
 
@@ -266,6 +271,14 @@ function AppContent() {
                 await saveSetlist(newSetlist, currentUser.id);
                 setView(ViewState.SONG_LIBRARY);
               }}
+            />
+          )}
+
+          {view === ViewState.VIEW_SETLIST && selectedSetlist && (
+            <SetlistViewer
+              setlist={selectedSetlist}
+              availableSongs={songs}
+              onBack={() => setView(ViewState.SONG_LIBRARY)}
             />
           )}
 

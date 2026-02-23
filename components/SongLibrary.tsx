@@ -12,9 +12,10 @@ interface SongLibraryProps {
   onEditSong: (song: Song) => void;
   onCreateNewSetlist: () => void;
   onEditSetlist: (setlist: Setlist) => void;
+  onViewSetlist: (setlist: Setlist) => void;
 }
 
-export const SongLibrary: React.FC<SongLibraryProps> = ({ songs, setlists, onCreateNewSong, onEditSong, onCreateNewSetlist, onEditSetlist }) => {
+export const SongLibrary: React.FC<SongLibraryProps> = ({ songs, setlists, onCreateNewSong, onEditSong, onCreateNewSetlist, onEditSetlist, onViewSetlist }) => {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'songs' | 'setlists'>('songs');
@@ -131,7 +132,7 @@ export const SongLibrary: React.FC<SongLibraryProps> = ({ songs, setlists, onCre
             filteredSetlists.map(setlist => (
               <div
                 key={setlist.id}
-                onClick={() => onEditSetlist(setlist)}
+                onClick={() => onViewSetlist(setlist)}
                 className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-xl flex items-center justify-between hover:border-brand-500/50 hover:shadow-md transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-4">
