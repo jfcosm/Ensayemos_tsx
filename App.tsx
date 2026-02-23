@@ -28,6 +28,8 @@ function AppContent() {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [selectedSetlist, setSelectedSetlist] = useState<Setlist | null>(null);
   const [activePlaylist, setActivePlaylist] = useState<Song[]>([]);
+  const [viewerInitialSongId, setViewerInitialSongId] = useState<string | undefined>();
+  const [viewerReturnView, setViewerReturnView] = useState<ViewState>(ViewState.SONG_LIBRARY);
 
   const [rehearsals, setRehearsals] = useState<Rehearsal[]>([]);
   const [songs, setSongs] = useState<Song[]>([]);
@@ -220,6 +222,8 @@ function AppContent() {
               }}
               onViewSetlist={(setlist) => {
                 setSelectedSetlist(setlist);
+                setViewerInitialSongId(undefined);
+                setViewerReturnView(ViewState.SONG_LIBRARY);
                 setView(ViewState.VIEW_SETLIST);
               }}
             />
@@ -227,10 +231,26 @@ function AppContent() {
 
           {view === ViewState.REHEARSAL_DETAIL && selectedRehearsal && (
             <RehearsalView currentUser={currentUser!} rehearsal={selectedRehearsal} onBack={() => setView(ViewState.DASHBOARD)} onUpdate={handleUpdateRehearsal} onPlaySong={(id) => {
-              const playlist = selectedRehearsal.setlist.map(sid => songs.find(s => s.id === sid)).filter(Boolean) as Song[];
-              setActivePlaylist(playlist);
-              setSelectedSong(playlist.find(p => p.id === id) || null);
-              setView(ViewState.PLAY_MODE);
+              const linkedSetlist = selectedRehearsal.linkedSetlistId ? setlists.find(s => s.id === selectedRehearsal.linkedSetlistId) : null;
+
+              if (linkedSetlist) {
+                setSelectedSetlist(linkedSetlist);
+              } else {
+                // Generar un setlist virtual para la vista
+                const virtualSetlist: Setlist = {
+                  id: 'virtual-' + selectedRehearsal.id,
+                  title: 'Canciones del Ensayo',
+                  description: selectedRehearsal.title,
+                  songs: selectedRehearsal.setlist,
+                  ownerId: currentUser!.id,
+                  createdAt: Date.now()
+                };
+                setSelectedSetlist(virtualSetlist);
+              }
+
+              setViewerInitialSongId(id);
+              setViewerReturnView(ViewState.REHEARSAL_DETAIL);
+              setView(ViewState.VIEW_SETLIST);
             }} />
           )}
 
@@ -278,7 +298,8 @@ function AppContent() {
             <SetlistViewer
               setlist={selectedSetlist}
               availableSongs={songs}
-              onBack={() => setView(ViewState.SONG_LIBRARY)}
+              initialSongId={viewerInitialSongId}
+              onBack={() => setView(viewerReturnView)}
             />
           )}
 

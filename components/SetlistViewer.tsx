@@ -5,13 +5,14 @@ import { ArrowLeft, Music } from 'lucide-react';
 interface SetlistViewerProps {
     setlist: Setlist;
     availableSongs: Song[];
+    initialSongId?: string;
     onBack: () => void;
 }
 
-export const SetlistViewer: React.FC<SetlistViewerProps> = ({ setlist, availableSongs, onBack }) => {
-    // Inicializamos con la primera canción del setlist (si la hay)
+export const SetlistViewer: React.FC<SetlistViewerProps> = ({ setlist, availableSongs, initialSongId, onBack }) => {
+    // Inicializamos con la primera canción del setlist (si la hay) o con la canción inicial
     const [selectedSongId, setSelectedSongId] = useState<string>(
-        setlist.songs.length > 0 ? setlist.songs[0] : ''
+        initialSongId || (setlist.songs.length > 0 ? setlist.songs[0] : '')
     );
 
     // Mapear los IDs a objetos Song reales filtrando los no encontrados
@@ -21,12 +22,14 @@ export const SetlistViewer: React.FC<SetlistViewerProps> = ({ setlist, available
 
     const activeSong = setlistSongs.find(s => s.id === selectedSongId);
 
-    // Si el setlist cambia o se vacía, resetear la selección
+    // Si el setlist cambia, resetear la selección o aplicar el initialSongId
     useEffect(() => {
-        if (setlist.songs.length > 0 && !setlist.songs.includes(selectedSongId)) {
+        if (initialSongId && setlist.songs.includes(initialSongId)) {
+            setSelectedSongId(initialSongId);
+        } else if (setlist.songs.length > 0 && !setlist.songs.includes(selectedSongId)) {
             setSelectedSongId(setlist.songs[0]);
         }
-    }, [setlist, selectedSongId]);
+    }, [setlist, selectedSongId, initialSongId]);
 
     return (
         <div className="fixed inset-0 z-50 bg-white dark:bg-zinc-950 flex flex-col animate-in fade-in duration-300">
