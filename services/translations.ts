@@ -1,7 +1,7 @@
 // v3.12 - Full 100% Translation Coverage | 18 Languages
 import { Language } from '../types';
 
-type TranslationKey = 
+type TranslationKey =
   | 'app_name' | 'tagline' | 'start_button' | 'what_is_verso' | 'tour_title' | 'tour_subtitle'
   | 'tour_feature_1_title' | 'tour_feature_1_desc' | 'tour_feature_2_title' | 'tour_feature_2_desc'
   | 'tour_feature_3_title' | 'tour_feature_3_desc' | 'tour_mockup_header' | 'tour_mockup_date'
@@ -948,11 +948,11 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_desc: "Firebase 似乎无法识别你当前的身份。请退出并重新登录。",
     error_auth_button: "重新同步",
     loading_rehearsals: "正在加载安全排练...",
-    tab_details: "Details",
-    tab_setlist: "Setlist",
-    btn_invite: "Invite",
-    btn_copied: "Copied!",
-    section_options: "Date and Location Options"
+    tab_details: "详情",
+    tab_setlist: "歌单",
+    btn_invite: "邀请",
+    btn_copied: "已复制！",
+    section_options: "日期和地点选项"
   },
   gu: {
     app_name: "Verso",
@@ -1051,11 +1051,11 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_desc: "લાગે છે કે Firebase તમારી વર્તમાન ઓળખને ઓળખતું નથી. કૃપા કરીને લોગ આઉટ કરો અને ફરી આવો.",
     error_auth_button: "ફરીથી સિંક કરો",
     loading_rehearsals: "સુરક્ષિત રિહર્સલ્સ લોડ થઈ રહ્યાં છે...",
-    tab_details: "Details",
-    tab_setlist: "Setlist",
-    btn_invite: "Invite",
-    btn_copied: "Copied!",
-    section_options: "Date and Location Options"
+    tab_details: "વિગતો",
+    tab_setlist: "સેટલિસ્ટ",
+    btn_invite: "આમંત્રિત કરો",
+    btn_copied: "કૉપિ કર્યું!",
+    section_options: "તારીખ અને સ્થાન વિકલ્પો"
   },
   ta: {
     app_name: "Verso",
@@ -1154,11 +1154,11 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_desc: "Firebase உங்கள் தற்போதைய அடையாளத்தை அடையாளம் காணவில்லை எனத் தெரிகிறது. தயவுசெய்து வெளியேறி மீண்டும் உள்நுழையவும்.",
     error_auth_button: "மீண்டும் ஒத்திசைக்கவும்",
     loading_rehearsals: "பாதுகாப்பான ஒத்திகைகள் ஏற்றப்படுகின்றன...",
-    tab_details: "Details",
-    tab_setlist: "Setlist",
-    btn_invite: "Invite",
-    btn_copied: "Copied!",
-    section_options: "Date and Location Options"
+    tab_details: "விவரங்கள்",
+    tab_setlist: "பாடல் பட்டியல்",
+    btn_invite: "அழை",
+    btn_copied: "நகலெடுக்கப்பட்டது!",
+    section_options: "தேதி மற்றும் இட விருப்பங்கள்"
   },
   uk: {
     app_name: "Verso",
@@ -1257,11 +1257,11 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_desc: "Здається, Firebase не розпізнає вашу поточну особу. Будь ласка, вийдіть і увійдіть знову.",
     error_auth_button: "Синхронізувати знову",
     loading_rehearsals: "Завантаження безпечних репетицій...",
-    tab_details: "Details",
-    tab_setlist: "Setlist",
-    btn_invite: "Invite",
-    btn_copied: "Copied!",
-    section_options: "Date and Location Options"
+    tab_details: "Деталі",
+    tab_setlist: "Сет-лист",
+    btn_invite: "Запросити",
+    btn_copied: "Скопійовано!",
+    section_options: "Параметри дати та місця"
   },
   sv: {
     app_name: "Verso",
@@ -1360,11 +1360,11 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_desc: "Det verkar som att Firebase inte känner igen din identitet. Logga ut och in igen.",
     error_auth_button: "Synka igen",
     loading_rehearsals: "Laddar säkra rep...",
-    tab_details: "Details",
-    tab_setlist: "Setlist",
-    btn_invite: "Invite",
-    btn_copied: "Copied!",
-    section_options: "Date and Location Options"
+    tab_details: "Detaljer",
+    tab_setlist: "Låtlista",
+    btn_invite: "Bjud in",
+    btn_copied: "Kopierad!",
+    section_options: "Datum och platsalternativ"
   },
   fi: {
     app_name: "Verso",
@@ -1463,11 +1463,11 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_desc: "Firebase ei tunnista henkilöllisyyttäsi. Kirjaudu ulos ja takaisin sisään.",
     error_auth_button: "Synkronoi uudelleen",
     loading_rehearsals: "Ladataan treenejä...",
-    tab_details: "Details",
-    tab_setlist: "Setlist",
-    btn_invite: "Invite",
-    btn_copied: "Copied!",
-    section_options: "Date and Location Options"
+    tab_details: "Tiedot",
+    tab_setlist: "Settilista",
+    btn_invite: "Kutsu",
+    btn_copied: "Kopioitu!",
+    section_options: "Päivämäärän ja paikan vaihtoehdot"
   },
   nl: {
     app_name: "Verso",
@@ -1567,10 +1567,10 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_button: "Opnieuw synchroniseren",
     loading_rehearsals: "Veilige repetities laden...",
     tab_details: "Details",
-    tab_setlist: "Setlist",
-    btn_invite: "Invite",
-    btn_copied: "Copied!",
-    section_options: "Date and Location Options"
+    tab_setlist: "Setlijst",
+    btn_invite: "Uitnodigen",
+    btn_copied: "Gekopieerd!",
+    section_options: "Datum en locatie opties"
   },
   is: {
     app_name: "Verso",
@@ -1669,11 +1669,11 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_desc: "Firebase þekkir ekki auðkenni þitt. Vinsamlegast skráðu þig út og aftur inn.",
     error_auth_button: "Samstilla aftur",
     loading_rehearsals: "Hleður öruggum æfingum...",
-    tab_details: "Details",
-    tab_setlist: "Setlist",
-    btn_invite: "Invite",
-    btn_copied: "Copied!",
-    section_options: "Date and Location Options"
+    tab_details: "Upplýsingar",
+    tab_setlist: "Lagalisti",
+    btn_invite: "Bjóða",
+    btn_copied: "Afritað!",
+    section_options: "Dagsetning og staðsetning valkostir"
   },
   arn: {
     app_name: "Verso",
@@ -1772,11 +1772,11 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_desc: "Firebase kimlai tami küpan. Tripan ka konun wiño.",
     error_auth_button: "Wiño konun",
     loading_rehearsals: "Kintun pepiluwün...",
-    tab_details: "Details",
-    tab_setlist: "Setlist",
-    btn_invite: "Invite",
-    btn_copied: "Copied!",
-    section_options: "Date and Location Options"
+    tab_details: "Kom zungu",
+    tab_setlist: "Dungu ülkantun",
+    btn_invite: "Meliñ",
+    btn_copied: "Nentun!",
+    section_options: "Antü ka lelfün rakiduam"
   },
   pl: {
     app_name: "Verso",
@@ -1875,10 +1875,10 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     error_auth_desc: "Firebase nie rozpoznaje Twojej tożsamości. Wyloguj się i zaloguj ponownie.",
     error_auth_button: "Zsynchronizuj ponownie",
     loading_rehearsals: "Ładowanie bezpiecznych prób...",
-    tab_details: "Details",
-    tab_setlist: "Setlist",
-    btn_invite: "Invite",
-    btn_copied: "Copied!",
-    section_options: "Date and Location Options"
+    tab_details: "Szczegóły",
+    tab_setlist: "Setlista",
+    btn_invite: "Zaproś",
+    btn_copied: "Skopiowano!",
+    section_options: "Opcje daty i miejsca"
   }
 };
