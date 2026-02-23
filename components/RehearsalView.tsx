@@ -6,6 +6,8 @@ import { subscribeToSongs, saveSong, subscribeToSetlists } from '../services/sto
 import { formatSongContent } from '../services/geminiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Setlist } from '../types';
+import { DatePicker } from './DatePicker';
+import { TimePicker } from './TimePicker';
 
 interface RehearsalViewProps {
   rehearsal: Rehearsal;
@@ -250,8 +252,8 @@ export const RehearsalView: React.FC<RehearsalViewProps> = ({ rehearsal, current
               <div className="mb-6 bg-zinc-50 dark:bg-zinc-950 p-4 rounded-lg border border-zinc-200 dark:border-zinc-800">
                 <h4 className="text-sm font-bold text-zinc-900 dark:text-white mb-3">{t('propose_new_title')}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                  <input type="date" value={propDate} onChange={e => setPropDate(e.target.value)} className="p-2 rounded border dark:bg-zinc-900" />
-                  <input type="time" value={propTime} onChange={e => setPropTime(e.target.value)} className="p-2 rounded border dark:bg-zinc-900" />
+                  <DatePicker value={propDate} onChange={setPropDate} className="[&>button]:py-2 [&>button]:bg-white dark:[&>button]:bg-zinc-900" />
+                  <TimePicker value={propTime} onChange={setPropTime} className="[&>select]:py-2 [&>select]:bg-white dark:[&>select]:bg-zinc-900" />
                   <input type="text" placeholder={t('field_location')} value={propLocation} onChange={e => setPropLocation(e.target.value)} className="p-2 rounded border dark:bg-zinc-900" />
                 </div>
                 <div className="flex justify-end gap-2">

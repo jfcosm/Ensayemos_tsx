@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Button } from './Button';
 import { ArrowLeft, Calendar, Clock, MapPin, Music2, Save } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { DatePicker } from './DatePicker';
+import { TimePicker } from './TimePicker';
 
 interface CreateRehearsalProps {
   onSave: (data: { title: string; date: string; time: string; location: string }) => void;
@@ -22,27 +24,27 @@ export const CreateRehearsal: React.FC<CreateRehearsalProps> = ({ onSave, onCanc
 
     // Activamos visualmente el envío
     setIsSubmitting(true);
-    
+
     // FLUJO DE FUERZA BRUTA:
     // 1. Disparamos la función de guardado (que es asíncrona en el padre)
     // pero NO la esperamos con 'await'.
-    onSave({ title, date, time, location }); 
-    
+    onSave({ title, date, time, location });
+
     // 2. Liberamos el estado de submit inmediatamente
-    setIsSubmitting(false); 
-    
+    setIsSubmitting(false);
+
     // 3. Cerramos el formulario tras un micro-delay (10ms) para 
     // asegurar que el hilo de ejecución de onSave comenzó.
     setTimeout(() => {
-      onCancel(); 
+      onCancel();
     }, 10);
   };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4">
       <div className="flex items-center gap-4 mb-2">
-        <button 
-          onClick={onCancel} 
+        <button
+          onClick={onCancel}
           className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full transition-colors"
         >
           <ArrowLeft className="text-zinc-500 dark:text-zinc-400" />
@@ -83,12 +85,9 @@ export const CreateRehearsal: React.FC<CreateRehearsalProps> = ({ onSave, onCanc
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Calendar className="h-5 w-5 text-zinc-400" />
                 </div>
-                <input
-                  type="date"
+                <DatePicker
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
-                  required
+                  onChange={setDate}
                 />
               </div>
             </div>
@@ -101,12 +100,10 @@ export const CreateRehearsal: React.FC<CreateRehearsalProps> = ({ onSave, onCanc
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Clock className="h-5 w-5 text-zinc-400" />
                 </div>
-                <input
-                  type="time"
+                <TimePicker
                   value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
-                  required
+                  onChange={setTime}
+                  className="pl-8"
                 />
               </div>
             </div>
