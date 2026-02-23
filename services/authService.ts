@@ -3,16 +3,19 @@
 import { User } from '../types';
 import { auth } from './firebaseConfig';
 // Fix: Re-structured imports from 'firebase/auth' to ensure all members are correctly identified as modular exports
-import { 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  signOut 
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  setPersistence,
+  browserLocalPersistence
 } from 'firebase/auth';
 
 const USER_KEY = 'ensayamos_user';
 
 export const loginWithGoogle = async (): Promise<User | null> => {
   try {
+    await setPersistence(auth, browserLocalPersistence);
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const fbUser = result.user;
@@ -49,6 +52,6 @@ export const getCurrentUser = (): User | null => {
 export const logout = async (): Promise<void> => {
   try {
     await signOut(auth);
-  } catch (e) {}
+  } catch (e) { }
   localStorage.removeItem(USER_KEY);
 };

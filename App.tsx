@@ -111,6 +111,7 @@ function AppContent() {
 
   const handleLogin = (user: User) => {
     setCurrentUser(user);
+    setIsAuthSynced(true);
     setView(ViewState.DASHBOARD);
   };
 
