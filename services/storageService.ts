@@ -31,38 +31,23 @@ export const subscribeToSongs = (
 ) => {
   if (!workspaceId) return () => { };
 
-  let songs1: Song[] = [];
-  let songs2: Song[] = [];
-  let errCount = 0;
+  const q = query(collection(db, SONGS_COLLECTION));
 
-  const update = () => {
-    const map = new Map<string, Song>();
-    [...songs1, ...songs2].forEach(s => map.set(s.id, s));
-    const merged = Array.from(map.values());
-    merged.sort((a, b) => a.title.localeCompare(b.title));
-    callback(merged);
-  };
+  return onSnapshot(q,
+    (snapshot) => {
+      let allSongs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Song));
 
-  const handleErr = (error: any) => {
-    console.error("Firestore Songs Error:", error);
-    errCount++;
-    if (errCount === 2 && onError) onError(error);
-  };
+      // Filter locally to bypass Firebase "OR" query IndexedDB cache freezes
+      let filtered = allSongs.filter(s => s.ownerId === workspaceId || s.workspaceId === workspaceId);
 
-  const q1 = query(collection(db, SONGS_COLLECTION), where('ownerId', '==', workspaceId));
-  const q2 = query(collection(db, SONGS_COLLECTION), where('workspaceId', '==', workspaceId));
-
-  const unsub1 = onSnapshot(q1, snap => {
-    songs1 = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Song));
-    update();
-  }, handleErr);
-
-  const unsub2 = onSnapshot(q2, snap => {
-    songs2 = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Song));
-    update();
-  }, handleErr);
-
-  return () => { unsub1(); unsub2(); };
+      filtered.sort((a, b) => a.title.localeCompare(b.title));
+      callback(filtered);
+    },
+    (error) => {
+      console.error("Firestore Songs Error:", error);
+      if (onError) onError(error);
+    }
+  );
 };
 
 export const saveSong = async (song: Song, workspaceId: string, userId: string = workspaceId): Promise<void> => {
@@ -100,38 +85,23 @@ export const subscribeToSetlists = (
 ) => {
   if (!workspaceId) return () => { };
 
-  let list1: Setlist[] = [];
-  let list2: Setlist[] = [];
-  let errCount = 0;
+  const q = query(collection(db, SETLISTS_COLLECTION));
 
-  const update = () => {
-    const map = new Map<string, Setlist>();
-    [...list1, ...list2].forEach(s => map.set(s.id, s));
-    const merged = Array.from(map.values());
-    merged.sort((a, b) => b.createdAt - a.createdAt);
-    callback(merged);
-  };
+  return onSnapshot(q,
+    (snapshot) => {
+      let allSetlists = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Setlist));
 
-  const handleErr = (error: any) => {
-    console.error("Firestore Setlists Error:", error);
-    errCount++;
-    if (errCount === 2 && onError) onError(error);
-  };
+      // Filter locally
+      let filtered = allSetlists.filter(s => s.ownerId === workspaceId || s.workspaceId === workspaceId);
 
-  const q1 = query(collection(db, SETLISTS_COLLECTION), where('ownerId', '==', workspaceId));
-  const q2 = query(collection(db, SETLISTS_COLLECTION), where('workspaceId', '==', workspaceId));
-
-  const unsub1 = onSnapshot(q1, snap => {
-    list1 = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Setlist));
-    update();
-  }, handleErr);
-
-  const unsub2 = onSnapshot(q2, snap => {
-    list2 = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Setlist));
-    update();
-  }, handleErr);
-
-  return () => { unsub1(); unsub2(); };
+      filtered.sort((a, b) => b.createdAt - a.createdAt);
+      callback(filtered);
+    },
+    (error) => {
+      console.error("Firestore Setlists Error:", error);
+      if (onError) onError(error);
+    }
+  );
 };
 
 export const saveSetlist = async (setlist: Setlist, workspaceId: string, userId: string = workspaceId): Promise<void> => {
@@ -168,38 +138,23 @@ export const subscribeToRehearsals = (
 ) => {
   if (!workspaceId) return () => { };
 
-  let list1: Rehearsal[] = [];
-  let list2: Rehearsal[] = [];
-  let errCount = 0;
+  const q = query(collection(db, REHEARSALS_COLLECTION));
 
-  const update = () => {
-    const map = new Map<string, Rehearsal>();
-    [...list1, ...list2].forEach(s => map.set(s.id, s));
-    const merged = Array.from(map.values());
-    merged.sort((a, b) => b.createdAt - a.createdAt);
-    callback(merged);
-  };
+  return onSnapshot(q,
+    (snapshot) => {
+      let all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Rehearsal));
 
-  const handleErr = (error: any) => {
-    console.error("Firestore Rehearsals Error:", error);
-    errCount++;
-    if (errCount === 2 && onError) onError(error);
-  };
+      // Filter locally
+      let filtered = all.filter(r => r.createdBy === workspaceId || r.workspaceId === workspaceId);
 
-  const q1 = query(collection(db, REHEARSALS_COLLECTION), where('createdBy', '==', workspaceId));
-  const q2 = query(collection(db, REHEARSALS_COLLECTION), where('workspaceId', '==', workspaceId));
-
-  const unsub1 = onSnapshot(q1, snap => {
-    list1 = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Rehearsal));
-    update();
-  }, handleErr);
-
-  const unsub2 = onSnapshot(q2, snap => {
-    list2 = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Rehearsal));
-    update();
-  }, handleErr);
-
-  return () => { unsub1(); unsub2(); };
+      filtered.sort((a, b) => b.createdAt - a.createdAt);
+      callback(filtered);
+    },
+    (error) => {
+      console.error("Firestore Rehearsals Error:", error);
+      if (onError) onError(error);
+    }
+  );
 };
 
 export const saveRehearsal = async (rehearsal: Rehearsal, workspaceId: string, userId: string = workspaceId): Promise<void> => {
