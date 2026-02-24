@@ -4,6 +4,7 @@ import { db } from './firebaseConfig';
 import {
   collection,
   doc,
+  getDoc,
   setDoc,
   deleteDoc,
   onSnapshot,
@@ -60,6 +61,18 @@ export const deleteSong = async (id: string): Promise<void> => {
   }
 };
 
+export const getSharedSongs = async (songIds: string[]): Promise<Song[]> => {
+  if (!songIds || songIds.length === 0) return [];
+  try {
+    const promises = songIds.map(id => getDoc(doc(db, SONGS_COLLECTION, id)));
+    const docs = await Promise.all(promises);
+    return docs.filter(d => d.exists()).map(d => ({ id: d.id, ...d.data() } as Song));
+  } catch (error) {
+    console.error("Error fetching shared songs:", error);
+    return [];
+  }
+};
+
 // --- Setlists ---
 
 export const subscribeToSetlists = (
@@ -98,6 +111,17 @@ export const deleteSetlist = async (id: string): Promise<void> => {
     await deleteDoc(doc(db, SETLISTS_COLLECTION, id));
   } catch (error) {
     console.error("Error deleting setlist:", error);
+  }
+};
+
+export const getSharedSetlist = async (id: string): Promise<Setlist | null> => {
+  if (!id) return null;
+  try {
+    const d = await getDoc(doc(db, SETLISTS_COLLECTION, id));
+    return d.exists() ? ({ id: d.id, ...d.data() } as Setlist) : null;
+  } catch (error) {
+    console.error("Error fetching shared setlist:", error);
+    return null;
   }
 };
 
@@ -141,5 +165,16 @@ export const deleteRehearsal = async (id: string): Promise<void> => {
     await deleteDoc(doc(db, REHEARSALS_COLLECTION, id));
   } catch (error) {
     console.error("Error deleting rehearsal:", error);
+  }
+};
+
+export const getRehearsalById = async (id: string): Promise<Rehearsal | null> => {
+  if (!id) return null;
+  try {
+    const d = await getDoc(doc(db, REHEARSALS_COLLECTION, id));
+    return d.exists() ? ({ id: d.id, ...d.data() } as Rehearsal) : null;
+  } catch (error) {
+    console.error("Error fetching rehearsal by ID:", error);
+    return null;
   }
 };

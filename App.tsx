@@ -12,7 +12,7 @@ import { Button } from './components/Button';
 import { SongComposer } from './components/SongComposer';
 import { Footer } from './components/Footer';
 import { Plus, Music4, CalendarDays, Loader2, AlertCircle, Heart, Music2, ListMusic } from 'lucide-react';
-import { subscribeToRehearsals, saveRehearsal, subscribeToSongs, saveSong, subscribeToSetlists, saveSetlist } from './services/storageService';
+import { subscribeToRehearsals, saveRehearsal, subscribeToSongs, saveSong, subscribeToSetlists, saveSetlist, getRehearsalById } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
 import { SetlistEditor } from './components/SetlistEditor';
 import { SetlistViewer } from './components/SetlistViewer';
@@ -38,6 +38,17 @@ function AppContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
   const [isAuthSynced, setIsAuthSynced] = useState(false);
+  const [pendingSharedRehearsalId, setPendingSharedRehearsalId] = useState<string | null>(null);
+
+  // 0. Capturar enlaces mágicos (URL)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const rid = params.get('rehearsal');
+    if (rid) {
+      setPendingSharedRehearsalId(rid);
+      window.history.replaceState({}, '', window.location.pathname); // Limpiar URL
+    }
+  }, []);
 
   // 1. Manejo de Autenticación
   useEffect(() => {
@@ -101,6 +112,26 @@ function AppContent() {
       unsubSetlists();
     };
   }, [currentUser?.id, isAuthSynced]);
+
+  // 3. Procesar enlace mágico compartido una vez logueado
+  useEffect(() => {
+    if (!isAuthSynced || !pendingSharedRehearsalId) return;
+
+    const fetchSharedRehearsal = async () => {
+      setIsLoading(true);
+      const sharedRehearsal = await getRehearsalById(pendingSharedRehearsalId);
+      if (sharedRehearsal) {
+        setSelectedRehearsal(sharedRehearsal);
+        setView(ViewState.REHEARSAL_DETAIL);
+      } else {
+        alert(t('error_auth_title')); // Rehearsal not found or access denied
+      }
+      setPendingSharedRehearsalId(null);
+      setIsLoading(false);
+    };
+
+    fetchSharedRehearsal();
+  }, [isAuthSynced, pendingSharedRehearsalId, t]);
 
   const toggleTheme = () => {
     const newIsDark = !isDark;

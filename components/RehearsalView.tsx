@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Rehearsal, Song, RehearsalOption, User } from '../types';
 import { Button } from './Button';
 import { Calendar, MapPin, Clock, CheckCircle2, Plus, Trash2, ArrowLeft, PlayCircle, Music, ChevronDown, ChevronUp, Save, Search, Pencil, Share2, ThumbsUp } from 'lucide-react';
-import { subscribeToSongs, saveSong, subscribeToSetlists } from '../services/storageService';
+import { subscribeToSongs, saveSong, subscribeToSetlists, getSharedSongs, getSharedSetlist } from '../services/storageService';
 import { formatSongContent } from '../services/geminiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Setlist } from '../types';
@@ -22,6 +22,11 @@ export const RehearsalView: React.FC<RehearsalViewProps> = ({ rehearsal, current
   const [activeTab, setActiveTab] = useState<'info' | 'setlist'>('info');
   const [availableSongs, setAvailableSongs] = useState<Song[]>([]);
   const [availableSetlists, setAvailableSetlists] = useState<Setlist[]>([]);
+
+  // Cross-user shared states for magic links
+  const [sharedSongs, setSharedSongs] = useState<Song[]>([]);
+  const [sharedSetlist, setSharedSetlist] = useState<Setlist | null>(null);
+
   const [showAddSection, setShowAddSection] = useState(false);
   const [addMode, setAddMode] = useState<'search' | 'create'>('create');
   const [copySuccess, setCopySuccess] = useState(false);
@@ -64,6 +69,33 @@ export const RehearsalView: React.FC<RehearsalViewProps> = ({ rehearsal, current
       unsubscribeSetlists();
     };
   }, [currentUser?.id]);
+
+  useEffect(() => {
+    const fetchMissingGuestData = async () => {
+      // Si el ensayo es propio, ya tenemos todo en availableSongs/availableSetlists
+      if (rehearsal.createdBy === currentUser.id) return;
+
+      let targetSongIds = rehearsal.setlist;
+
+      if (rehearsal.linkedSetlistId && !availableSetlists.find(s => s.id === rehearsal.linkedSetlistId)) {
+        const sl = await getSharedSetlist(rehearsal.linkedSetlistId);
+        if (sl) {
+          setSharedSetlist(sl);
+          targetSongIds = sl.songs;
+        }
+      } else if (rehearsal.linkedSetlistId) {
+        const tempSl = availableSetlists.find(s => s.id === rehearsal.linkedSetlistId);
+        if (tempSl) targetSongIds = tempSl.songs;
+      }
+
+      const missingIds = targetSongIds.filter(id => !availableSongs.find(s => s.id === id));
+      if (missingIds.length > 0) {
+        const fetched = await getSharedSongs(missingIds);
+        setSharedSongs(fetched);
+      }
+    };
+    fetchMissingGuestData();
+  }, [rehearsal, currentUser.id, availableSetlists, availableSongs]);
 
   const handleToggleVote = async (optionId: string) => {
     const updatedOptions = rehearsal.options.map(opt => {
@@ -192,9 +224,11 @@ export const RehearsalView: React.FC<RehearsalViewProps> = ({ rehearsal, current
   };
 
   const activeSetlistId = rehearsal.linkedSetlistId;
-  const activeSetlist = availableSetlists.find(s => s.id === activeSetlistId);
+  const activeSetlist = availableSetlists.find(s => s.id === activeSetlistId) || sharedSetlist;
   const displayedSongIds = activeSetlist ? activeSetlist.songs : rehearsal.setlist;
-  const setlistSongs = displayedSongIds.map(id => availableSongs.find(s => s.id === id)).filter(Boolean) as Song[];
+
+  const allKnownSongs = [...availableSongs, ...sharedSongs];
+  const setlistSongs = displayedSongIds.map(id => allKnownSongs.find(s => s.id === id)).filter(Boolean) as Song[];
 
   const handleLinkSetlist = (setlistId: string) => {
     onUpdate({ ...rehearsal, linkedSetlistId: setlistId, setlist: [] }); // Clear individual setlist to avoid conflicts
