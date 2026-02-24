@@ -5,32 +5,39 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
   setDoc,
+  updateDoc,
   deleteDoc,
   onSnapshot,
   query,
   where,
-  orderBy
+  or,
+  orderBy,
+  arrayUnion
 } from 'firebase/firestore';
 
 const SONGS_COLLECTION = 'songs';
 const REHEARSALS_COLLECTION = 'rehearsals';
 const SETLISTS_COLLECTION = 'setlists';
+const BANDS_COLLECTION = 'bands';
 
 // --- Canciones ---
 
 export const subscribeToSongs = (
-  userId: string,
+  workspaceId: string,
   callback: (songs: Song[]) => void,
   onError?: (error: any) => void
 ) => {
-  if (!userId) return () => { }; // Seguridad si no hay ID
+  if (!workspaceId) return () => { }; // Seguridad si no hay ID
 
-  // REMOVED 'orderBy' to prevent Firebase Index Missing errors on production
-  // We will sort on the client side instead.
+  // Usamos 'or' para compatibilidad retroactiva: si ownerId coincide (legacy) o workspaceId coincide
   const q = query(
     collection(db, SONGS_COLLECTION),
-    where('ownerId', '==', userId)
+    or(
+      where('ownerId', '==', workspaceId),
+      where('workspaceId', '==', workspaceId)
+    )
   );
 
   return onSnapshot(q,
@@ -47,10 +54,10 @@ export const subscribeToSongs = (
   );
 };
 
-export const saveSong = async (song: Song, userId: string): Promise<void> => {
-  if (!userId) throw new Error("Se requiere ID de usuario para guardar");
+export const saveSong = async (song: Song, workspaceId: string, userId: string = workspaceId): Promise<void> => {
+  if (!workspaceId) throw new Error("Se requiere ID de workspace para guardar");
   const docRef = doc(db, SONGS_COLLECTION, song.id);
-  return await setDoc(docRef, { ...song, ownerId: userId }, { merge: true });
+  return await setDoc(docRef, { ...song, workspaceId, ownerId: song.ownerId || userId }, { merge: true });
 };
 
 export const deleteSong = async (id: string): Promise<void> => {
@@ -76,15 +83,18 @@ export const getSharedSongs = async (songIds: string[]): Promise<Song[]> => {
 // --- Setlists ---
 
 export const subscribeToSetlists = (
-  userId: string,
+  workspaceId: string,
   callback: (setlists: Setlist[]) => void,
   onError?: (error: any) => void
 ) => {
-  if (!userId) return () => { };
+  if (!workspaceId) return () => { };
 
   const q = query(
     collection(db, SETLISTS_COLLECTION),
-    where('ownerId', '==', userId)
+    or(
+      where('ownerId', '==', workspaceId),
+      where('workspaceId', '==', workspaceId)
+    )
   );
 
   return onSnapshot(q,
@@ -100,10 +110,10 @@ export const subscribeToSetlists = (
   );
 };
 
-export const saveSetlist = async (setlist: Setlist, userId: string): Promise<void> => {
-  if (!userId) throw new Error("Se requiere ID de usuario para guardar");
+export const saveSetlist = async (setlist: Setlist, workspaceId: string, userId: string = workspaceId): Promise<void> => {
+  if (!workspaceId) throw new Error("Se requiere ID de workspace para guardar");
   const docRef = doc(db, SETLISTS_COLLECTION, setlist.id);
-  return await setDoc(docRef, { ...setlist, ownerId: userId }, { merge: true });
+  return await setDoc(docRef, { ...setlist, workspaceId, ownerId: setlist.ownerId || userId }, { merge: true });
 };
 
 export const deleteSetlist = async (id: string): Promise<void> => {
@@ -128,16 +138,18 @@ export const getSharedSetlist = async (id: string): Promise<Setlist | null> => {
 // --- Ensayos ---
 
 export const subscribeToRehearsals = (
-  userId: string,
+  workspaceId: string,
   callback: (rehearsals: Rehearsal[]) => void,
   onError?: (error: any) => void
 ) => {
-  if (!userId) return () => { };
+  if (!workspaceId) return () => { };
 
-  // REMOVED 'orderBy' to prevent Firebase Index Missing errors.
   const q = query(
     collection(db, REHEARSALS_COLLECTION),
-    where('createdBy', '==', userId)
+    or(
+      where('createdBy', '==', workspaceId),
+      where('workspaceId', '==', workspaceId)
+    )
   );
 
   return onSnapshot(q,
@@ -154,10 +166,10 @@ export const subscribeToRehearsals = (
   );
 };
 
-export const saveRehearsal = async (rehearsal: Rehearsal, userId: string): Promise<void> => {
-  if (!userId || typeof userId !== 'string') throw new Error("ID de usuario inválido");
+export const saveRehearsal = async (rehearsal: Rehearsal, workspaceId: string, userId: string = workspaceId): Promise<void> => {
+  if (!workspaceId || typeof workspaceId !== 'string') throw new Error("ID de workspace inválido");
   const docRef = doc(db, REHEARSALS_COLLECTION, rehearsal.id);
-  return await setDoc(docRef, { ...rehearsal, createdBy: userId }, { merge: true });
+  return await setDoc(docRef, { ...rehearsal, workspaceId, createdBy: rehearsal.createdBy || userId }, { merge: true });
 };
 
 export const deleteRehearsal = async (id: string): Promise<void> => {
@@ -177,4 +189,54 @@ export const getRehearsalById = async (id: string): Promise<Rehearsal | null> =>
     console.error("Error fetching rehearsal by ID:", error);
     return null;
   }
+};
+
+// --- Bands (Workspaces) ---
+
+export const createBand = async (band: import('../types').Band): Promise<void> => {
+  const docRef = doc(db, BANDS_COLLECTION, band.id);
+  return await setDoc(docRef, band);
+};
+
+export const getUserBands = async (userId: string): Promise<import('../types').Band[]> => {
+  if (!userId) return [];
+  try {
+    const q = query(
+      collection(db, BANDS_COLLECTION),
+      where('members', 'array-contains', { userId, role: 'ADMIN' })
+      // Note: Firestore array-contains on objects requires exact match. 
+      // For a more robust query, we'll fetch all and filter in memory if needed, 
+      // or change how members are stored (e.g. memberIds string[]). Let's use getDocs and filter manually to be safe.
+    );
+    const snapshot = await getDocs(collection(db, BANDS_COLLECTION));
+    const allBands = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as import('../types').Band));
+    return allBands.filter(band => band.members.some(m => m.userId === userId));
+  } catch (error) {
+    console.error("Error fetching user bands:", error);
+    return [];
+  }
+};
+
+export const getBandById = async (id: string): Promise<import('../types').Band | null> => {
+  if (!id) return null;
+  try {
+    const d = await getDoc(doc(db, BANDS_COLLECTION, id));
+    return d.exists() ? ({ id: d.id, ...d.data() } as import('../types').Band) : null;
+  } catch (error) {
+    console.error("Error fetching band by ID:", error);
+    return null;
+  }
+};
+
+export const joinBand = async (bandId: string, userId: string): Promise<void> => {
+  if (!bandId || !userId) return;
+  const docRef = doc(db, BANDS_COLLECTION, bandId);
+  const newMember: import('../types').BandMember = {
+    userId,
+    role: 'MEMBER',
+    joinedAt: Date.now()
+  };
+  await updateDoc(docRef, {
+    members: arrayUnion(newMember)
+  });
 };

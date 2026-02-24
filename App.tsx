@@ -1,7 +1,8 @@
 // v3.17 - Cleaned Sync Logic & Multi-User Shield | MelodIA Lab
 import React, { useState, useEffect } from 'react';
-import { ViewState, Song, Rehearsal, User, Setlist } from './types';
+import { ViewState, Song, Rehearsal, User, Setlist, Band } from './types';
 import { RehearsalView } from './components/RehearsalView';
+import { BandsView } from './components/BandsView';
 import { SongEditor } from './components/SongEditor';
 import { ChordViewer } from './components/ChordViewer';
 import { LandingPage } from './components/LandingPage';
@@ -12,7 +13,7 @@ import { Button } from './components/Button';
 import { SongComposer } from './components/SongComposer';
 import { Footer } from './components/Footer';
 import { Plus, Music4, CalendarDays, Loader2, AlertCircle, Heart, Music2, ListMusic } from 'lucide-react';
-import { subscribeToRehearsals, saveRehearsal, subscribeToSongs, saveSong, subscribeToSetlists, saveSetlist, getRehearsalById } from './services/storageService';
+import { subscribeToRehearsals, saveRehearsal, subscribeToSongs, saveSong, subscribeToSetlists, saveSetlist, getRehearsalById, getUserBands, getBandById, joinBand } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
 import { SetlistEditor } from './components/SetlistEditor';
 import { SetlistViewer } from './components/SetlistViewer';
@@ -39,13 +40,21 @@ function AppContent() {
   const [dbError, setDbError] = useState<string | null>(null);
   const [isAuthSynced, setIsAuthSynced] = useState(false);
   const [pendingSharedRehearsalId, setPendingSharedRehearsalId] = useState<string | null>(null);
+  const [pendingJoinBandId, setPendingJoinBandId] = useState<string | null>(null);
+
+  // Workspaces States
+  const [userBands, setUserBands] = useState<Band[]>([]);
+  const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string | null>(null);
 
   // 0. Capturar enlaces mágicos (URL)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const rid = params.get('rehearsal');
-    if (rid) {
-      setPendingSharedRehearsalId(rid);
+    const jid = params.get('joinBand');
+
+    if (rid || jid) {
+      if (rid) setPendingSharedRehearsalId(rid);
+      if (jid) setPendingJoinBandId(jid);
       window.history.replaceState({}, '', window.location.pathname); // Limpiar URL
     }
   }, []);
@@ -61,6 +70,7 @@ function AppContent() {
     const unsubAuth = onAuthStateChanged(auth, (fbUser) => {
       if (fbUser) {
         setIsAuthSynced(true);
+        if (!currentWorkspaceId) setCurrentWorkspaceId(fbUser.uid);
       } else {
         setIsAuthSynced(false);
         if (!localUser) setIsLoading(false);
@@ -70,12 +80,21 @@ function AppContent() {
     return () => unsubAuth();
   }, []);
 
-  // 2. Suscripción a Datos (Blindada contra el error "Unsupported field value: a function")
+  // 2. Cargar Bandas (Workspaces) del usuario
+  useEffect(() => {
+    if (currentUser?.id && isAuthSynced) {
+      getUserBands(currentUser.id).then(bands => setUserBands(bands));
+    } else {
+      setUserBands([]);
+    }
+  }, [currentUser?.id, isAuthSynced]);
+
+  // 3. Suscripción a Datos (Basados en currentWorkspaceId)
   useEffect(() => {
     const userId = currentUser?.id;
 
     // Verificación estricta para evitar que Firestore reciba datos inválidos
-    if (!userId || typeof userId !== 'string' || !isAuthSynced) {
+    if (!userId || !currentWorkspaceId || !isAuthSynced) {
       return;
     }
 
@@ -83,7 +102,7 @@ function AppContent() {
     setDbError(null);
 
     const unsubRehearsals = subscribeToRehearsals(
-      userId,
+      currentWorkspaceId,
       (data) => {
         setRehearsals(data);
         setIsLoading(false);
@@ -95,13 +114,13 @@ function AppContent() {
     );
 
     const unsubSongs = subscribeToSongs(
-      userId,
+      currentWorkspaceId,
       (data) => setSongs(data),
       (err) => console.error("Error songs:", err)
     );
 
     const unsubSetlists = subscribeToSetlists(
-      userId,
+      currentWorkspaceId,
       (data) => setSetlists(data),
       (err) => console.error("Error setlists:", err)
     );
@@ -111,9 +130,9 @@ function AppContent() {
       unsubSongs();
       unsubSetlists();
     };
-  }, [currentUser?.id, isAuthSynced]);
+  }, [currentUser?.id, currentWorkspaceId, isAuthSynced, t]);
 
-  // 3. Procesar enlace mágico compartido una vez logueado
+  // 4. Procesar enlace mágico compartido una vez logueado
   useEffect(() => {
     if (!isAuthSynced || !pendingSharedRehearsalId) return;
 
@@ -133,6 +152,35 @@ function AppContent() {
     fetchSharedRehearsal();
   }, [isAuthSynced, pendingSharedRehearsalId, t]);
 
+  // 5. Procesar invitación a banda compartida
+  useEffect(() => {
+    if (!isAuthSynced || !pendingJoinBandId || !currentUser) return;
+
+    const processJoinBand = async () => {
+      setIsLoading(true);
+      const band = await getBandById(pendingJoinBandId);
+      if (band) {
+        const isMember = band.members.some(m => m.userId === currentUser.id);
+        if (!isMember) {
+          await joinBand(pendingJoinBandId, currentUser.id);
+          alert(`¡Te has unido exitosamente a ${band.name}!`);
+          const updatedBands = await getUserBands(currentUser.id);
+          setUserBands(updatedBands);
+        } else {
+          alert(`Ya eres miembro de ${band.name}`);
+        }
+        setCurrentWorkspaceId(pendingJoinBandId);
+        setView(ViewState.BANDS);
+      } else {
+        alert("Enlace de banda inválido o no existe.");
+      }
+      setPendingJoinBandId(null);
+      setIsLoading(false);
+    };
+
+    processJoinBand();
+  }, [isAuthSynced, pendingJoinBandId, currentUser]);
+
   const toggleTheme = () => {
     const newIsDark = !isDark;
     setIsDark(newIsDark);
@@ -142,6 +190,7 @@ function AppContent() {
 
   const handleLogin = (user: User) => {
     setCurrentUser(user);
+    if (!currentWorkspaceId) setCurrentWorkspaceId(user.id);
     setIsAuthSynced(true);
     setView(ViewState.DASHBOARD);
   };
@@ -149,15 +198,16 @@ function AppContent() {
   const handleLogout = async () => {
     await logout();
     setCurrentUser(null);
+    setCurrentWorkspaceId(null);
     setIsAuthSynced(false);
     setView(ViewState.DASHBOARD);
   };
 
   const handleUpdateRehearsal = async (updated: Rehearsal) => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.id || !currentWorkspaceId) return;
     try {
       setSelectedRehearsal(updated);
-      await saveRehearsal(updated, currentUser.id);
+      await saveRehearsal(updated, currentWorkspaceId, currentUser.id);
     } catch (e) {
       setDbError(t('error_auth_title'));
     }
@@ -288,7 +338,7 @@ function AppContent() {
 
           {view === ViewState.CREATE_REHEARSAL && (
             <CreateRehearsal onSave={async (d) => {
-              if (!currentUser?.id) return;
+              if (!currentUser?.id || !currentWorkspaceId) return;
               const newR: Rehearsal = {
                 id: crypto.randomUUID(),
                 title: d.title,
@@ -297,30 +347,30 @@ function AppContent() {
                 setlist: [],
                 createdAt: Date.now()
               };
-              await saveRehearsal(newR, currentUser.id);
+              await saveRehearsal(newR, currentWorkspaceId, currentUser.id);
               setView(ViewState.DASHBOARD);
             }} onCancel={() => setView(ViewState.DASHBOARD)} />
           )}
 
-          {view === ViewState.EDIT_SONG && currentUser && (
+          {view === ViewState.EDIT_SONG && currentUser && currentWorkspaceId && (
             <SongEditor
               initialSong={selectedSong}
               userId={currentUser.id}
               onClose={() => setView(ViewState.SONG_LIBRARY)}
               onSave={async (newSong) => {
-                await saveSong(newSong, currentUser.id);
+                await saveSong(newSong, currentWorkspaceId, currentUser.id);
                 setView(ViewState.SONG_LIBRARY);
               }}
             />
           )}
 
-          {view === ViewState.EDIT_SETLIST && currentUser && (
+          {view === ViewState.EDIT_SETLIST && currentUser && currentWorkspaceId && (
             <SetlistEditor
               initialSetlist={selectedSetlist}
               availableSongs={songs}
               onClose={() => setView(ViewState.SONG_LIBRARY)}
               onSave={async (newSetlist) => {
-                await saveSetlist(newSetlist, currentUser.id);
+                await saveSetlist(newSetlist, currentWorkspaceId, currentUser.id);
                 setView(ViewState.SONG_LIBRARY);
               }}
             />
@@ -329,9 +379,26 @@ function AppContent() {
           {view === ViewState.VIEW_SETLIST && selectedSetlist && (
             <SetlistViewer
               setlist={selectedSetlist}
-              availableSongs={songs}
+              songs={songs}
               initialSongId={viewerInitialSongId}
-              onBack={() => setView(viewerReturnView)}
+              onClose={() => setView(viewerReturnView)}
+            />
+          )}
+
+          {view === ViewState.BANDS && currentUser && (
+            <BandsView
+              currentUser={currentUser}
+              userBands={userBands}
+              currentWorkspaceId={currentWorkspaceId!}
+              onSwitchWorkspace={(id) => {
+                setCurrentWorkspaceId(id);
+                setView(ViewState.DASHBOARD);
+              }}
+              onBandCreated={(band) => {
+                setUserBands(prev => [...prev, band]);
+                setCurrentWorkspaceId(band.id);
+                setView(ViewState.DASHBOARD);
+              }}
             />
           )}
 

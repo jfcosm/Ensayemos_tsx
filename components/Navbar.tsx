@@ -142,7 +142,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* User Profile */}
             {user && (
               <div className="flex items-center gap-3 ml-2 border-l border-zinc-200 dark:border-zinc-800 pl-4">
-                <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onNavigate(ViewState.BANDS)}
+                  className="flex items-center gap-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1.5 rounded-lg transition-colors text-left"
+                >
                   {user.picture ? (
                     <img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full border border-zinc-200 dark:border-zinc-700" />
                   ) : (
@@ -150,8 +153,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <UserIcon size={16} />
                     </div>
                   )}
-                  <span className="hidden lg:block text-sm font-medium text-zinc-700 dark:text-zinc-300 max-w-[100px] truncate">{user.name}</span>
-                </div>
+                  <div className="hidden lg:flex flex-col">
+                    <span className="text-sm font-bold text-zinc-900 dark:text-white max-w-[100px] truncate leading-tight">{user.name}</span>
+                    <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider leading-tight">Espacios</span>
+                  </div>
+                </button>
                 <button onClick={onLogout} className="text-zinc-500 hover:text-red-500 transition-colors p-2" title={t('logout')}>
                   <LogOut size={18} />
                 </button>
@@ -175,16 +181,22 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="p-4 flex flex-col gap-4">
             {user && (
               <>
-                <div className="flex items-center gap-3 pb-4 border-b border-zinc-100 dark:border-zinc-900">
+                <button
+                  onClick={() => handleMobileNav(ViewState.BANDS)}
+                  className="flex items-center gap-3 pb-4 border-b border-zinc-100 dark:border-zinc-900 w-full text-left"
+                >
                   {user.picture ? (
-                    <img src={user.picture} alt={user.name} className="w-10 h-10 rounded-full border border-zinc-200 dark:border-zinc-700" />
+                    <img src={user.picture} alt={user.name} className="w-12 h-12 rounded-full border border-zinc-200 dark:border-zinc-700" />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
-                      <UserIcon size={20} />
+                    <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
+                      <UserIcon size={24} />
                     </div>
                   )}
-                  <span className="font-semibold text-zinc-900 dark:text-white">{user.name}</span>
-                </div>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-lg text-zinc-900 dark:text-white">{user.name}</span>
+                    <span className="text-sm text-brand-600 dark:text-brand-400 font-medium tracking-wide">Gestionar Espacios &rarr;</span>
+                  </div>
+                </button>
 
                 <div className="flex flex-col gap-2">
                   <button
