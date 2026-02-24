@@ -379,9 +379,9 @@ function AppContent() {
           {view === ViewState.VIEW_SETLIST && selectedSetlist && (
             <SetlistViewer
               setlist={selectedSetlist}
-              songs={songs}
+              availableSongs={songs}
               initialSongId={viewerInitialSongId}
-              onClose={() => setView(viewerReturnView)}
+              onBack={() => setView(viewerReturnView)}
             />
           )}
 
