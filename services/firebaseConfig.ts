@@ -5,7 +5,7 @@ import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
     apiKey: "AIzaSyAihjd-EIiYDxU4dEUDh8iODfq1ldcUlz8",
-    authDomain: "ensayamos-4581f.firebaseapp.com",
+    authDomain: "auth.verso.social",
     projectId: "ensayamos-4581f",
     storageBucket: "ensayamos-4581f.firebasestorage.app",
     messagingSenderId: "290114942318",
