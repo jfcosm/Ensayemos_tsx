@@ -14,13 +14,16 @@ export const CreateRehearsal: React.FC<CreateRehearsalProps> = ({ onSave, onCanc
   const { t } = useLanguage();
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [time, setTime] = useState('12:00'); // Default matches TimePicker visual default
   const [location, setLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !date || !time || !location) return;
+    if (!title || !date || !time || !location) {
+      alert(t('error_missing_fields') || 'Por favor, completa todos los campos (asegúrate de seleccionar una fecha).');
+      return;
+    }
 
     // Activamos visualmente el envío
     setIsSubmitting(true);

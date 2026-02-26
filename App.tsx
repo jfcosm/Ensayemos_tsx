@@ -353,16 +353,21 @@ function AppContent() {
           {view === ViewState.CREATE_REHEARSAL && (
             <CreateRehearsal onSave={async (d) => {
               if (!currentUser?.id || !currentWorkspaceId) return;
-              const newR: Rehearsal = {
-                id: crypto.randomUUID(),
-                title: d.title,
-                status: 'PROPOSED',
-                options: [{ id: crypto.randomUUID(), date: d.date, time: d.time, location: d.location, voterIds: [currentUser.id] }],
-                setlist: [],
-                createdAt: Date.now()
-              };
-              await saveRehearsal(newR, currentWorkspaceId, currentUser.id);
-              setView(ViewState.DASHBOARD);
+              try {
+                const newR: Rehearsal = {
+                  id: crypto.randomUUID(),
+                  title: d.title,
+                  status: 'PROPOSED',
+                  options: [{ id: crypto.randomUUID(), date: d.date, time: d.time, location: d.location, voterIds: [currentUser.id] }],
+                  setlist: [],
+                  createdAt: Date.now()
+                };
+                await saveRehearsal(newR, currentWorkspaceId, currentUser.id);
+                setView(ViewState.DASHBOARD);
+              } catch (error: any) {
+                console.error("Error guardando el ensayo:", error);
+                alert("Hubo un error al guardar el ensayo. Revisa tus permisos de internet o la consola de desarrollo.");
+              }
             }} onCancel={() => setView(ViewState.DASHBOARD)} />
           )}
 
