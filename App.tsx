@@ -399,6 +399,9 @@ function AppContent() {
                 setCurrentWorkspaceId(band.id);
                 setView(ViewState.DASHBOARD);
               }}
+              onBandDeleted={(bandId) => {
+                setUserBands(prev => prev.filter(b => b.id !== bandId));
+              }}
             />
           )}
 

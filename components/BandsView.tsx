@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Band, User } from '../types';
 import { Button } from './Button';
-import { Plus, Users, User as UserIcon, Copy, Check } from 'lucide-react';
-import { createBand } from '../services/storageService';
+import { Plus, Users, User as UserIcon, Copy, Check, Trash2, Loader2 } from 'lucide-react';
+import { createBand, deleteBand } from '../services/storageService';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface BandsViewProps {
@@ -11,29 +11,58 @@ interface BandsViewProps {
     currentWorkspaceId: string;
     onSwitchWorkspace: (id: string) => void;
     onBandCreated: (band: Band) => void;
+    onBandDeleted?: (bandId: string) => void; // Added optional callback to update parent state
 }
 
-export function BandsView({ currentUser, userBands, currentWorkspaceId, onSwitchWorkspace, onBandCreated }: BandsViewProps) {
+export function BandsView({ currentUser, userBands, currentWorkspaceId, onSwitchWorkspace, onBandCreated, onBandDeleted }: BandsViewProps) {
     const { t } = useLanguage();
     const [isCreating, setIsCreating] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [newBandName, setNewBandName] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
     const handleCreateBand = async () => {
-        if (!newBandName.trim()) return;
-        const newBand: Band = {
-            id: crypto.randomUUID(),
-            name: newBandName,
-            createdBy: currentUser.id,
-            createdAt: Date.now(),
-            members: [
-                { userId: currentUser.id, role: 'ADMIN', joinedAt: Date.now() }
-            ]
-        };
-        await createBand(newBand);
-        onBandCreated(newBand);
-        setIsCreating(false);
-        setNewBandName('');
+        if (!newBandName.trim() || isSubmitting) return;
+        setIsSubmitting(true);
+        try {
+            const newBand: Band = {
+                id: crypto.randomUUID(),
+                name: newBandName,
+                createdBy: currentUser.id,
+                createdAt: Date.now(),
+                members: [
+                    { userId: currentUser.id, role: 'ADMIN', joinedAt: Date.now() }
+                ]
+            };
+            await createBand(newBand);
+            onBandCreated(newBand);
+            setIsCreating(false);
+            setNewBandName('');
+        } catch (error) {
+            console.error("Error creating band:", error);
+            alert("Hubo un error al crear la banda. Inténtalo de nuevo.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDeleteBand = async (e: React.MouseEvent, bandId: string, bandName: string) => {
+        e.stopPropagation(); // Evitar que el click cambie de workspace
+        if (window.confirm(`¿Estás seguro de que deseas eliminar permanentemente la banda "${bandName}"? Esta acción no se puede deshacer.`)) {
+            try {
+                await deleteBand(bandId);
+                if (onBandDeleted) {
+                    onBandDeleted(bandId);
+                }
+                // If deleting the current workspace, switch back to personal
+                if (currentWorkspaceId === bandId) {
+                    onSwitchWorkspace(currentUser.id);
+                }
+            } catch (error) {
+                console.error("Error deleting band:", error);
+                alert("Hubo un error al eliminar la banda.");
+            }
+        }
     };
 
     return (
@@ -97,8 +126,18 @@ export function BandsView({ currentUser, userBands, currentWorkspaceId, onSwitch
                                 {copiedId === band.id ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
                                 <span className="hidden sm:inline">{copiedId === band.id ? '¡Copiado!' : 'Invitar'}</span>
                             </button>
+                            {/* Solo permitir al creador o admin borrar la banda */}
+                            {band.createdBy === currentUser.id && (
+                                <button
+                                    onClick={(e) => handleDeleteBand(e, band.id, band.name)}
+                                    className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                    title="Eliminar Banda"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            )}
                             {currentWorkspaceId === band.id && (
-                                <div className="bg-brand-500 text-white text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Activo</div>
+                                <div className="bg-brand-500 text-white text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider hidden sm:block">Activo</div>
                             )}
                         </div>
                     </div>
@@ -117,8 +156,11 @@ export function BandsView({ currentUser, userBands, currentWorkspaceId, onSwitch
                         autoFocus
                     />
                     <div className="flex gap-3 justify-end">
-                        <Button variant="secondary" onClick={() => setIsCreating(false)}>Cancelar</Button>
-                        <Button onClick={handleCreateBand} disabled={!newBandName.trim()}>Crear Banda</Button>
+                        <Button variant="secondary" onClick={() => setIsCreating(false)} disabled={isSubmitting}>Cancelar</Button>
+                        <Button onClick={handleCreateBand} disabled={!newBandName.trim() || isSubmitting} className="gap-2">
+                            {isSubmitting && <Loader2 size={16} className="animate-spin" />}
+                            Crear Banda
+                        </Button>
                     </div>
                 </div>
             ) : (

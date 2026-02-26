@@ -189,6 +189,14 @@ export const createBand = async (band: import('../types').Band): Promise<void> =
   return await setDoc(docRef, band);
 };
 
+export const deleteBand = async (id: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, BANDS_COLLECTION, id));
+  } catch (error) {
+    console.error("Error deleting band:", error);
+  }
+};
+
 export const getUserBands = async (userId: string): Promise<import('../types').Band[]> => {
   if (!userId) return [];
   try {
