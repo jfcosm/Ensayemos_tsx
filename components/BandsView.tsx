@@ -8,13 +8,12 @@ import { useLanguage } from '../contexts/LanguageContext';
 interface BandsViewProps {
     currentUser: User;
     userBands: Band[];
+    isLoadingBands: boolean;
     currentWorkspaceId: string;
     onSwitchWorkspace: (id: string) => void;
-    onBandCreated: (band: Band) => void;
-    onBandDeleted?: (bandId: string) => void; // Added optional callback to update parent state
 }
 
-export function BandsView({ currentUser, userBands, currentWorkspaceId, onSwitchWorkspace, onBandCreated, onBandDeleted }: BandsViewProps) {
+export function BandsView({ currentUser, userBands, isLoadingBands, currentWorkspaceId, onSwitchWorkspace }: BandsViewProps) {
     const { t } = useLanguage();
     const [isCreating, setIsCreating] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,51 +22,38 @@ export function BandsView({ currentUser, userBands, currentWorkspaceId, onSwitch
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
     const handleCreateBand = async () => {
-        if (!newBandName.trim() || isSubmitting) return;
-        setIsSubmitting(true);
-        try {
-            const newBand: Band = {
-                id: crypto.randomUUID(),
-                name: newBandName,
-                createdBy: currentUser.id,
-                createdAt: Date.now(),
-                members: [
-                    { userId: currentUser.id, role: 'ADMIN', joinedAt: Date.now() }
-                ],
-                memberIds: [currentUser.id]
-            };
-            await createBand(newBand);
-            onBandCreated(newBand);
-            setIsCreating(false);
-            setNewBandName('');
-        } catch (error) {
+        if (!newBandName.trim()) return;
+
+        const newBand: Band = {
+            id: crypto.randomUUID(),
+            name: newBandName,
+            createdBy: currentUser.id,
+            createdAt: Date.now(),
+            members: [
+                { userId: currentUser.id, role: 'ADMIN', joinedAt: Date.now() }
+            ],
+            memberIds: [currentUser.id]
+        };
+
+        setIsCreating(false);
+        setNewBandName('');
+
+        createBand(newBand).catch(error => {
             console.error("Error creating band:", error);
-            alert("Hubo un error al crear la banda. Inténtalo de nuevo.");
-        } finally {
-            setIsSubmitting(false);
-        }
+            alert("Hubo un error silencioso creando la banda en la nube.");
+        });
     };
 
     const handleDeleteBand = async (e: React.MouseEvent, bandId: string, bandName: string) => {
-        e.stopPropagation(); // Evitar que el click cambie de workspace
-        if (deletingBandId) return; // Prevent double delete
+        e.stopPropagation();
         if (window.confirm(`¿Estás seguro de que deseas eliminar permanentemente la banda "${bandName}"? Esta acción no se puede deshacer.`)) {
-            setDeletingBandId(bandId);
-            try {
-                await deleteBand(bandId);
-                if (onBandDeleted) {
-                    onBandDeleted(bandId);
-                }
-                // If deleting the current workspace, switch back to personal
-                if (currentWorkspaceId === bandId) {
-                    onSwitchWorkspace(currentUser.id);
-                }
-            } catch (error) {
-                console.error("Error deleting band:", error);
-                alert("Hubo un error al eliminar la banda.");
-            } finally {
-                setDeletingBandId(null);
+            if (currentWorkspaceId === bandId) {
+                onSwitchWorkspace(currentUser.id);
             }
+            deleteBand(bandId).catch(error => {
+                console.error("Error deleting band from firebase:", error);
+                alert("Hubo un error de sincronización al eliminar la banda.");
+            });
         }
     };
 
@@ -75,81 +61,86 @@ export function BandsView({ currentUser, userBands, currentWorkspaceId, onSwitch
         <div className="max-w-2xl mx-auto animate-in fade-in duration-500 pt-8">
             <h2 className="text-3xl font-bold mb-6 text-zinc-900 dark:text-white">Mis Bandas y Espacios</h2>
 
-            <div className="space-y-4 mb-8">
-                {/* Personal Workspace */}
-                <div
-                    onClick={() => onSwitchWorkspace(currentUser.id)}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between
-            ${currentWorkspaceId === currentUser.id
-                            ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
-                            : 'border-zinc-200 dark:border-zinc-800 hover:border-brand-300 dark:hover:border-brand-700 bg-white dark:bg-zinc-900'
-                        }`}
-                >
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                            <UserIcon className="text-zinc-500 dark:text-zinc-400" size={24} />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-xl text-zinc-900 dark:text-white">Espacio Personal</h3>
-                            <p className="text-sm text-zinc-500">Solo tú puedes ver este contenido</p>
-                        </div>
-                    </div>
-                    {currentWorkspaceId === currentUser.id && (
-                        <div className="bg-brand-500 text-white text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Activo</div>
-                    )}
+            {isLoadingBands ? (
+                <div className="flex flex-col items-center justify-center py-20 animate-in fade-in zoom-in duration-300">
+                    <Loader2 className="w-12 h-12 text-brand-500 animate-spin mb-4" />
+                    <p className="text-zinc-500 dark:text-zinc-400 font-medium font-mono text-center tracking-wide text-lg">Cargando tus bandas...</p>
                 </div>
-
-                {/* Bands */}
-                {userBands.map(band => (
+            ) : (
+                <div className="space-y-4 mb-8">
+                    {/* Personal Workspace */}
                     <div
-                        key={band.id}
-                        className={`p-4 rounded-xl border-2 transition-all flex items-center justify-between
-              ${currentWorkspaceId === band.id
+                        onClick={() => onSwitchWorkspace(currentUser.id)}
+                        className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between
+            ${currentWorkspaceId === currentUser.id
                                 ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
                                 : 'border-zinc-200 dark:border-zinc-800 hover:border-brand-300 dark:hover:border-brand-700 bg-white dark:bg-zinc-900'
                             }`}
                     >
-                        <div className="flex items-center gap-3 cursor-pointer flex-1" onClick={() => onSwitchWorkspace(band.id)}>
-                            <div className="w-12 h-12 rounded-full bg-brand-100 dark:bg-brand-900/40 flex items-center justify-center">
-                                <Users className="text-brand-600 dark:text-brand-400" size={24} />
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                                <UserIcon className="text-zinc-500 dark:text-zinc-400" size={24} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-xl text-zinc-900 dark:text-white">{band.name}</h3>
-                                <p className="text-sm text-zinc-500">{band.members.length} miembro(s)</p>
+                                <h3 className="font-bold text-xl text-zinc-900 dark:text-white">Espacio Personal</h3>
+                                <p className="text-sm text-zinc-500">Solo tú puedes ver este contenido</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigator.clipboard.writeText(`${window.location.origin}/?joinBand=${band.id}`);
-                                    setCopiedId(band.id);
-                                    setTimeout(() => setCopiedId(null), 2000);
-                                }}
-                                className="text-zinc-500 hover:text-brand-600 transition-colors flex items-center gap-2 text-sm font-medium"
-                                title="Copiar Link de Invitación"
-                            >
-                                {copiedId === band.id ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
-                                <span className="hidden sm:inline">{copiedId === band.id ? '¡Copiado!' : 'Invitar'}</span>
-                            </button>
-                            {/* Solo permitir al creador o admin borrar la banda */}
-                            {band.createdBy === currentUser.id && (
-                                <button
-                                    onClick={(e) => handleDeleteBand(e, band.id, band.name)}
-                                    disabled={deletingBandId === band.id}
-                                    className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
-                                    title="Eliminar Banda"
-                                >
-                                    {deletingBandId === band.id ? <Loader2 size={18} className="animate-spin text-red-500" /> : <Trash2 size={18} />}
-                                </button>
-                            )}
-                            {currentWorkspaceId === band.id && (
-                                <div className="bg-brand-500 text-white text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider hidden sm:block">Activo</div>
-                            )}
-                        </div>
+                        {currentWorkspaceId === currentUser.id && (
+                            <div className="bg-brand-500 text-white text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Activo</div>
+                        )}
                     </div>
-                ))}
-            </div>
+
+                    {/* Bands */}
+                    {userBands.map(band => (
+                        <div
+                            key={band.id}
+                            className={`p-4 rounded-xl border-2 transition-all flex items-center justify-between
+              ${currentWorkspaceId === band.id
+                                    ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20'
+                                    : 'border-zinc-200 dark:border-zinc-800 hover:border-brand-300 dark:hover:border-brand-700 bg-white dark:bg-zinc-900'
+                                }`}
+                        >
+                            <div className="flex items-center gap-3 cursor-pointer flex-1" onClick={() => onSwitchWorkspace(band.id)}>
+                                <div className="w-12 h-12 rounded-full bg-brand-100 dark:bg-brand-900/40 flex items-center justify-center">
+                                    <Users className="text-brand-600 dark:text-brand-400" size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-xl text-zinc-900 dark:text-white">{band.name}</h3>
+                                    <p className="text-sm text-zinc-500">{band.members.length} miembro(s)</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigator.clipboard.writeText(`${window.location.origin}/?joinBand=${band.id}`);
+                                        setCopiedId(band.id);
+                                        setTimeout(() => setCopiedId(null), 2000);
+                                    }}
+                                    className="text-zinc-500 hover:text-brand-600 transition-colors flex items-center gap-2 text-sm font-medium"
+                                    title="Copiar Link de Invitación"
+                                >
+                                    {copiedId === band.id ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
+                                    <span className="hidden sm:inline">{copiedId === band.id ? '¡Copiado!' : 'Invitar'}</span>
+                                </button>
+                                {band.createdBy === currentUser.id && (
+                                    <button
+                                        onClick={(e) => handleDeleteBand(e, band.id, band.name)}
+                                        className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
+                                        title="Eliminar Banda"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                )}
+                                {currentWorkspaceId === band.id && (
+                                    <div className="bg-brand-500 text-white text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider hidden sm:block">Activo</div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {isCreating ? (
                 <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-xl p-6">
@@ -163,15 +154,14 @@ export function BandsView({ currentUser, userBands, currentWorkspaceId, onSwitch
                         autoFocus
                     />
                     <div className="flex gap-3 justify-end">
-                        <Button variant="secondary" onClick={() => setIsCreating(false)} disabled={isSubmitting}>Cancelar</Button>
-                        <Button onClick={handleCreateBand} disabled={!newBandName.trim() || isSubmitting} className="gap-2">
-                            {isSubmitting && <Loader2 size={16} className="animate-spin" />}
+                        <Button variant="secondary" onClick={() => setIsCreating(false)}>Cancelar</Button>
+                        <Button onClick={handleCreateBand} disabled={!newBandName.trim()} className="gap-2">
                             Crear Banda
                         </Button>
                     </div>
                 </div>
             ) : (
-                <Button onClick={() => setIsCreating(true)} className="w-full gap-2 py-8 border-dashed border-2 bg-transparent text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 text-lg">
+                <Button onClick={() => setIsCreating(true)} className="w-full gap-2 py-8 border-dashed border-2 bg-transparent text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 text-lg mb-8">
                     <Plus /> Crear Nueva Banda
                 </Button>
             )}

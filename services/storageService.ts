@@ -184,6 +184,36 @@ export const getRehearsalById = async (id: string): Promise<Rehearsal | null> =>
 
 // --- Bands (Workspaces) ---
 
+export const subscribeToUserBands = (
+  userId: string,
+  callback: (bands: import('../types').Band[]) => void,
+  onError?: (error: any) => void
+) => {
+  if (!userId) return () => { };
+
+  const q = query(
+    collection(db, BANDS_COLLECTION),
+    or(
+      where('memberIds', 'array-contains', userId),
+      where('createdBy', '==', userId)
+    )
+  );
+
+  return onSnapshot(q,
+    (snapshot) => {
+      const allBandsMap = new Map<string, import('../types').Band>();
+      snapshot.docs.forEach(doc => {
+        allBandsMap.set(doc.id, { id: doc.id, ...doc.data() } as import('../types').Band);
+      });
+      callback(Array.from(allBandsMap.values()));
+    },
+    (error) => {
+      console.error("Firestore Bands Error:", error);
+      if (onError) onError(error);
+    }
+  );
+};
+
 export const createBand = async (band: import('../types').Band): Promise<void> => {
   const docRef = doc(db, BANDS_COLLECTION, band.id);
   return await setDoc(docRef, band);
@@ -194,10 +224,11 @@ export const deleteBand = async (id: string): Promise<void> => {
     await deleteDoc(doc(db, BANDS_COLLECTION, id));
   } catch (error) {
     console.error("Error deleting band:", error);
-    throw error; // Let UI catch it
+    throw error; // Let UI catch it if needed, though we'll use fire-and-forget
   }
 };
 
+// Obsoleted by subscribeToUserBands, but kept for reference/migration if needed elsewhere
 export const getUserBands = async (userId: string): Promise<import('../types').Band[]> => {
   if (!userId) return [];
   try {

@@ -13,7 +13,7 @@ import { Button } from './components/Button';
 import { SongComposer } from './components/SongComposer';
 import { Footer } from './components/Footer';
 import { Plus, Music4, CalendarDays, Loader2, AlertCircle, Heart, Music2, ListMusic } from 'lucide-react';
-import { subscribeToRehearsals, saveRehearsal, subscribeToSongs, saveSong, subscribeToSetlists, saveSetlist, getRehearsalById, getUserBands, getBandById, joinBand } from './services/storageService';
+import { subscribeToRehearsals, saveRehearsal, subscribeToSongs, saveSong, subscribeToSetlists, saveSetlist, getRehearsalById, subscribeToUserBands, getUserBands, getBandById, joinBand } from './services/storageService';
 import { getCurrentUser, logout } from './services/authService';
 import { SetlistEditor } from './components/SetlistEditor';
 import { SetlistViewer } from './components/SetlistViewer';
@@ -44,6 +44,7 @@ function AppContent() {
 
   // Workspaces States
   const [userBands, setUserBands] = useState<Band[]>([]);
+  const [isLoadingBands, setIsLoadingBands] = useState(true);
   const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string | null>(null);
 
   // 0. Capturar enlaces mágicos (URL)
@@ -80,12 +81,25 @@ function AppContent() {
     return () => unsubAuth();
   }, []);
 
-  // 2. Cargar Bandas (Workspaces) del usuario
+  // 2. Cargar Bandas (Workspaces) del usuario en Tiempo Real
   useEffect(() => {
     if (currentUser?.id && isAuthSynced) {
-      getUserBands(currentUser.id).then(bands => setUserBands(bands));
+      setIsLoadingBands(true);
+      const unsubBands = subscribeToUserBands(
+        currentUser.id,
+        (bands) => {
+          setUserBands(bands);
+          setIsLoadingBands(false);
+        },
+        (error) => {
+          console.error("Error subscribiendo a bandas:", error);
+          setIsLoadingBands(false);
+        }
+      );
+      return () => unsubBands();
     } else {
       setUserBands([]);
+      setIsLoadingBands(false);
     }
   }, [currentUser?.id, isAuthSynced]);
 
@@ -389,18 +403,11 @@ function AppContent() {
             <BandsView
               currentUser={currentUser}
               userBands={userBands}
+              isLoadingBands={isLoadingBands}
               currentWorkspaceId={currentWorkspaceId!}
               onSwitchWorkspace={(id) => {
                 setCurrentWorkspaceId(id);
                 setView(ViewState.DASHBOARD);
-              }}
-              onBandCreated={(band) => {
-                setUserBands(prev => [...prev, band]);
-                setCurrentWorkspaceId(band.id);
-                setView(ViewState.DASHBOARD);
-              }}
-              onBandDeleted={(bandId) => {
-                setUserBands(prev => prev.filter(b => b.id !== bandId));
               }}
             />
           )}
