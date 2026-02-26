@@ -18,6 +18,7 @@ export function BandsView({ currentUser, userBands, currentWorkspaceId, onSwitch
     const { t } = useLanguage();
     const [isCreating, setIsCreating] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [deletingBandId, setDeletingBandId] = useState<string | null>(null);
     const [newBandName, setNewBandName] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -32,7 +33,8 @@ export function BandsView({ currentUser, userBands, currentWorkspaceId, onSwitch
                 createdAt: Date.now(),
                 members: [
                     { userId: currentUser.id, role: 'ADMIN', joinedAt: Date.now() }
-                ]
+                ],
+                memberIds: [currentUser.id]
             };
             await createBand(newBand);
             onBandCreated(newBand);
@@ -48,7 +50,9 @@ export function BandsView({ currentUser, userBands, currentWorkspaceId, onSwitch
 
     const handleDeleteBand = async (e: React.MouseEvent, bandId: string, bandName: string) => {
         e.stopPropagation(); // Evitar que el click cambie de workspace
+        if (deletingBandId) return; // Prevent double delete
         if (window.confirm(`¿Estás seguro de que deseas eliminar permanentemente la banda "${bandName}"? Esta acción no se puede deshacer.`)) {
+            setDeletingBandId(bandId);
             try {
                 await deleteBand(bandId);
                 if (onBandDeleted) {
@@ -61,6 +65,8 @@ export function BandsView({ currentUser, userBands, currentWorkspaceId, onSwitch
             } catch (error) {
                 console.error("Error deleting band:", error);
                 alert("Hubo un error al eliminar la banda.");
+            } finally {
+                setDeletingBandId(null);
             }
         }
     };
@@ -130,10 +136,11 @@ export function BandsView({ currentUser, userBands, currentWorkspaceId, onSwitch
                             {band.createdBy === currentUser.id && (
                                 <button
                                     onClick={(e) => handleDeleteBand(e, band.id, band.name)}
-                                    className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                    disabled={deletingBandId === band.id}
+                                    className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
                                     title="Eliminar Banda"
                                 >
-                                    <Trash2 size={18} />
+                                    {deletingBandId === band.id ? <Loader2 size={18} className="animate-spin text-red-500" /> : <Trash2 size={18} />}
                                 </button>
                             )}
                             {currentWorkspaceId === band.id && (

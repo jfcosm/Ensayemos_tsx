@@ -194,22 +194,42 @@ export const deleteBand = async (id: string): Promise<void> => {
     await deleteDoc(doc(db, BANDS_COLLECTION, id));
   } catch (error) {
     console.error("Error deleting band:", error);
+    throw error; // Let UI catch it
   }
 };
 
 export const getUserBands = async (userId: string): Promise<import('../types').Band[]> => {
   if (!userId) return [];
   try {
-    const q = query(
+    // 1. Query by memberIds for new format
+    const qMembers = query(
       collection(db, BANDS_COLLECTION),
-      where('members', 'array-contains', { userId, role: 'ADMIN' })
-      // Note: Firestore array-contains on objects requires exact match. 
-      // For a more robust query, we'll fetch all and filter in memory if needed, 
-      // or change how members are stored (e.g. memberIds string[]). Let's use getDocs and filter manually to be safe.
+      where('memberIds', 'array-contains', userId)
     );
-    const snapshot = await getDocs(collection(db, BANDS_COLLECTION));
-    const allBands = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as import('../types').Band));
-    return allBands.filter(band => band.members.some(m => m.userId === userId));
+    // 2. Query by createdBy as a fallback for older records
+    const qCreator = query(
+      collection(db, BANDS_COLLECTION),
+      where('createdBy', '==', userId)
+    );
+
+    const [membersSnapshot, creatorSnapshot] = await Promise.all([
+      getDocs(qMembers),
+      getDocs(qCreator)
+    ]);
+
+    const allBandsMap = new Map<string, import('../types').Band>();
+
+    // Merge results to avoid duplicates
+    membersSnapshot.docs.forEach(doc => {
+      allBandsMap.set(doc.id, { id: doc.id, ...doc.data() } as import('../types').Band);
+    });
+    creatorSnapshot.docs.forEach(doc => {
+      if (!allBandsMap.has(doc.id)) {
+        allBandsMap.set(doc.id, { id: doc.id, ...doc.data() } as import('../types').Band);
+      }
+    });
+
+    return Array.from(allBandsMap.values());
   } catch (error) {
     console.error("Error fetching user bands:", error);
     return [];

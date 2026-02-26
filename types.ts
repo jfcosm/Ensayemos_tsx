@@ -72,6 +72,7 @@ export interface Band {
   name: string;
   createdBy: string;
   members: BandMember[];
+  memberIds: string[]; // For fast native query
   createdAt: number;
   picture?: string;
 }
